@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import pdfRoutes from "./routes/pdf";
 import profileRoutes from "./routes/profile";
+import resumeRoutes from "./routes/resumes";
 
 admin.initializeApp();
 
@@ -33,6 +34,7 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/pdf", pdfRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/resumes", resumeRoutes);
 
 // TODO: Routes will be added in Tasks 14-19
 // app.use("/api/stripe", stripeRoutes);
