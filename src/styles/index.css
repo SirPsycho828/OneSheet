@@ -1,2 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&family=Crimson+Text:ital,wght@0,400;0,700;1,400&display=swap");
 @import "tailwindcss";
+
+@theme {
+  --color-brand-50: #EFF6FF;
+  --color-brand-500: #2563EB;
+  --color-brand-600: #1D4ED8;
+  --color-brand-700: #1E40AF;
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-error: #DC2626;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-serif: "Crimson Text", serif;
+}
