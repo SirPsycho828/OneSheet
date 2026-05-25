@@ -5,6 +5,10 @@ import cors from "cors";
 import pdfRoutes from "./routes/pdf";
 import profileRoutes from "./routes/profile";
 import resumeRoutes from "./routes/resumes";
+import versionRoutes from "./routes/versions";
+import { cleanupVersions } from "./scheduled/cleanupVersions";
+
+export { cleanupVersions };
 
 admin.initializeApp();
 
@@ -35,6 +39,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/pdf", pdfRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/resumes", resumeRoutes);
+app.use("/api/resumes/:resumeId/versions", versionRoutes);
 
 // TODO: Routes will be added in Tasks 14-19
 // app.use("/api/stripe", stripeRoutes);

@@ -170,6 +170,7 @@ export function useResume(resumeId?: string) {
   return {
     resume,
     isLoading,
+    resumeId: resumeIdRef.current,
     markdown,
     setMarkdown,
     title,

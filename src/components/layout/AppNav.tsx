@@ -15,6 +15,7 @@ interface AppNavProps {
   templateId: string;
   username?: string;
   onOpenTemplatePicker: () => void;
+  onOpenVersionHistory?: () => void;
   resumeId?: string;
   paperSize?: "us-letter" | "a4";
 }
@@ -35,6 +36,7 @@ export function AppNav({
   templateId,
   username,
   onOpenTemplatePicker,
+  onOpenVersionHistory,
   resumeId,
 }: AppNavProps) {
   const navigate = useNavigate();
@@ -173,7 +175,9 @@ export function AppNav({
     {
       label: "Version History",
       onClick: () => {
-        toast.info("Version history coming soon.");
+        if (onOpenVersionHistory) {
+          onOpenVersionHistory();
+        }
       },
     },
     {

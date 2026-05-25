@@ -2,11 +2,15 @@ import * as React from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useResume } from "../hooks/useResume";
+import { useToast } from "../hooks/useToast";
 import { AppNav } from "../components/layout/AppNav";
 import { StatusBar } from "../components/layout/StatusBar";
 import { EditorLayout } from "../components/editor/EditorLayout";
 import { Skeleton } from "../components/ui/Skeleton";
 import { TemplatePicker } from "../components/templates/TemplatePicker";
+import { VersionPanel } from "../components/versions/VersionPanel";
+import { createSnapshot } from "../services/versions";
+import type { VersionEntry } from "../services/versions";
 
 /**
  * Main editor page.
@@ -15,12 +19,17 @@ import { TemplatePicker } from "../components/templates/TemplatePicker";
  *   /editor            — loads the user's default resume
  *   /editor/:resumeId  — loads a specific resume
  */
+// How long (ms) a user must be idle before the next auto-save creates a snapshot
+const IDLE_SNAPSHOT_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+
 export function Editor() {
-  const { resumeId } = useParams<{ resumeId?: string }>();
-  const { user } = useAuth();
+  const { resumeId: routeResumeId } = useParams<{ resumeId?: string }>();
+  const { user, firebaseUser } = useAuth();
+  const toast = useToast();
 
   const {
     isLoading,
+    resumeId: resolvedResumeId,
     markdown,
     setMarkdown,
     title,
@@ -32,36 +41,160 @@ export function Editor() {
     saveStatus,
     forceSave,
     setOverflow,
-  } = useResume(resumeId);
+  } = useResume(routeResumeId);
 
   const [isPickerOpen, setIsPickerOpen] = React.useState(false);
+
+  // ---------------------------------------------------------------------------
+  // Version history state
+  // ---------------------------------------------------------------------------
+  const [isVersionPanelOpen, setIsVersionPanelOpen] = React.useState(false);
+  const [previewingVersion, setPreviewingVersion] =
+    React.useState<VersionEntry | null>(null);
+
+  // Track when a snapshot was last created to implement idle-based snapshotting
+  const lastSnapshotAtRef = React.useRef<number | null>(null);
+  // Track last-changed timestamp for idle detection
+  const lastChangedAtRef = React.useRef<number | null>(null);
+  // Track whether a snapshot is needed on next auto-save (due to idle)
+  const needsSnapshotRef = React.useRef(false);
+  // Track whether this is the first auto-save of the session
+  const isFirstAutoSaveRef = React.useRef(true);
 
   const isPaid =
     user?.subscription?.status === "active" ||
     user?.subscription?.status === "past_due";
 
   // ---------------------------------------------------------------------------
+  // Snapshot helper: fire-and-forget, uses current editor state
+  // ---------------------------------------------------------------------------
+  const takeSnapshot = React.useCallback(
+    async (snapshotMarkdown: string, snapshotTemplateId: string) => {
+      const id = resolvedResumeId;
+      if (!id) return;
+      try {
+        await createSnapshot(id, snapshotMarkdown, snapshotTemplateId);
+        lastSnapshotAtRef.current = Date.now();
+        needsSnapshotRef.current = false;
+      } catch (err) {
+        console.error("Editor: snapshot failed", err);
+      }
+    },
+    [resolvedResumeId]
+  );
+
+  // ---------------------------------------------------------------------------
   // Ctrl/Cmd+S at page level (catches events that bubble outside the textarea)
+  // Creates a snapshot on every manual save.
   // ---------------------------------------------------------------------------
   React.useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
+    async function handleKeyDown(e: KeyboardEvent) {
       const isMac = navigator.platform.toUpperCase().includes("MAC");
       const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
       if (ctrlOrCmd && e.key === "s") {
         e.preventDefault();
-        forceSave();
+        await forceSave();
+        // Snapshot on every manual Ctrl+S
+        await takeSnapshot(markdown, templateId);
       }
     }
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [forceSave]);
+  }, [forceSave, takeSnapshot, markdown, templateId]);
+
+  // ---------------------------------------------------------------------------
+  // Idle detection: mark needsSnapshot when content is unchanged for 5+ minutes
+  // ---------------------------------------------------------------------------
+  React.useEffect(() => {
+    if (saveStatus === "unsaved") {
+      lastChangedAtRef.current = Date.now();
+    }
+  }, [markdown, title, templateId, paperSize, saveStatus]);
+
+  // Check idle threshold on a 30-second interval
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      if (lastChangedAtRef.current === null) return;
+      const idleMs = Date.now() - lastChangedAtRef.current;
+      if (idleMs >= IDLE_SNAPSHOT_THRESHOLD_MS) {
+        needsSnapshotRef.current = true;
+      }
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Auto-save side-effect: create snapshot when needed (idle or first session save)
+  // ---------------------------------------------------------------------------
+  React.useEffect(() => {
+    if (saveStatus !== "saved") return;
+    if (!resolvedResumeId) return;
+
+    const shouldSnapshot = isFirstAutoSaveRef.current || needsSnapshotRef.current;
+    if (shouldSnapshot) {
+      isFirstAutoSaveRef.current = false;
+      takeSnapshot(markdown, templateId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saveStatus]);
 
   // ---------------------------------------------------------------------------
   // Paper size toggle
   // ---------------------------------------------------------------------------
   function handleTogglePaperSize() {
     setPaperSize(paperSize === "us-letter" ? "a4" : "us-letter");
+  }
+
+  // ---------------------------------------------------------------------------
+  // Restore a version via the server-side API
+  // ---------------------------------------------------------------------------
+  async function handleRestoreVersion(versionId: string) {
+    const id = resolvedResumeId;
+    if (!id) return;
+
+    try {
+      const token = await firebaseUser?.getIdToken();
+      if (!token) {
+        toast.error("Authentication error. Please sign in again.");
+        return;
+      }
+
+      const apiBase =
+        import.meta.env.VITE_FUNCTIONS_URL ??
+        `https://us-central1-${import.meta.env.VITE_FIREBASE_PROJECT_ID}.cloudfunctions.net/api`;
+
+      const response = await fetch(
+        `${apiBase}/api/resumes/${id}/versions/restore`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ versionId }),
+        }
+      );
+
+      if (!response.ok) {
+        const json = await response.json().catch(() => ({}));
+        const message: string =
+          (json as { error?: { message?: string } })?.error?.message ??
+          "Failed to restore version. Please try again.";
+        toast.error(message);
+        return;
+      }
+
+      // Close preview and panel, then reload to pull restored content
+      setPreviewingVersion(null);
+      setIsVersionPanelOpen(false);
+      toast.success("Version restored");
+
+      // Reload the page so the editor pulls the restored resume data
+      window.location.reload();
+    } catch {
+      toast.error("Failed to restore version. Please try again.");
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -105,6 +238,10 @@ export function Editor() {
     );
   }
 
+  // When previewing a version, show its content in the preview pane
+  const previewMarkdown = previewingVersion?.markdown ?? markdown;
+  const previewTemplateId = previewingVersion?.templateId ?? templateId;
+
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       <AppNav
@@ -113,16 +250,17 @@ export function Editor() {
         templateId={templateId}
         username={user?.username}
         onOpenTemplatePicker={() => setIsPickerOpen(true)}
-        resumeId={resumeId}
+        onOpenVersionHistory={() => setIsVersionPanelOpen(true)}
+        resumeId={resolvedResumeId ?? undefined}
         paperSize={paperSize}
       />
 
       <main className="flex-1 overflow-hidden">
         <EditorLayout
-          markdown={markdown}
-          onMarkdownChange={setMarkdown}
+          markdown={previewMarkdown}
+          onMarkdownChange={previewingVersion ? () => {} : setMarkdown}
           onForceSave={forceSave}
-          templateId={templateId}
+          templateId={previewTemplateId}
           paperSize={paperSize}
           onOverflowChange={setOverflow}
         />
@@ -137,7 +275,9 @@ export function Editor() {
       <TemplatePicker
         isOpen={isPickerOpen}
         onClose={() => setIsPickerOpen(false)}
-        onApply={(newId) => {
+        onApply={async (newId) => {
+          // Snapshot current state before switching template
+          await takeSnapshot(markdown, templateId);
           setTemplateId(newId);
           setIsPickerOpen(false);
         }}
@@ -146,6 +286,21 @@ export function Editor() {
         paperSize={paperSize}
         isPaid={isPaid ?? false}
       />
+
+      {isVersionPanelOpen && resolvedResumeId && (
+        <VersionPanel
+          resumeId={resolvedResumeId}
+          currentTemplateId={templateId}
+          isPaid={isPaid ?? false}
+          onClose={() => {
+            setIsVersionPanelOpen(false);
+            setPreviewingVersion(null);
+          }}
+          onPreview={setPreviewingVersion}
+          onRestore={handleRestoreVersion}
+          previewingVersion={previewingVersion}
+        />
+      )}
     </div>
   );
 }
