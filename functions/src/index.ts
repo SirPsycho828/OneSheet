@@ -2,6 +2,7 @@ import * as admin from "firebase-admin";
 import { onRequest } from "firebase-functions/v2/https";
 import express from "express";
 import cors from "cors";
+import pdfRoutes from "./routes/pdf";
 
 admin.initializeApp();
 
@@ -29,8 +30,9 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// TODO: Routes will be added in Tasks 12-19
-// app.use("/api/pdf", pdfRoutes);
+app.use("/api/pdf", pdfRoutes);
+
+// TODO: Routes will be added in Tasks 13-19
 // app.use("/api/profile", profileRoutes);
 // app.use("/api/stripe", stripeRoutes);
 // etc.
@@ -39,8 +41,9 @@ app.get("/api/health", (req, res) => {
 export const api = onRequest(
   {
     region: "us-central1",
-    memory: "256MiB",
+    memory: "1GiB",
     timeoutSeconds: 60,
+    concurrency: 1,
   },
   app
 );

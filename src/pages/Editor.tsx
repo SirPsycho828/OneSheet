@@ -113,6 +113,8 @@ export function Editor() {
         templateId={templateId}
         username={user?.username}
         onOpenTemplatePicker={() => setIsPickerOpen(true)}
+        resumeId={resumeId}
+        paperSize={paperSize}
       />
 
       <main className="flex-1 overflow-hidden">

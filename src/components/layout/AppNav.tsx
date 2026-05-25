@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Download, Share2, Layout } from "lucide-react";
+import { Download, Share2, Layout, Loader2 } from "lucide-react";
 import { Button } from "../ui/Button";
 import { OverflowMenu } from "../ui/OverflowMenu";
 import { useAuth } from "../../hooks/useAuth";
@@ -15,6 +15,8 @@ interface AppNavProps {
   templateId: string;
   username?: string;
   onOpenTemplatePicker: () => void;
+  resumeId?: string;
+  paperSize?: "us-letter" | "a4";
 }
 
 /**
@@ -27,13 +29,21 @@ interface AppNavProps {
  * - Share button: copies public profile URL to clipboard
  * - Kebab menu: Dashboard, Settings, Version History, Sign Out
  */
-export function AppNav({ title, onTitleChange, templateId, username, onOpenTemplatePicker }: AppNavProps) {
+export function AppNav({
+  title,
+  onTitleChange,
+  templateId,
+  username,
+  onOpenTemplatePicker,
+  resumeId,
+}: AppNavProps) {
   const navigate = useNavigate();
   const toast = useToast();
-  const { user } = useAuth();
+  const { user, firebaseUser } = useAuth();
 
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
   const [localTitle, setLocalTitle] = React.useState(title);
+  const [isExporting, setIsExporting] = React.useState(false);
   const titleInputRef = React.useRef<HTMLInputElement>(null);
 
   // Sync local title when prop changes (e.g., initial load)
@@ -60,6 +70,72 @@ export function AppNav({ title, onTitleChange, templateId, username, onOpenTempl
     if (e.key === "Escape") {
       setLocalTitle(title); // revert
       setIsEditingTitle(false);
+    }
+  }
+
+  async function handleExportPdf() {
+    const subscriptionStatus = user?.subscription?.status;
+
+    // Past-due: button is disabled, but guard here too
+    if (subscriptionStatus === "past_due") return;
+
+    // Free / canceled: prompt to upgrade
+    if (subscriptionStatus !== "active") {
+      toast.info("Upgrade to a paid plan to export PDFs.");
+      return;
+    }
+
+    if (!resumeId) {
+      toast.error("Cannot export: resume ID is missing.");
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const token = await firebaseUser?.getIdToken();
+      if (!token) {
+        toast.error("Authentication error. Please sign in again.");
+        return;
+      }
+
+      const apiBase =
+        import.meta.env.VITE_FUNCTIONS_URL ??
+        `https://us-central1-${import.meta.env.VITE_FIREBASE_PROJECT_ID}.cloudfunctions.net/api`;
+
+      const response = await fetch(`${apiBase}/api/pdf/generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ resumeId }),
+      });
+
+      if (!response.ok) {
+        const json = await response.json().catch(() => ({}));
+        const message: string =
+          (json as { error?: { message?: string } })?.error?.message ??
+          "PDF generation failed. Please try again.";
+        toast.error(message);
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      const safeUsername = (user?.username ?? "resume").toLowerCase().replace(/[^a-z0-9_-]/g, "");
+      anchor.href = url;
+      anchor.download = `${safeUsername}-resume.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+
+      toast.success("PDF downloaded!");
+    } catch {
+      toast.error("PDF generation failed. Please try again.");
+    } finally {
+      setIsExporting(false);
     }
   }
 
@@ -177,15 +253,44 @@ export function AppNav({ title, onTitleChange, templateId, username, onOpenTempl
         </Button>
 
         {/* Export PDF */}
-        <Button
-          variant="primary"
-          className="text-xs"
-          onClick={() => toast.info("PDF export coming soon.")}
-          title="Export as PDF"
-        >
-          <Download className="w-4 h-4" strokeWidth={1.5} />
-          <span className="hidden sm:inline">Export PDF</span>
-        </Button>
+        {user?.subscription?.status === "active" ? (
+          <Button
+            variant="primary"
+            className="text-xs"
+            onClick={handleExportPdf}
+            disabled={isExporting}
+            title="Export as PDF"
+          >
+            {isExporting ? (
+              <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.5} />
+            ) : (
+              <Download className="w-4 h-4" strokeWidth={1.5} />
+            )}
+            <span className="hidden sm:inline">
+              {isExporting ? "Generating..." : "Export PDF"}
+            </span>
+          </Button>
+        ) : user?.subscription?.status === "past_due" ? (
+          <Button
+            variant="primary"
+            className="text-xs opacity-50 cursor-not-allowed"
+            disabled
+            title="Your subscription is past due. Please update your payment method."
+          >
+            <Download className="w-4 h-4" strokeWidth={1.5} />
+            <span className="hidden sm:inline">Export PDF</span>
+          </Button>
+        ) : (
+          <Button
+            variant="primary"
+            className="text-xs"
+            onClick={handleExportPdf}
+            title="Upgrade to export as PDF"
+          >
+            <Download className="w-4 h-4" strokeWidth={1.5} />
+            <span className="hidden sm:inline">Upgrade to export</span>
+          </Button>
+        )}
 
         {/* Kebab menu */}
         <OverflowMenu items={menuItems} triggerLabel="Editor menu" />
