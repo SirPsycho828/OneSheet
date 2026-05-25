@@ -1,0 +1,31 @@
+{
+  "name": "bragsheet-functions",
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.3.0",
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "unified": "^11.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-gfm": "^4.0.0",
+    "remark-breaks": "^4.0.0",
+    "remark-rehype": "^11.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "rehype-stringify": "^10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.0"
+  }
+}
