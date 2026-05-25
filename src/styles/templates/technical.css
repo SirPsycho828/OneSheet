@@ -1,0 +1,48 @@
+/* ==========================================================================
+   technical.css — Monospace developer style.
+   ========================================================================== */
+
+[data-template="technical"] .resume-content {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.67px; /* 9.5pt */
+}
+
+[data-template="technical"] .resume-content h1 {
+  font-size: 18.67px; /* 14pt */
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+[data-template="technical"] .resume-content h2 {
+  font-size: 13.33px; /* 10pt */
+  font-weight: 700;
+  border-bottom: 2px solid #000;
+  padding-bottom: 2px;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+[data-template="technical"] .resume-content h3 {
+  font-size: 12.67px; /* 9.5pt */
+  font-weight: 700;
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+
+[data-template="technical"] .resume-content p {
+  margin-bottom: 3px;
+}
+
+/* ">" prefix via ::before, no standard bullets */
+[data-template="technical"] .resume-content ul {
+  list-style: none;
+  padding-left: 18px;
+}
+
+[data-template="technical"] .resume-content li::before {
+  content: "> ";
+}
+
+[data-template="technical"] .resume-content hr {
+  border-top: 1px dashed #9CA3AF;
+}

@@ -1,0 +1,45 @@
+/* ==========================================================================
+   minimal.css — Maximum content density. Tight spacing everywhere.
+   ========================================================================== */
+
+[data-template="minimal"] .resume-content {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 13.33px; /* 10pt */
+}
+
+[data-template="minimal"] .resume-content h1 {
+  font-size: 18.67px; /* 14pt */
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+[data-template="minimal"] .resume-content h2 {
+  font-size: 13.33px; /* 10pt */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6B7280;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+[data-template="minimal"] .resume-content h3 {
+  font-size: 13.33px; /* 10pt */
+  font-weight: 600;
+  margin-top: 4px;
+  margin-bottom: 1px;
+}
+
+[data-template="minimal"] .resume-content p {
+  margin-bottom: 2px;
+}
+
+/* Dash bullets */
+[data-template="minimal"] .resume-content ul {
+  list-style-type: "- ";
+  padding-left: 12px;
+}
+
+[data-template="minimal"] .resume-content hr {
+  border-top: 0.5px solid #D1D5DB;
+}

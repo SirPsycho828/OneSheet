@@ -1,0 +1,67 @@
+/* ==========================================================================
+   compact.css — Two-column layout for maximum information density.
+   ========================================================================== */
+
+[data-template="compact"] .resume-content {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 12.67px; /* 9.5pt */
+  column-count: 2;
+  column-gap: 24px;
+}
+
+/* h1 spans full width above the columns */
+[data-template="compact"] .resume-content > h1 {
+  font-size: 18.67px; /* 14pt */
+  font-weight: 700;
+  text-align: left;
+  margin-bottom: 2px;
+  column-span: all;
+}
+
+/* First paragraph (contact/summary) spans full width */
+[data-template="compact"] .resume-content > h1 + p {
+  column-span: all;
+}
+
+/* First hr triggers column split — hide it but keep the span */
+[data-template="compact"] .resume-content > hr:first-of-type {
+  column-span: all;
+  visibility: hidden;
+  height: 0;
+  margin: 0;
+}
+
+[data-template="compact"] .resume-content h2 {
+  font-size: 12.67px; /* 9.5pt */
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+[data-template="compact"] .resume-content h3 {
+  font-size: 12.67px; /* 9.5pt */
+  font-weight: 600;
+  margin-top: 4px;
+  margin-bottom: 1px;
+}
+
+[data-template="compact"] .resume-content p {
+  margin-bottom: 2px;
+}
+
+[data-template="compact"] .resume-content ul {
+  list-style: disc;
+  padding-left: 14px;
+}
+
+/* Subsequent hr — thin line within column flow */
+[data-template="compact"] .resume-content hr {
+  border-top: 0.5px solid #D1D5DB;
+}
+
+/* Prevent headings from breaking across columns */
+[data-template="compact"] .resume-content h2,
+[data-template="compact"] .resume-content h3 {
+  break-inside: avoid;
+}
