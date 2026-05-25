@@ -9,6 +9,7 @@ import { SignIn } from "./pages/SignIn";
 import { SignUp } from "./pages/SignUp";
 import { Onboarding } from "./pages/Onboarding";
 import { VerifyEmail } from "./pages/VerifyEmail";
+import { Editor } from "./pages/Editor";
 
 // ---------------------------------------------------------------------------
 // Placeholder pages — will be replaced in later tasks
@@ -21,14 +22,6 @@ function Landing() {
         <h1 className="text-4xl font-semibold tracking-tight text-gray-950">BragSheet</h1>
         <p className="mt-2 text-lg text-gray-600">One page. Markdown. Done.</p>
       </div>
-    </div>
-  );
-}
-
-function Editor() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <p className="text-gray-600">Editor — coming soon</p>
     </div>
   );
 }
@@ -110,6 +103,7 @@ export default function App() {
             {/* Private routes — require authenticated state */}
             <Route element={<PrivateRoute />}>
               <Route path="/editor" element={<Editor />} />
+              <Route path="/editor/:resumeId" element={<Editor />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
