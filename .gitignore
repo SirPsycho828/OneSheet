@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.env.local
+.env
+*.log
+functions/lib/
+functions/node_modules/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vite
+dist-ssr/
+*.local
