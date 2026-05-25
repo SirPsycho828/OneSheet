@@ -14,18 +14,11 @@ import { Landing } from "./pages/Landing";
 import { Privacy } from "./pages/Privacy";
 import { Terms } from "./pages/Terms";
 import { PublicProfile } from "./pages/PublicProfile";
+import { Dashboard } from "./pages/Dashboard";
 
 // ---------------------------------------------------------------------------
 // Placeholder pages — will be replaced in later tasks
 // ---------------------------------------------------------------------------
-
-function Dashboard() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <p className="text-gray-600">Dashboard — coming soon</p>
-    </div>
-  );
-}
 
 function Settings() {
   return (
