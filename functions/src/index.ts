@@ -6,7 +6,9 @@ import pdfRoutes from "./routes/pdf";
 import profileRoutes from "./routes/profile";
 import resumeRoutes from "./routes/resumes";
 import versionRoutes from "./routes/versions";
+import stripeRoutes from "./routes/stripe";
 import { cleanupVersions } from "./scheduled/cleanupVersions";
+import { stripeSecretKey, stripeWebhookSecret, stripeProPriceId } from "./config";
 
 export { cleanupVersions };
 
@@ -40,10 +42,7 @@ app.use("/api/pdf", pdfRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/resumes", resumeRoutes);
 app.use("/api/resumes/:resumeId/versions", versionRoutes);
-
-// TODO: Routes will be added in Tasks 14-19
-// app.use("/api/stripe", stripeRoutes);
-// etc.
+app.use("/api/stripe", stripeRoutes);
 
 // Export as Firebase Function
 export const api = onRequest(
@@ -52,6 +51,7 @@ export const api = onRequest(
     memory: "1GiB",
     timeoutSeconds: 60,
     concurrency: 1,
+    secrets: [stripeSecretKey, stripeWebhookSecret, stripeProPriceId],
   },
   app
 );

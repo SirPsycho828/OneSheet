@@ -15,18 +15,7 @@ import { Privacy } from "./pages/Privacy";
 import { Terms } from "./pages/Terms";
 import { PublicProfile } from "./pages/PublicProfile";
 import { Dashboard } from "./pages/Dashboard";
-
-// ---------------------------------------------------------------------------
-// Placeholder pages — will be replaced in later tasks
-// ---------------------------------------------------------------------------
-
-function Settings() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <p className="text-gray-600">Settings — coming soon</p>
-    </div>
-  );
-}
+import { Settings } from "./pages/Settings";
 
 
 function NotFound() {
