@@ -41,6 +41,11 @@ export function Editor() {
     saveStatus,
     forceSave,
     setOverflow,
+    isOnline,
+    isLocalBackupActive,
+    showRecoveryBanner,
+    acceptRecovery,
+    dismissRecovery,
   } = useResume(routeResumeId);
 
   const [isPickerOpen, setIsPickerOpen] = React.useState(false);
@@ -266,10 +271,34 @@ export function Editor() {
         />
       </main>
 
+      {showRecoveryBanner && (
+        <div className="flex items-center justify-between gap-4 px-4 py-2 bg-amber-50 border-t border-amber-200 text-xs text-amber-800 flex-shrink-0">
+          <span>A newer local backup was found. Restore it?</span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={acceptRecovery}
+              className="font-semibold underline underline-offset-2 hover:text-amber-900"
+            >
+              Restore
+            </button>
+            <button
+              type="button"
+              onClick={dismissRecovery}
+              className="hover:text-amber-900"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       <StatusBar
         saveStatus={saveStatus}
         paperSize={paperSize}
         onTogglePaperSize={handleTogglePaperSize}
+        isOnline={isOnline}
+        isLocalBackupActive={isLocalBackupActive}
       />
 
       <TemplatePicker

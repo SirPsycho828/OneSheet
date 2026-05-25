@@ -2,14 +2,61 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { getResume, getDefaultResume, updateResume } from "../services/resumes";
 import { useAuth } from "./useAuth";
 import { useDebounce } from "./useDebounce";
+import { useOnlineStatus } from "./useOnlineStatus";
 import type { Resume, Overflow } from "../types/resume";
 
-export type SaveStatus = "saved" | "saving" | "unsaved" | "error";
+export type SaveStatus = "saved" | "saving" | "unsaved" | "error" | "offline";
 
 const AUTO_SAVE_DELAY = 1500;
 
+// Retry backoff schedule in milliseconds: 2s, 5s, 15s, 30s, 60s (then cap at 60s)
+const RETRY_DELAYS_MS = [2_000, 5_000, 15_000, 30_000, 60_000];
+
+// After this many consecutive failures, show "local backup" messaging
+const LOCAL_BACKUP_FAILURE_THRESHOLD = 3;
+
+interface LocalBackup {
+  markdown: string;
+  title: string;
+  templateId: string;
+  paperSize: "us-letter" | "a4";
+  timestamp: number;
+}
+
+function backupKey(resumeId: string) {
+  return `bragsheet_backup_${resumeId}`;
+}
+
+function writeLocalBackup(resumeId: string, data: Omit<LocalBackup, "timestamp">) {
+  try {
+    const backup: LocalBackup = { ...data, timestamp: Date.now() };
+    localStorage.setItem(backupKey(resumeId), JSON.stringify(backup));
+  } catch {
+    // localStorage may be unavailable; ignore silently
+  }
+}
+
+function readLocalBackup(resumeId: string): LocalBackup | null {
+  try {
+    const raw = localStorage.getItem(backupKey(resumeId));
+    if (!raw) return null;
+    return JSON.parse(raw) as LocalBackup;
+  } catch {
+    return null;
+  }
+}
+
+function clearLocalBackup(resumeId: string) {
+  try {
+    localStorage.removeItem(backupKey(resumeId));
+  } catch {
+    // ignore
+  }
+}
+
 export function useResume(resumeId?: string) {
   const { firebaseUser } = useAuth();
+  const isOnline = useOnlineStatus();
 
   // Server-fetched resume document
   const [resume, setResume] = useState<Resume | null>(null);
@@ -27,6 +74,10 @@ export function useResume(resumeId?: string) {
   // Save tracking
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
 
+  // Show a recovery banner when local backup is newer than server
+  const [showRecoveryBanner, setShowRecoveryBanner] = useState(false);
+  const [recoveryBackup, setRecoveryBackup] = useState<LocalBackup | null>(null);
+
   // Track what was last successfully saved so we can deduplicate
   const lastSavedRef = useRef<{
     markdown: string;
@@ -37,6 +88,13 @@ export function useResume(resumeId?: string) {
 
   // Ref to the actual resume ID (may resolve asynchronously for default resume)
   const resumeIdRef = useRef<string | null>(null);
+
+  // Retry state
+  const retryCountRef = useRef(0);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Pending save flag — set when offline so we sync on reconnect
+  const pendingSaveRef = useRef(false);
 
   // ---------------------------------------------------------------------------
   // Initial load
@@ -59,6 +117,23 @@ export function useResume(resumeId?: string) {
 
         if (loaded) {
           setResume(loaded);
+
+          // Check for a newer local backup before applying server data
+          const backup = readLocalBackup(loaded.id);
+          const serverUpdatedAt =
+            loaded.updatedAt instanceof Date
+              ? loaded.updatedAt.getTime()
+              : typeof loaded.updatedAt === "object" && loaded.updatedAt !== null
+              ? // Firestore Timestamp
+                (loaded.updatedAt as { toMillis?: () => number }).toMillis?.() ?? 0
+              : 0;
+
+          if (backup && backup.timestamp > serverUpdatedAt + 1_000) {
+            // Backup is meaningfully newer — offer recovery
+            setRecoveryBackup(backup);
+            setShowRecoveryBanner(true);
+          }
+
           setMarkdown(loaded.markdown);
           setTitle(loaded.title);
           setTemplateId(loaded.templateId);
@@ -99,8 +174,8 @@ export function useResume(resumeId?: string) {
       templateId !== lastSavedRef.current.templateId ||
       paperSize !== lastSavedRef.current.paperSize;
 
-    if (dirty) setSaveStatus("unsaved");
-  }, [markdown, title, templateId, paperSize, isLoading]);
+    if (dirty) setSaveStatus(isOnline ? "unsaved" : "offline");
+  }, [markdown, title, templateId, paperSize, isLoading, isOnline]);
 
   // ---------------------------------------------------------------------------
   // Core save function (shared by auto-save and forceSave)
@@ -108,6 +183,13 @@ export function useResume(resumeId?: string) {
   const save = useCallback(async () => {
     const id = resumeIdRef.current;
     if (!id) return;
+
+    // If offline, mark pending and bail out
+    if (!isOnline) {
+      pendingSaveRef.current = true;
+      setSaveStatus("offline");
+      return;
+    }
 
     const current = { markdown, title, templateId, paperSize };
 
@@ -128,12 +210,30 @@ export function useResume(resumeId?: string) {
       // Include the latest overflow state from the preview measurement
       await updateResume(id, { ...current, overflow: overflowRef.current });
       lastSavedRef.current = current;
+      retryCountRef.current = 0;
+      pendingSaveRef.current = false;
       setSaveStatus("saved");
+      // Clear backup on successful save
+      clearLocalBackup(id);
     } catch (err) {
       console.error("useResume: save failed", err);
+      retryCountRef.current += 1;
       setSaveStatus("error");
+
+      // Schedule retry with exponential backoff
+      const delayIndex = Math.min(retryCountRef.current - 1, RETRY_DELAYS_MS.length - 1);
+      const delay = RETRY_DELAYS_MS[delayIndex];
+
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current);
+      }
+      retryTimerRef.current = setTimeout(() => {
+        retryTimerRef.current = null;
+        save();
+      }, delay);
     }
-  }, [markdown, title, templateId, paperSize]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [markdown, title, templateId, paperSize, isOnline]);
 
   // ---------------------------------------------------------------------------
   // Auto-save: debounced 1500ms after last change
@@ -142,6 +242,19 @@ export function useResume(resumeId?: string) {
   const debouncedTitle = useDebounce(title, AUTO_SAVE_DELAY);
   const debouncedTemplateId = useDebounce(templateId, AUTO_SAVE_DELAY);
   const debouncedPaperSize = useDebounce(paperSize, AUTO_SAVE_DELAY);
+
+  // Write localStorage backup on every debounce tick (before attempting network save)
+  useEffect(() => {
+    if (isLoading) return;
+    const id = resumeIdRef.current;
+    if (!id) return;
+    writeLocalBackup(id, {
+      markdown: debouncedMarkdown,
+      title: debouncedTitle,
+      templateId: debouncedTemplateId,
+      paperSize: debouncedPaperSize,
+    });
+  }, [debouncedMarkdown, debouncedTitle, debouncedTemplateId, debouncedPaperSize, isLoading]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -152,11 +265,50 @@ export function useResume(resumeId?: string) {
   }, [debouncedMarkdown, debouncedTitle, debouncedTemplateId, debouncedPaperSize]);
 
   // ---------------------------------------------------------------------------
+  // Sync on reconnect: if there was a pending save, trigger immediately
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!isOnline) return;
+    if (!pendingSaveRef.current) return;
+    // Transition from offline to online with pending changes
+    setSaveStatus("unsaved");
+    save();
+  }, [isOnline, save]);
+
+  // ---------------------------------------------------------------------------
   // forceSave: immediate save, bypasses debounce (used by Ctrl+S)
   // ---------------------------------------------------------------------------
   const forceSave = useCallback(async () => {
     await save();
   }, [save]);
+
+  // ---------------------------------------------------------------------------
+  // beforeunload guard: warn if there are unsaved changes
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      if (saveStatus === "unsaved" || saveStatus === "error" || saveStatus === "offline") {
+        const message = "You have unsaved changes. Are you sure you want to leave?";
+        e.preventDefault();
+        e.returnValue = message;
+        return message;
+      }
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [saveStatus]);
+
+  // ---------------------------------------------------------------------------
+  // Cleanup retry timer on unmount
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    return () => {
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current);
+      }
+    };
+  }, []);
 
   /**
    * Called by ResumePreview after each overflow measurement.
@@ -166,6 +318,37 @@ export function useResume(resumeId?: string) {
   const setOverflow = useCallback((state: Overflow) => {
     overflowRef.current = state;
   }, []);
+
+  /**
+   * Accept the locally-backed-up content (from recovery banner).
+   */
+  const acceptRecovery = useCallback(() => {
+    if (!recoveryBackup) return;
+    setMarkdown(recoveryBackup.markdown);
+    setTitle(recoveryBackup.title);
+    setTemplateId(recoveryBackup.templateId);
+    setPaperSize(recoveryBackup.paperSize);
+    setShowRecoveryBanner(false);
+    setRecoveryBackup(null);
+    setSaveStatus("unsaved");
+  }, [recoveryBackup]);
+
+  /**
+   * Dismiss the recovery banner without applying the backup.
+   */
+  const dismissRecovery = useCallback(() => {
+    const id = resumeIdRef.current;
+    if (id) clearLocalBackup(id);
+    setShowRecoveryBanner(false);
+    setRecoveryBackup(null);
+  }, []);
+
+  // Derived: is retrying?
+  const isRetrying = saveStatus === "error" && retryTimerRef.current !== null;
+
+  // Derived: show local-backup message after threshold failures
+  const isLocalBackupActive =
+    saveStatus === "error" && retryCountRef.current >= LOCAL_BACKUP_FAILURE_THRESHOLD;
 
   return {
     resume,
@@ -182,5 +365,12 @@ export function useResume(resumeId?: string) {
     saveStatus,
     forceSave,
     setOverflow,
+    isOnline,
+    isRetrying,
+    isLocalBackupActive,
+    showRecoveryBanner,
+    recoveryBackup,
+    acceptRecovery,
+    dismissRecovery,
   };
 }
