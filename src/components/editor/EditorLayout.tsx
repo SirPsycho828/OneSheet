@@ -153,7 +153,10 @@ export function EditorLayout({
           </button>
           <button
             type="button"
-            onClick={() => setMobileTab("preview")}
+            onClick={() => {
+              if (mobileTab === "edit") onForceSave();
+              setMobileTab("preview");
+            }}
             className={[
               "flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors",
               mobileTab === "preview"

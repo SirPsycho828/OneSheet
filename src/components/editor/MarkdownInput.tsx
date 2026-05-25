@@ -91,7 +91,7 @@ export function MarkdownInput({ value, onChange, onForceSave }: MarkdownInputPro
         aria-label="Markdown editor"
         className={[
           "w-full h-full resize-none",
-          "font-mono text-sm text-gray-900 leading-relaxed",
+          "font-mono text-base text-gray-900 leading-relaxed",
           "bg-white",
           "border-none outline-none",
           "p-6",
