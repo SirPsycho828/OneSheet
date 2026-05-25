@@ -14,6 +14,7 @@ interface AppNavProps {
   onTitleChange: (title: string) => void;
   templateId: string;
   username?: string;
+  onOpenTemplatePicker: () => void;
 }
 
 /**
@@ -21,12 +22,12 @@ interface AppNavProps {
  *
  * - Logo links to dashboard
  * - Resume title is inline-editable (click to edit, blur to commit)
- * - Template button: placeholder (Task 8)
- * - Export PDF button: placeholder (Task 9)
+ * - Template button: opens TemplatePicker overlay
+ * - Export PDF button: placeholder (Task 10)
  * - Share button: copies public profile URL to clipboard
  * - Kebab menu: Dashboard, Settings, Version History, Sign Out
  */
-export function AppNav({ title, onTitleChange, templateId, username }: AppNavProps) {
+export function AppNav({ title, onTitleChange, templateId, username, onOpenTemplatePicker }: AppNavProps) {
   const navigate = useNavigate();
   const toast = useToast();
   const { user } = useAuth();
@@ -157,7 +158,7 @@ export function AppNav({ title, onTitleChange, templateId, username }: AppNavPro
         <Button
           variant="ghost"
           className="hidden sm:inline-flex items-center gap-1.5 text-xs"
-          onClick={() => toast.info("Template picker coming soon.")}
+          onClick={onOpenTemplatePicker}
           title="Change template"
         >
           <Layout className="w-4 h-4" strokeWidth={1.5} />

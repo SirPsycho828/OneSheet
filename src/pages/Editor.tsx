@@ -6,6 +6,7 @@ import { AppNav } from "../components/layout/AppNav";
 import { StatusBar } from "../components/layout/StatusBar";
 import { EditorLayout } from "../components/editor/EditorLayout";
 import { Skeleton } from "../components/ui/Skeleton";
+import { TemplatePicker } from "../components/templates/TemplatePicker";
 
 /**
  * Main editor page.
@@ -25,12 +26,19 @@ export function Editor() {
     title,
     setTitle,
     templateId,
+    setTemplateId,
     paperSize,
     setPaperSize,
     saveStatus,
     forceSave,
     setOverflow,
   } = useResume(resumeId);
+
+  const [isPickerOpen, setIsPickerOpen] = React.useState(false);
+
+  const isPaid =
+    user?.subscription?.status === "active" ||
+    user?.subscription?.status === "past_due";
 
   // ---------------------------------------------------------------------------
   // Ctrl/Cmd+S at page level (catches events that bubble outside the textarea)
@@ -104,6 +112,7 @@ export function Editor() {
         onTitleChange={setTitle}
         templateId={templateId}
         username={user?.username}
+        onOpenTemplatePicker={() => setIsPickerOpen(true)}
       />
 
       <main className="flex-1 overflow-hidden">
@@ -121,6 +130,19 @@ export function Editor() {
         saveStatus={saveStatus}
         paperSize={paperSize}
         onTogglePaperSize={handleTogglePaperSize}
+      />
+
+      <TemplatePicker
+        isOpen={isPickerOpen}
+        onClose={() => setIsPickerOpen(false)}
+        onApply={(newId) => {
+          setTemplateId(newId);
+          setIsPickerOpen(false);
+        }}
+        currentTemplateId={templateId}
+        markdown={markdown}
+        paperSize={paperSize}
+        isPaid={isPaid ?? false}
       />
     </div>
   );
