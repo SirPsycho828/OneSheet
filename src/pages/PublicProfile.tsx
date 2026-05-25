@@ -1,5 +1,7 @@
 import * as React from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../config/firebase";
 import { ProfileResume } from "../components/profile/ProfileResume";
 import { ProfileActions } from "../components/profile/ProfileActions";
 import { Skeleton } from "../components/ui/Skeleton";
@@ -74,6 +76,7 @@ function ProfileNotFound() {
 
 export function PublicProfile() {
   const { username } = useParams<{ username: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [data, setData] = React.useState<ProfileData | null>(null);
   const [notFound, setNotFound] = React.useState(false);
@@ -88,6 +91,18 @@ export function PublicProfile() {
       setLoading(true);
       setNotFound(false);
       setData(null);
+
+      // Check for username redirect before hitting the API
+      try {
+        const redirectDoc = await getDoc(doc(db, "usernameRedirects", username!.toLowerCase()));
+        if (!cancelled && redirectDoc.exists()) {
+          const newUsername = redirectDoc.data().redirectTo;
+          navigate(`/${newUsername}`, { replace: true });
+          return;
+        }
+      } catch {
+        // Redirect check failed — continue with normal fetch
+      }
 
       try {
         const apiBase =

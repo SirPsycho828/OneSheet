@@ -93,3 +93,36 @@ export async function claimUsername(
 
   await batch.commit();
 }
+
+/**
+ * Change a user's username. Creates a redirect from the old username
+ * so existing links continue to work.
+ */
+export async function changeUsername(
+  uid: string,
+  oldUsername: string,
+  newUsername: string
+): Promise<void> {
+  const batch = writeBatch(db);
+
+  // 1. Claim new username
+  batch.set(doc(db, "usernames", newUsername), { uid });
+
+  // 2. Delete old username claim
+  batch.delete(doc(db, "usernames", oldUsername));
+
+  // 3. Create redirect from old → new
+  batch.set(doc(db, "usernameRedirects", oldUsername), {
+    redirectTo: newUsername,
+    uid,
+    createdAt: serverTimestamp(),
+  });
+
+  // 4. Update user doc
+  batch.update(doc(db, "users", uid), {
+    username: newUsername,
+    updatedAt: serverTimestamp(),
+  });
+
+  await batch.commit();
+}

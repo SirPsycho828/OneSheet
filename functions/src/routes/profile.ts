@@ -22,6 +22,18 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
       .get();
 
     if (!usernameDoc.exists) {
+      // Check for a redirect from an old username
+      const redirectDoc = await db
+        .collection("usernameRedirects")
+        .doc(username.toLowerCase())
+        .get();
+
+      if (redirectDoc.exists) {
+        const newUsername = redirectDoc.data()!.redirectTo;
+        res.redirect(301, `/api/profile/${newUsername}`);
+        return;
+      }
+
       res.status(404).json({
         error: { code: "NOT_FOUND", message: "Profile not found" },
       });

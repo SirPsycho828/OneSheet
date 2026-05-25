@@ -62,6 +62,14 @@ service cloud.firestore {
         && resource.data.userId == request.auth.uid;
     }
 
+    // usernameRedirects/{oldUsername} — public read, owner write
+    match /usernameRedirects/{oldUsername} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
     // stripeEvents/{eventId} — admin SDK only
     match /stripeEvents/{eventId} {
       allow read, write: if false;
