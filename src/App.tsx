@@ -10,21 +10,13 @@ import { SignUp } from "./pages/SignUp";
 import { Onboarding } from "./pages/Onboarding";
 import { VerifyEmail } from "./pages/VerifyEmail";
 import { Editor } from "./pages/Editor";
+import { Landing } from "./pages/Landing";
+import { Privacy } from "./pages/Privacy";
+import { Terms } from "./pages/Terms";
 
 // ---------------------------------------------------------------------------
 // Placeholder pages — will be replaced in later tasks
 // ---------------------------------------------------------------------------
-
-function Landing() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <h1 className="text-4xl font-semibold tracking-tight text-gray-950">BragSheet</h1>
-        <p className="mt-2 text-lg text-gray-600">One page. Markdown. Done.</p>
-      </div>
-    </div>
-  );
-}
 
 function Dashboard() {
   return (
@@ -38,22 +30,6 @@ function Settings() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <p className="text-gray-600">Settings — coming soon</p>
-    </div>
-  );
-}
-
-function Privacy() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <p className="text-gray-600">Privacy Policy — coming soon</p>
-    </div>
-  );
-}
-
-function Terms() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <p className="text-gray-600">Terms of Service — coming soon</p>
     </div>
   );
 }
