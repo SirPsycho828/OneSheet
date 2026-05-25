@@ -59,9 +59,7 @@ function SettingsNav() {
       <div className="flex items-center gap-2 flex-shrink-0">
         {user?.username && (
           <a
-            href={`https://bragsheet.io/${user.username}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`/${user.username}`}
             className="text-xs text-gray-500 hover:text-brand-500 transition-colors hidden sm:inline"
           >
             View profile

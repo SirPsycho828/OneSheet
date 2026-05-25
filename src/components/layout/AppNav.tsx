@@ -147,7 +147,7 @@ export function AppNav({
       toast.info("Your profile URL isn't available yet.");
       return;
     }
-    const url = `https://bragsheet.io/${profileUsername}`;
+    const url = `${window.location.origin}/${profileUsername}`;
     try {
       await navigator.clipboard.writeText(url);
       toast.success("Link copied!");

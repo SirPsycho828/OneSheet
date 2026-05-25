@@ -7,7 +7,7 @@ import { signOut } from "../services/auth";
 type CheckState = "idle" | "checking" | "available" | "taken";
 
 export function Onboarding() {
-  const { firebaseUser } = useAuth();
+  const { firebaseUser, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
@@ -75,10 +75,8 @@ export function Onboarding() {
         firebaseUser.email ?? ""
       );
 
-      // AuthContext will re-evaluate and determine the next state.
-      // Email users -> unverified -> /verify-email
-      // OAuth users -> authenticated -> /editor
-      // The route guards will handle the redirect automatically.
+      // Re-evaluate auth state so route guards redirect appropriately
+      await refreshUser();
     } catch (err) {
       console.error("Onboarding error:", err);
       setSubmitError("Failed to claim username. It may have just been taken. Try another.");
@@ -108,11 +106,10 @@ export function Onboarding() {
           </span>
           <h1 className="mt-2 text-xl font-medium text-gray-800">Choose your username</h1>
           <p className="mt-1 text-sm text-gray-500">
-            This will be your public profile URL:{" "}
-            <span className="font-mono text-gray-700">
-              bragsheet.com/
-              {username || "yourname"}
-            </span>
+            This will be your public profile URL:
+          </p>
+          <p className="mt-0.5 min-h-[1.25rem] font-mono text-sm text-gray-700">
+            bragsheet.com/{username || "yourname"}
           </p>
         </div>
 
@@ -139,12 +136,11 @@ export function Onboarding() {
                 placeholder="yourname"
                 maxLength={30}
               />
-              {checkMessage && (
-                <p className={`text-xs ${checkColorClass}`}>{checkMessage}</p>
-              )}
-              {checkState === "checking" && (
-                <p className="text-xs text-gray-400">Checking availability...</p>
-              )}
+              <p className={`text-xs ${checkColorClass} min-h-[1rem]`}>
+                {checkState === "checking"
+                  ? "Checking availability..."
+                  : checkMessage || "\u00A0"}
+              </p>
               <p className="text-xs text-gray-400">
                 3–30 characters. Lowercase letters, numbers, and hyphens only.
               </p>

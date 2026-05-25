@@ -49,7 +49,7 @@ function DashboardNav({ onSignOut }: DashboardNavProps) {
   ];
 
   const profileUrl = user?.username
-    ? `https://bragsheet.io/${user.username}`
+    ? `/${user.username}`
     : undefined;
 
   return (
@@ -74,8 +74,6 @@ function DashboardNav({ onSignOut }: DashboardNavProps) {
         {profileUrl && (
           <a
             href={profileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
             className="text-xs text-gray-500 hover:text-brand-500 transition-colors hidden sm:inline"
           >
             View profile

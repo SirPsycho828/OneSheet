@@ -3,9 +3,13 @@ import { db } from "../config/firebase";
 import type { Analytics } from "../types/analytics";
 
 export async function getAnalytics(resumeId: string): Promise<Analytics | null> {
-  const snap = await getDoc(doc(db, "analytics", resumeId));
-  if (!snap.exists()) return null;
-  return snap.data() as Analytics;
+  try {
+    const snap = await getDoc(doc(db, "analytics", resumeId));
+    if (!snap.exists()) return null;
+    return snap.data() as Analytics;
+  } catch {
+    return null;
+  }
 }
 
 export async function getAnalyticsForResumes(

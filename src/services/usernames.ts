@@ -57,13 +57,14 @@ export async function claimUsername(
   // 1. Claim username document
   batch.set(doc(db, "usernames", username), { uid });
 
-  // 2. Update users document
-  batch.update(doc(db, "users", uid), {
+  // 2. Create or update users document
+  batch.set(doc(db, "users", uid), {
     username,
     displayName,
+    email,
     onboardingComplete: true,
     updatedAt: serverTimestamp(),
-  });
+  }, { merge: true });
 
   // 3. Create initial default resume
   const resumeRef = doc(collection(db, "resumes"));

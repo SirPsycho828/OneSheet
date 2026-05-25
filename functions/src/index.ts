@@ -18,10 +18,12 @@ admin.initializeApp();
 
 const app = express();
 
-// CORS: allow bragsheet.io and localhost dev
+// CORS: allow bragsheet.io, Firebase hosting, and localhost dev
 app.use(cors({
   origin: [
     /bragsheet\.io$/,
+    /bragsheet-mvp\.web\.app$/,
+    /bragsheet-mvp\.firebaseapp\.com$/,
     /localhost:\d+$/,
   ],
 }));

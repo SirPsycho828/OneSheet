@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -14,6 +15,7 @@ interface AuthContextValue {
   authState: AuthState;
   user: User | null;
   firebaseUser: FirebaseUser | null;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -22,6 +24,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>("loading");
   const [user, setUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+
+  const evaluateUser = useCallback(async (fbUser: FirebaseUser) => {
+    try {
+      const userDocRef = doc(db, "users", fbUser.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        setUser(null);
+        setAuthState("needs_onboarding");
+        return;
+      }
+
+      const userData = userDoc.data() as User;
+
+      if (!userData.onboardingComplete || !userData.username) {
+        setUser(userData);
+        setAuthState("needs_onboarding");
+        return;
+      }
+
+      const isEmailProvider = fbUser.providerData.some(
+        (p) => p.providerId === "password"
+      );
+      if (isEmailProvider && !fbUser.emailVerified) {
+        setUser(userData);
+        setAuthState("unverified");
+        return;
+      }
+
+      setUser(userData);
+      setAuthState("authenticated");
+    } catch (error) {
+      console.error("AuthContext: error fetching user doc", error);
+      setUser(null);
+      setAuthState("unauthenticated");
+    }
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
@@ -33,51 +72,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setFirebaseUser(fbUser);
-
-      try {
-        const userDocRef = doc(db, "users", fbUser.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (!userDoc.exists()) {
-          // No users document at all — needs onboarding
-          setUser(null);
-          setAuthState("needs_onboarding");
-          return;
-        }
-
-        const userData = userDoc.data() as User;
-
-        if (!userData.onboardingComplete || !userData.username) {
-          // Has doc but hasn't completed onboarding
-          setUser(userData);
-          setAuthState("needs_onboarding");
-          return;
-        }
-
-        // Email/password users must verify their email
-        const isEmailProvider = fbUser.providerData.some(
-          (p) => p.providerId === "password"
-        );
-        if (isEmailProvider && !fbUser.emailVerified) {
-          setUser(userData);
-          setAuthState("unverified");
-          return;
-        }
-
-        setUser(userData);
-        setAuthState("authenticated");
-      } catch (error) {
-        console.error("AuthContext: error fetching user doc", error);
-        setUser(null);
-        setAuthState("unauthenticated");
-      }
+      await evaluateUser(fbUser);
     });
 
     return unsubscribe;
-  }, []);
+  }, [evaluateUser]);
+
+  const refreshUser = useCallback(async () => {
+    const fbUser = auth.currentUser;
+    if (!fbUser) return;
+    setFirebaseUser(fbUser);
+    await evaluateUser(fbUser);
+  }, [evaluateUser]);
 
   return (
-    <AuthContext.Provider value={{ authState, user, firebaseUser }}>
+    <AuthContext.Provider value={{ authState, user, firebaseUser, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -25,7 +25,7 @@ export function ProfileActions({
   const [copying, setCopying] = React.useState(false);
   const [downloading, setDownloading] = React.useState(false);
 
-  const profileUrl = `https://bragsheet.io/${username}`;
+  const profileUrl = `${window.location.origin}/${username}`;
 
   async function handleCopyLink() {
     setCopying(true);

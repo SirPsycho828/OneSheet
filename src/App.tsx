@@ -20,8 +20,16 @@ import { Settings } from "./pages/Settings";
 
 function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <p className="text-gray-600">404 — Page not found</p>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 gap-3">
+      <span className="text-lg font-semibold tracking-tight text-gray-950">BragSheet</span>
+      <span className="text-6xl font-bold text-gray-200">404</span>
+      <p className="text-gray-500">Page not found</p>
+      <a
+        href="/"
+        className="mt-2 inline-flex items-center justify-center rounded-md bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
+      >
+        Go to Homepage
+      </a>
     </div>
   );
 }
