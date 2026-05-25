@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ToastProvider } from "./contexts/ToastContext";
+import { ToastContainer } from "./components/ui/Toast";
 import { PublicRoute } from "./components/auth/PublicRoute";
 import { PrivateRoute } from "./components/auth/PrivateRoute";
 import { OnboardingRoute } from "./components/auth/OnboardingRoute";
@@ -86,41 +88,44 @@ function NotFound() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/* Public routes — redirect signed-in users */}
-          <Route element={<PublicRoute />}>
-            <Route path="/" element={<Landing />} />
-            <Route path="/sign-in" element={<SignIn />} />
-            <Route path="/sign-up" element={<SignUp />} />
-          </Route>
+      <ToastProvider>
+        <AuthProvider>
+          <ToastContainer />
+          <Routes>
+            {/* Public routes — redirect signed-in users */}
+            <Route element={<PublicRoute />}>
+              <Route path="/" element={<Landing />} />
+              <Route path="/sign-in" element={<SignIn />} />
+              <Route path="/sign-up" element={<SignUp />} />
+            </Route>
 
-          {/* Onboarding — only accessible to needs_onboarding state */}
-          <Route element={<OnboardingRoute />}>
-            <Route path="/onboarding" element={<Onboarding />} />
-          </Route>
+            {/* Onboarding — only accessible to needs_onboarding state */}
+            <Route element={<OnboardingRoute />}>
+              <Route path="/onboarding" element={<Onboarding />} />
+            </Route>
 
-          {/* Email verification — accessible while unverified */}
-          <Route path="/verify-email" element={<VerifyEmail />} />
+            {/* Email verification — accessible while unverified */}
+            <Route path="/verify-email" element={<VerifyEmail />} />
 
-          {/* Private routes — require authenticated state */}
-          <Route element={<PrivateRoute />}>
-            <Route path="/editor" element={<Editor />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/settings" element={<Settings />} />
-          </Route>
+            {/* Private routes — require authenticated state */}
+            <Route element={<PrivateRoute />}>
+              <Route path="/editor" element={<Editor />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/settings" element={<Settings />} />
+            </Route>
 
-          {/* Static public pages */}
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
+            {/* Static public pages */}
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
 
-          {/* Public profile catch-all — MUST be last */}
-          <Route path="/:username" element={<PublicProfile />} />
+            {/* Public profile catch-all — MUST be last */}
+            <Route path="/:username" element={<PublicProfile />} />
 
-          {/* 404 fallback */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </AuthProvider>
+            {/* 404 fallback */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }
