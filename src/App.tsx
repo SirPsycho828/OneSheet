@@ -1,12 +1,126 @@
-function App() {
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { PublicRoute } from "./components/auth/PublicRoute";
+import { PrivateRoute } from "./components/auth/PrivateRoute";
+import { OnboardingRoute } from "./components/auth/OnboardingRoute";
+import { SignIn } from "./pages/SignIn";
+import { SignUp } from "./pages/SignUp";
+import { Onboarding } from "./pages/Onboarding";
+import { VerifyEmail } from "./pages/VerifyEmail";
+
+// ---------------------------------------------------------------------------
+// Placeholder pages — will be replaced in later tasks
+// ---------------------------------------------------------------------------
+
+function Landing() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-6 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="text-center">
         <h1 className="text-4xl font-semibold tracking-tight text-gray-950">BragSheet</h1>
-        <p className="mt-2 text-lg text-gray-700">One page. Markdown. Done.</p>
+        <p className="mt-2 text-lg text-gray-600">One page. Markdown. Done.</p>
       </div>
     </div>
   );
 }
 
-export default App;
+function Editor() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <p className="text-gray-600">Editor — coming soon</p>
+    </div>
+  );
+}
+
+function Dashboard() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <p className="text-gray-600">Dashboard — coming soon</p>
+    </div>
+  );
+}
+
+function Settings() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <p className="text-gray-600">Settings — coming soon</p>
+    </div>
+  );
+}
+
+function Privacy() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <p className="text-gray-600">Privacy Policy — coming soon</p>
+    </div>
+  );
+}
+
+function Terms() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <p className="text-gray-600">Terms of Service — coming soon</p>
+    </div>
+  );
+}
+
+function PublicProfile() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <p className="text-gray-600">Public profile — coming soon</p>
+    </div>
+  );
+}
+
+function NotFound() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <p className="text-gray-600">404 — Page not found</p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// App
+// ---------------------------------------------------------------------------
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Public routes — redirect signed-in users */}
+          <Route element={<PublicRoute />}>
+            <Route path="/" element={<Landing />} />
+            <Route path="/sign-in" element={<SignIn />} />
+            <Route path="/sign-up" element={<SignUp />} />
+          </Route>
+
+          {/* Onboarding — only accessible to needs_onboarding state */}
+          <Route element={<OnboardingRoute />}>
+            <Route path="/onboarding" element={<Onboarding />} />
+          </Route>
+
+          {/* Email verification — accessible while unverified */}
+          <Route path="/verify-email" element={<VerifyEmail />} />
+
+          {/* Private routes — require authenticated state */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/editor" element={<Editor />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
+
+          {/* Static public pages */}
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+
+          {/* Public profile catch-all — MUST be last */}
+          <Route path="/:username" element={<PublicProfile />} />
+
+          {/* 404 fallback */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}

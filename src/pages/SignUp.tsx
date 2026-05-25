@@ -1,0 +1,51 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { SignUpForm } from "../components/auth/SignUpForm";
+import { OAuthButtons } from "../components/auth/OAuthButtons";
+
+export function SignUp() {
+  const [oauthError, setOauthError] = useState("");
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 text-center">
+          <Link to="/" className="text-2xl font-semibold tracking-tight text-gray-950">
+            BragSheet
+          </Link>
+          <h1 className="mt-2 text-xl font-medium text-gray-800">Create your account</h1>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          {oauthError && (
+            <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+              {oauthError}
+            </p>
+          )}
+
+          <OAuthButtons onError={setOauthError} />
+
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-200" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="h-px flex-1 bg-gray-200" />
+          </div>
+
+          <SignUpForm />
+        </div>
+
+        <p className="mt-4 text-center text-xs text-gray-400">
+          By signing up you agree to our{" "}
+          <Link to="/terms" className="underline hover:text-gray-600">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link to="/privacy" className="underline hover:text-gray-600">
+            Privacy Policy
+          </Link>
+          .
+        </p>
+      </div>
+    </div>
+  );
+}
