@@ -29,6 +29,7 @@ export function Editor() {
     setPaperSize,
     saveStatus,
     forceSave,
+    setOverflow,
   } = useResume(resumeId);
 
   // ---------------------------------------------------------------------------
@@ -112,6 +113,7 @@ export function Editor() {
           onForceSave={forceSave}
           templateId={templateId}
           paperSize={paperSize}
+          onOverflowChange={setOverflow}
         />
       </main>
 

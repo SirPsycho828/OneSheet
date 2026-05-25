@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { getResume, getDefaultResume, updateResume } from "../services/resumes";
 import { useAuth } from "./useAuth";
 import { useDebounce } from "./useDebounce";
-import type { Resume } from "../types/resume";
+import type { Resume, Overflow } from "../types/resume";
 
 export type SaveStatus = "saved" | "saving" | "unsaved" | "error";
 
@@ -20,6 +20,9 @@ export function useResume(resumeId?: string) {
   const [title, setTitle] = useState("");
   const [templateId, setTemplateId] = useState("classic");
   const [paperSize, setPaperSize] = useState<"us-letter" | "a4">("us-letter");
+
+  // Overflow state — updated by the preview component on every measurement
+  const overflowRef = useRef<Overflow>({ isOverflowing: false, scaleFactor: 1.0 });
 
   // Save tracking
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
@@ -122,7 +125,8 @@ export function useResume(resumeId?: string) {
 
     setSaveStatus("saving");
     try {
-      await updateResume(id, current);
+      // Include the latest overflow state from the preview measurement
+      await updateResume(id, { ...current, overflow: overflowRef.current });
       lastSavedRef.current = current;
       setSaveStatus("saved");
     } catch (err) {
@@ -154,6 +158,15 @@ export function useResume(resumeId?: string) {
     await save();
   }, [save]);
 
+  /**
+   * Called by ResumePreview after each overflow measurement.
+   * Stores the latest state in a ref so the next auto-save includes it.
+   * Does NOT trigger a re-render — overflow save happens piggyback on content saves.
+   */
+  const setOverflow = useCallback((state: Overflow) => {
+    overflowRef.current = state;
+  }, []);
+
   return {
     resume,
     isLoading,
@@ -167,5 +180,6 @@ export function useResume(resumeId?: string) {
     setPaperSize,
     saveStatus,
     forceSave,
+    setOverflow,
   };
 }

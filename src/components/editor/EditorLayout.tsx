@@ -2,6 +2,7 @@ import * as React from "react";
 import { Code, Eye } from "lucide-react";
 import { MarkdownInput } from "./MarkdownInput";
 import { ResumePreview } from "./ResumePreview";
+import type { OverflowState } from "../../hooks/useOverflow";
 
 interface EditorLayoutProps {
   markdown: string;
@@ -9,6 +10,8 @@ interface EditorLayoutProps {
   onForceSave: () => void;
   templateId: string;
   paperSize: "us-letter" | "a4";
+  /** Called after each overflow measurement in the preview panel. */
+  onOverflowChange?: (state: OverflowState) => void;
 }
 
 type MobileTab = "edit" | "preview";
@@ -25,6 +28,7 @@ export function EditorLayout({
   onForceSave,
   templateId,
   paperSize,
+  onOverflowChange,
 }: EditorLayoutProps) {
   // ---------------------------------------------------------------------------
   // Desktop split state
@@ -123,6 +127,7 @@ export function EditorLayout({
             markdown={markdown}
             templateId={templateId}
             paperSize={paperSize}
+            onOverflowChange={onOverflowChange}
           />
         </div>
       </div>
@@ -174,6 +179,7 @@ export function EditorLayout({
               markdown={markdown}
               templateId={templateId}
               paperSize={paperSize}
+              onOverflowChange={onOverflowChange}
             />
           )}
         </div>

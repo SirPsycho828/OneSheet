@@ -10,8 +10,12 @@ interface PaperContainerProps {
   paperSize: "us-letter" | "a4";
   templateId: string;
   htmlContent: string;
-  /** Optional additional scale factor for overflow shrinking (Task 8). Defaults to 1.0. */
-  scaleFactor?: number;
+  /**
+   * Content-level scale factor for overflow shrinking (Task 8).
+   * Applied to the content wrapper inside the paper, not to the paper itself.
+   * Defaults to 1.0 (no scaling).
+   */
+  contentScaleFactor?: number;
 }
 
 /**
@@ -27,7 +31,7 @@ export function PaperContainer({
   paperSize,
   templateId,
   htmlContent,
-  scaleFactor = 1.0,
+  contentScaleFactor = 1.0,
 }: PaperContainerProps) {
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const [panelScale, setPanelScale] = React.useState(1);
@@ -57,30 +61,50 @@ export function PaperContainer({
     return () => observer.disconnect();
   }, [paperWidth]);
 
-  const combinedScale = panelScale * scaleFactor;
-  const scaledHeight = paperHeight * combinedScale;
+  // panelScale: shrinks the entire paper to fit the panel width
+  // contentScaleFactor: shrinks content inside the paper (overflow scaling)
+  const scaledHeight = paperHeight * panelScale;
 
   return (
     // Outer wrapper — fills available space, used by ResizeObserver
     <div ref={wrapperRef} className="w-full flex justify-center">
       {/* Height placeholder so the parent scroll area accounts for the scaled paper */}
-      <div style={{ height: scaledHeight, width: paperWidth * combinedScale }}>
+      <div style={{ height: scaledHeight, width: paperWidth * panelScale }}>
         <div
           style={{
             width: paperWidth,
             height: paperHeight,
             transformOrigin: "top left",
-            transform: `scale(${combinedScale})`,
+            transform: `scale(${panelScale})`,
           }}
           className="bg-white shadow-lg border border-gray-200 overflow-hidden"
         >
           {/* Inner padding: 48px = ~0.5 inch at 96 DPI */}
-          <div
-            className="resume-content w-full h-full"
-            data-template={templateId}
-            style={{ padding: "48px" }}
-            dangerouslySetInnerHTML={{ __html: htmlContent }}
-          />
+          <div style={{ padding: "48px" }}>
+            {/*
+              Content scale wrapper — applies overflow shrinking (contentScaleFactor).
+              Width is expanded to 100%/factor so scaled content still fills paper width.
+              transform-origin: top left ensures content shrinks from the top corner,
+              not the center.
+            */}
+            <div
+              style={
+                contentScaleFactor < 1
+                  ? {
+                      transform: `scale(${contentScaleFactor})`,
+                      transformOrigin: "top left",
+                      width: `${100 / contentScaleFactor}%`,
+                    }
+                  : undefined
+              }
+            >
+              <div
+                className="resume-content"
+                data-template={templateId}
+                dangerouslySetInnerHTML={{ __html: htmlContent }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
