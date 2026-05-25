@@ -13,6 +13,7 @@ import { Editor } from "./pages/Editor";
 import { Landing } from "./pages/Landing";
 import { Privacy } from "./pages/Privacy";
 import { Terms } from "./pages/Terms";
+import { PublicProfile } from "./pages/PublicProfile";
 
 // ---------------------------------------------------------------------------
 // Placeholder pages — will be replaced in later tasks
@@ -34,13 +35,6 @@ function Settings() {
   );
 }
 
-function PublicProfile() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <p className="text-gray-600">Public profile — coming soon</p>
-    </div>
-  );
-}
 
 function NotFound() {
   return (

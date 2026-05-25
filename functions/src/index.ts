@@ -3,6 +3,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import express from "express";
 import cors from "cors";
 import pdfRoutes from "./routes/pdf";
+import profileRoutes from "./routes/profile";
 
 admin.initializeApp();
 
@@ -31,9 +32,9 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/pdf", pdfRoutes);
+app.use("/api/profile", profileRoutes);
 
-// TODO: Routes will be added in Tasks 13-19
-// app.use("/api/profile", profileRoutes);
+// TODO: Routes will be added in Tasks 14-19
 // app.use("/api/stripe", stripeRoutes);
 // etc.
 
