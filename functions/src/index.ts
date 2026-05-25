@@ -8,6 +8,7 @@ import resumeRoutes from "./routes/resumes";
 import versionRoutes from "./routes/versions";
 import stripeRoutes from "./routes/stripe";
 import analyticsRoutes from "./routes/analytics";
+import agentRoutes from "./routes/agent";
 import { cleanupVersions } from "./scheduled/cleanupVersions";
 import { stripeSecretKey, stripeWebhookSecret, stripeProPriceId } from "./config";
 
@@ -45,6 +46,7 @@ app.use("/api/resumes", resumeRoutes);
 app.use("/api/resumes/:resumeId/versions", versionRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/agent", agentRoutes);
 
 // Export as Firebase Function
 export const api = onRequest(

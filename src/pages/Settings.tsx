@@ -4,6 +4,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
 import { OverflowMenu } from "../components/ui/OverflowMenu";
 import { SubscriptionCard } from "../components/settings/SubscriptionCard";
+import { ApiKeysCard } from "../components/settings/ApiKeysCard";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/useToast";
 
@@ -157,7 +158,7 @@ export function Settings() {
         </section>
 
         {/* Billing section */}
-        <section>
+        <section className="mb-8">
           <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
             Billing
           </h2>
@@ -165,6 +166,14 @@ export function Settings() {
             pollOnMount={checkoutParam === "success"}
             onSubscriptionActive={handleSubscriptionActive}
           />
+        </section>
+
+        {/* API section */}
+        <section>
+          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+            API
+          </h2>
+          <ApiKeysCard />
         </section>
       </main>
     </div>
