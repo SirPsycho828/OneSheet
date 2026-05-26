@@ -62,10 +62,10 @@ export function ProfileResume({
             >
               {/* data-preset on parent, .resume-content as child — required by CSS descendant selectors */}
               <div {...dataAttrs}>
+                {/* SAFE: resumeHtml is sanitized server-side by rehype-sanitize */}
                 <div
                   className="resume-content"
                   style={cssVars as React.CSSProperties}
-                  {/* SAFE: resumeHtml is sanitized server-side by rehype-sanitize */}
                   dangerouslySetInnerHTML={{ __html: resumeHtml }}
                 />
               </div>
@@ -80,10 +80,10 @@ export function ProfileResume({
           <div style={{ padding: pageMarginPx }}>
             {/* data-preset on parent, .resume-content as child — required by CSS descendant selectors */}
             <div {...dataAttrs}>
+              {/* SAFE: resumeHtml is sanitized server-side by rehype-sanitize */}
               <div
                 className="resume-content"
                 style={cssVars as React.CSSProperties}
-                {/* SAFE: resumeHtml is sanitized server-side by rehype-sanitize */}
                 dangerouslySetInnerHTML={{ __html: resumeHtml }}
               />
             </div>
