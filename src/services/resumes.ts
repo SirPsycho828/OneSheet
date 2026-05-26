@@ -59,7 +59,7 @@ export async function getUserResumes(userId: string): Promise<Resume[]> {
  */
 export async function updateResume(
   resumeId: string,
-  data: Partial<Pick<Resume, "markdown" | "title" | "templateId" | "overflow" | "paperSize">>
+  data: Partial<Pick<Resume, "markdown" | "title" | "templateId" | "overflow" | "paperSize" | "showQrCode" | "qrCodeUrl" | "styles">>
 ): Promise<void> {
   const ref = doc(db, "resumes", resumeId);
   await updateDoc(ref, {
