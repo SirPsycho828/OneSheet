@@ -1,33 +1,36 @@
 import * as React from "react";
-import { Code, Eye } from "lucide-react";
+import { Code, Eye, Palette } from "lucide-react";
 import { MarkdownInput } from "./MarkdownInput";
 import { ResumePreview } from "./ResumePreview";
+import { DesignPanel } from "./DesignPanel";
 import type { OverflowState } from "../../hooks/useOverflow";
+import type { ResumeStyles } from "../../types/resume";
 
 interface EditorLayoutProps {
   markdown: string;
   onMarkdownChange: (value: string) => void;
   onForceSave: () => void;
-  templateId: string;
-  paperSize: "us-letter" | "a4";
+  styles: ResumeStyles;
+  onStylesChange: (styles: ResumeStyles) => void;
   /** Called after each overflow measurement in the preview panel. */
   onOverflowChange?: (state: OverflowState) => void;
 }
 
-type MobileTab = "edit" | "preview";
+type LeftMode = "source" | "design";
+type MobileTab = "edit" | "design" | "preview";
 
 const MIN_PANEL_WIDTH = 320;
 
 /**
- * Desktop (>= 1024px): side-by-side resizable split panel.
+ * Desktop (>= 1024px): side-by-side resizable split panel with Source/Design toggle.
  * Mobile (< 1024px):   tab switcher with single visible panel.
  */
 export function EditorLayout({
   markdown,
   onMarkdownChange,
   onForceSave,
-  templateId,
-  paperSize,
+  styles,
+  onStylesChange,
   onOverflowChange,
 }: EditorLayoutProps) {
   // ---------------------------------------------------------------------------
@@ -38,6 +41,9 @@ export function EditorLayout({
   const isDraggingRef = React.useRef(false);
   const dragStartXRef = React.useRef(0);
   const dragStartSplitRef = React.useRef(50);
+
+  // Left panel mode: Source (markdown) or Design (style controls)
+  const [leftMode, setLeftMode] = React.useState<LeftMode>("source");
 
   function handleDragStart(e: React.MouseEvent) {
     e.preventDefault();
@@ -85,6 +91,18 @@ export function EditorLayout({
   // ---------------------------------------------------------------------------
   const [mobileTab, setMobileTab] = React.useState<MobileTab>("edit");
 
+  // ---------------------------------------------------------------------------
+  // Tab styling helper
+  // ---------------------------------------------------------------------------
+  function tabClass(active: boolean) {
+    return [
+      "flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors",
+      active
+        ? "border-b-2 border-brand-500 text-brand-500"
+        : "border-b-2 border-transparent text-gray-500 hover:text-gray-700",
+    ].join(" ");
+  }
+
   return (
     <>
       {/* ------------------------------------------------------------------ */}
@@ -94,16 +112,43 @@ export function EditorLayout({
         ref={containerRef}
         className="hidden lg:flex h-full w-full overflow-hidden"
       >
-        {/* Left panel: Markdown input */}
+        {/* Left panel: Source/Design toggle + content */}
         <div
-          className="h-full overflow-hidden border-r border-gray-200"
+          className="h-full overflow-hidden border-r border-gray-200 flex flex-col"
           style={{ width: `${splitPercent}%`, flexShrink: 0 }}
         >
-          <MarkdownInput
-            value={markdown}
-            onChange={onMarkdownChange}
-            onForceSave={onForceSave}
-          />
+          {/* Tab bar */}
+          <div className="flex border-b border-gray-200 bg-white flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setLeftMode("source")}
+              className={tabClass(leftMode === "source")}
+            >
+              <Code className="w-4 h-4" strokeWidth={1.5} />
+              Source
+            </button>
+            <button
+              type="button"
+              onClick={() => setLeftMode("design")}
+              className={tabClass(leftMode === "design")}
+            >
+              <Palette className="w-4 h-4" strokeWidth={1.5} />
+              Design
+            </button>
+          </div>
+
+          {/* Panel content */}
+          <div className="flex-1 overflow-hidden">
+            {leftMode === "source" ? (
+              <MarkdownInput
+                value={markdown}
+                onChange={onMarkdownChange}
+                onForceSave={onForceSave}
+              />
+            ) : (
+              <DesignPanel styles={styles} onStylesChange={onStylesChange} />
+            )}
+          </div>
         </div>
 
         {/* Drag handle */}
@@ -125,8 +170,7 @@ export function EditorLayout({
         <div className="h-full overflow-hidden flex-1 min-w-0">
           <ResumePreview
             markdown={markdown}
-            templateId={templateId}
-            paperSize={paperSize}
+            styles={styles}
             onOverflowChange={onOverflowChange}
           />
         </div>
@@ -141,15 +185,18 @@ export function EditorLayout({
           <button
             type="button"
             onClick={() => setMobileTab("edit")}
-            className={[
-              "flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors",
-              mobileTab === "edit"
-                ? "border-b-2 border-brand-500 text-brand-500"
-                : "border-b-2 border-transparent text-gray-500 hover:text-gray-700",
-            ].join(" ")}
+            className={tabClass(mobileTab === "edit")}
           >
             <Code className="w-4 h-4" strokeWidth={1.5} />
             Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileTab("design")}
+            className={tabClass(mobileTab === "design")}
+          >
+            <Palette className="w-4 h-4" strokeWidth={1.5} />
+            Design
           </button>
           <button
             type="button"
@@ -157,12 +204,7 @@ export function EditorLayout({
               if (mobileTab === "edit") onForceSave();
               setMobileTab("preview");
             }}
-            className={[
-              "flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors",
-              mobileTab === "preview"
-                ? "border-b-2 border-brand-500 text-brand-500"
-                : "border-b-2 border-transparent text-gray-500 hover:text-gray-700",
-            ].join(" ")}
+            className={tabClass(mobileTab === "preview")}
           >
             <Eye className="w-4 h-4" strokeWidth={1.5} />
             Preview
@@ -177,11 +219,12 @@ export function EditorLayout({
               onChange={onMarkdownChange}
               onForceSave={onForceSave}
             />
+          ) : mobileTab === "design" ? (
+            <DesignPanel styles={styles} onStylesChange={onStylesChange} />
           ) : (
             <ResumePreview
               markdown={markdown}
-              templateId={templateId}
-              paperSize={paperSize}
+              styles={styles}
               onOverflowChange={onOverflowChange}
             />
           )}

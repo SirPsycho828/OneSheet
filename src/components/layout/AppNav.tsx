@@ -1,23 +1,19 @@
 import * as React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Download, Share2, Layout, Loader2 } from "lucide-react";
+import { Download, Share2, Loader2 } from "lucide-react";
 import { Button } from "../ui/Button";
 import { OverflowMenu } from "../ui/OverflowMenu";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../../hooks/useToast";
 import { auth } from "../../config/firebase";
 import { signOut } from "firebase/auth";
-import { TEMPLATES } from "../../constants/templates";
 
 interface AppNavProps {
   title: string;
   onTitleChange: (title: string) => void;
-  templateId: string;
   username?: string;
-  onOpenTemplatePicker: () => void;
   onOpenVersionHistory?: () => void;
   resumeId?: string;
-  paperSize?: "us-letter" | "a4";
 }
 
 /**
@@ -33,9 +29,7 @@ interface AppNavProps {
 export function AppNav({
   title,
   onTitleChange,
-  templateId,
   username,
-  onOpenTemplatePicker,
   onOpenVersionHistory,
   resumeId,
 }: AppNavProps) {
@@ -161,8 +155,6 @@ export function AppNav({
     navigate("/sign-in");
   }
 
-  const currentTemplate = TEMPLATES.find((t) => t.id === templateId);
-
   const menuItems = [
     {
       label: "Dashboard",
@@ -234,17 +226,6 @@ export function AppNav({
 
       {/* Right actions */}
       <div className="flex items-center gap-1.5 flex-shrink-0">
-        {/* Template button */}
-        <Button
-          variant="ghost"
-          className="hidden sm:inline-flex items-center gap-1.5 text-xs"
-          onClick={onOpenTemplatePicker}
-          title="Change template"
-        >
-          <Layout className="w-4 h-4" strokeWidth={1.5} />
-          <span className="hidden md:inline">{currentTemplate?.name ?? "Template"}</span>
-        </Button>
-
         {/* Share button */}
         <Button
           variant="ghost"
