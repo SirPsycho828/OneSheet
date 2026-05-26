@@ -1,11 +1,13 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import { Check } from "lucide-react";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { createResume } from "../../services/resumes";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../../hooks/useToast";
 import { PRESET_DEFAULTS } from "../../constants/presets";
+import { STARTER_TEMPLATES } from "../../constants/starterTemplates";
 
 interface CreateResumeModalProps {
   isOpen: boolean;
@@ -18,13 +20,15 @@ export function CreateResumeModal({ isOpen, onClose }: CreateResumeModalProps) {
   const toast = useToast();
 
   const [title, setTitle] = React.useState("");
+  const [selectedStarter, setSelectedStarter] = React.useState("custom");
   const [isCreating, setIsCreating] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Focus input when modal opens
+  // Reset state when modal opens
   React.useEffect(() => {
     if (isOpen) {
       setTitle("");
+      setSelectedStarter("custom");
       requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [isOpen]);
@@ -32,13 +36,16 @@ export function CreateResumeModal({ isOpen, onClose }: CreateResumeModalProps) {
   async function handleCreate() {
     if (!user) return;
     const trimmedTitle = title.trim() || "Untitled Resume";
+    const starter = STARTER_TEMPLATES.find((t) => t.id === selectedStarter);
+    const starterMarkdown = starter?.markdown ?? "";
+
     setIsCreating(true);
     try {
       const paperSize = user.paperSize ?? "us-letter";
       const newId = await createResume({
         userId: user.uid,
         title: trimmedTitle,
-        markdown: "",
+        markdown: starterMarkdown,
         templateId: "classic",
         isDefault: false,
         paperSize,
@@ -83,6 +90,37 @@ export function CreateResumeModal({ isOpen, onClose }: CreateResumeModalProps) {
               "placeholder:text-gray-400",
             ].join(" ")}
           />
+        </div>
+
+        {/* Starter template picker */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-gray-700">
+            Start from
+          </span>
+          <div className="grid grid-cols-2 gap-2">
+            {STARTER_TEMPLATES.map((t) => {
+              const selected = selectedStarter === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setSelectedStarter(t.id)}
+                  className={[
+                    "relative text-left rounded-md border p-2.5 text-sm transition-colors",
+                    selected
+                      ? "border-brand-500 bg-brand-50 ring-1 ring-brand-500"
+                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
+                  ].join(" ")}
+                >
+                  <p className="font-medium text-gray-900">{t.label}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{t.description}</p>
+                  {selected && (
+                    <Check className="absolute top-2 right-2 w-4 h-4 text-brand-500" strokeWidth={2} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="flex justify-end gap-2">

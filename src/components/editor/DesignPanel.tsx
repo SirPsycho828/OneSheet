@@ -1,5 +1,6 @@
 import * as React from "react";
 import { AlignLeft, AlignCenter, AlignRight, Check, RotateCcw } from "lucide-react";
+import { ConfirmModal } from "../ui/ConfirmModal";
 import type { ResumeStyles } from "../../types/resume";
 import { PRESET_LIST, PRESET_DEFAULTS, FONT_OPTIONS, ACCENT_COLORS } from "../../constants/presets";
 import type { PresetId } from "../../constants/presets";
@@ -144,14 +145,22 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
   }, [styles.accentColor]);
 
   // -----------------------------------------------------------------------
+  // Confirm modal state for preset/reset
+  // -----------------------------------------------------------------------
+  const [confirmTarget, setConfirmTarget] = React.useState<PresetId | null>(null);
+  const confirmPresetName = confirmTarget
+    ? (PRESET_LIST.find((p) => p.id === confirmTarget)?.name ?? confirmTarget)
+    : "";
+
+  // -----------------------------------------------------------------------
   // Preset change handler
   // -----------------------------------------------------------------------
   function handlePresetChange(presetId: PresetId) {
     if (presetId === styles.preset && !hasCustomizations(styles)) return;
 
     if (hasCustomizations(styles)) {
-      const presetName = PRESET_LIST.find((p) => p.id === presetId)?.name ?? presetId;
-      if (!window.confirm(`Reset all style options to ${presetName} defaults?`)) return;
+      setConfirmTarget(presetId);
+      return;
     }
 
     onStylesChange(PRESET_DEFAULTS[presetId]);
@@ -162,9 +171,13 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
   // -----------------------------------------------------------------------
   function handleReset() {
     if (!hasCustomizations(styles)) return;
-    const presetName = PRESET_LIST.find((p) => p.id === styles.preset)?.name ?? styles.preset;
-    if (!window.confirm(`Reset all style options to ${presetName} defaults?`)) return;
-    onStylesChange(PRESET_DEFAULTS[styles.preset]);
+    setConfirmTarget(styles.preset);
+  }
+
+  function handleConfirmReset() {
+    if (!confirmTarget) return;
+    onStylesChange(PRESET_DEFAULTS[confirmTarget]);
+    setConfirmTarget(null);
   }
 
   // -----------------------------------------------------------------------
@@ -291,7 +304,6 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
               style={{
                 borderImage: "conic-gradient(red, yellow, lime, aqua, blue, magenta, red) 1",
                 borderImageSlice: 1,
-                background: isCustomColor ? styles.accentColor : "white",
                 borderRadius: "9999px",
                 border: "2px solid transparent",
                 backgroundImage: isCustomColor
@@ -537,6 +549,15 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
           Reset to preset defaults
         </button>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmTarget !== null}
+        onConfirm={handleConfirmReset}
+        onCancel={() => setConfirmTarget(null)}
+        title="Reset styles?"
+        message={`This will reset all style options to ${confirmPresetName} defaults.`}
+        confirmLabel="Reset"
+      />
     </div>
   );
 }

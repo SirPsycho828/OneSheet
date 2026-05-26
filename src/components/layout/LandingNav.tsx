@@ -5,7 +5,7 @@ import { Button } from "../ui/Button";
  * Sticky navigation bar for the landing page.
  *
  * - Sticky top, frosted-glass background
- * - Left: BragSheet wordmark
+ * - Left: OneSheet wordmark
  * - Right: Sign in (ghost, hidden on mobile), Get Started (primary)
  */
 export function LandingNav() {
@@ -16,7 +16,7 @@ export function LandingNav() {
         to="/"
         className="text-lg font-semibold tracking-tight text-gray-950 hover:text-brand-500 transition-colors"
       >
-        BragSheet
+        OneSheet
       </Link>
 
       {/* Right actions */}

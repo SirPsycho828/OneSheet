@@ -43,7 +43,7 @@ export function VerifyEmail() {
       <div className="w-full max-w-sm text-center">
         <div className="mb-6">
           <span className="text-2xl font-semibold tracking-tight text-gray-950">
-            BragSheet
+            OneSheet
           </span>
         </div>
 

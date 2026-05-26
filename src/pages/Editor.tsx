@@ -8,6 +8,7 @@ import { StatusBar } from "../components/layout/StatusBar";
 import { EditorLayout } from "../components/editor/EditorLayout";
 import { Skeleton } from "../components/ui/Skeleton";
 import { VersionPanel } from "../components/versions/VersionPanel";
+import { AIToolsPanel } from "../components/editor/AIToolsPanel";
 import { createSnapshot } from "../services/versions";
 import type { VersionEntry } from "../services/versions";
 
@@ -51,6 +52,7 @@ export function Editor() {
   // Version history state
   // ---------------------------------------------------------------------------
   const [isVersionPanelOpen, setIsVersionPanelOpen] = React.useState(false);
+  const [isAIPanelOpen, setIsAIPanelOpen] = React.useState(false);
   const [previewingVersion, setPreviewingVersion] =
     React.useState<VersionEntry | null>(null);
 
@@ -266,6 +268,7 @@ export function Editor() {
             styles={styles}
             onStylesChange={setStyles}
             onOverflowChange={setOverflow}
+            onOpenAI={() => setIsAIPanelOpen(true)}
           />
         )}
       </main>
@@ -299,6 +302,15 @@ export function Editor() {
         isOnline={isOnline}
         isLocalBackupActive={isLocalBackupActive}
       />
+
+      {isAIPanelOpen && (
+        <AIToolsPanel
+          markdown={markdown}
+          onMarkdownChange={setMarkdown}
+          onClose={() => setIsAIPanelOpen(false)}
+          resumeId={resolvedResumeId}
+        />
+      )}
 
       {isVersionPanelOpen && resolvedResumeId && (
         <VersionPanel

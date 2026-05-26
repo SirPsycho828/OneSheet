@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { writeBatch, doc } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import { Button } from "../ui/Button";
+import { ConfirmModal } from "../ui/ConfirmModal";
 import { OverflowMenu } from "../ui/OverflowMenu";
 import { renderMarkdown } from "../../lib/markdown";
 import { updateResume, createResume, deleteResume } from "../../services/resumes";
@@ -130,6 +131,7 @@ export function ResumeCard({
   const resolvedStyles: ResumeStyles =
     resume.styles ?? deriveStyles(resume.templateId, resume.paperSize ?? "us-letter");
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   const [isRenaming, setIsRenaming] = React.useState(false);
   const [renameValue, setRenameValue] = React.useState(resume.title);
   const [isSavingRename, setIsSavingRename] = React.useState(false);
@@ -207,15 +209,16 @@ export function ResumeCard({
     }
   }
 
-  async function handleDelete() {
+  function handleDeleteClick() {
     if (allResumes.length <= 1) {
       toast.error("You cannot delete your only resume.");
       return;
     }
-    const confirmed = window.confirm(
-      `Delete "${resume.title}"? This cannot be undone.`
-    );
-    if (!confirmed) return;
+    setShowDeleteConfirm(true);
+  }
+
+  async function handleDeleteConfirm() {
+    setShowDeleteConfirm(false);
     try {
       await deleteResume(resume.id);
       onResumesChange();
@@ -237,7 +240,7 @@ export function ResumeCard({
     { label: "Rename", onClick: startRename },
     {
       label: "Delete",
-      onClick: handleDelete,
+      onClick: handleDeleteClick,
       variant: "danger" as const,
     },
   ];
@@ -306,6 +309,16 @@ export function ResumeCard({
           <OverflowMenu items={overflowItems} triggerLabel="Resume actions" />
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setShowDeleteConfirm(false)}
+        title="Delete resume?"
+        message={`"${resume.title}" will be permanently deleted. This cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

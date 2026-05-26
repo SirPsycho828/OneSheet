@@ -107,7 +107,7 @@ const HOW_IT_WORKS_STEPS = [
     icon: Download,
     title: "Export or share",
     description:
-      "Download a pixel-perfect PDF or share your public link: bragsheet.io/you",
+      "Download a pixel-perfect PDF or share your public link: onesheet.cv/you",
   },
 ] as const;
 
@@ -200,7 +200,7 @@ function TemplateShowcase() {
 const FREE_FEATURES = [
   "Markdown editor with live preview",
   "1 template",
-  "Public profile link (with BragSheet branding)",
+  "Public profile link (with OneSheet branding)",
   "1 resume",
 ];
 
@@ -208,7 +208,7 @@ const PRO_FEATURES = [
   "Everything in Free",
   "All templates",
   "PDF export",
-  "Remove BragSheet branding",
+  "Remove OneSheet branding",
   "Up to 3 resume variants",
   "Version history",
   "Profile analytics",
@@ -330,7 +330,7 @@ function Footer() {
     <footer className="bg-gray-50 border-t border-gray-200 py-8">
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-gray-950">BragSheet</span>
+          <span className="font-semibold text-gray-950">OneSheet</span>
           <span>&mdash;</span>
           <span>&copy; {year} All rights reserved.</span>
         </div>

@@ -15,6 +15,8 @@ interface ResumePreviewProps {
   styles: ResumeStyles;
   /** Called after each overflow measurement so the editor can persist state. */
   onOverflowChange?: (state: OverflowState) => void;
+  /** URL to encode as a QR code on the resume. */
+  qrCodeUrl?: string;
 }
 
 const RENDER_DEBOUNCE_MS = 150;
@@ -31,6 +33,7 @@ export function ResumePreview({
   markdown,
   styles,
   onOverflowChange,
+  qrCodeUrl,
 }: ResumePreviewProps) {
   const [rawHtml, setRawHtml] = React.useState("");
   const [isRendering, setIsRendering] = React.useState(false);
@@ -128,6 +131,7 @@ export function ResumePreview({
               styles={styles}
               htmlContent={processedHtml}
               contentScaleFactor={scaleFactor}
+              qrCodeUrl={qrCodeUrl}
             />
           </div>
         )}

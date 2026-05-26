@@ -6,6 +6,8 @@ import { postProcessHtml } from "../lib/postProcess";
 
 const router = Router();
 
+const ADMIN_EMAIL = "steve.petusky@gmail.com";
+
 /**
  * GET /api/profile/:username
  *
@@ -91,8 +93,22 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
       )
       .catch(() => {});
 
-    // 6. Return response
-    const showBranding = userData.subscription?.status !== "active";
+    // 6. Determine Pro status (check admin override for admin user)
+    let isPro = userData.subscription?.status === "active";
+    const authUser = await admin.auth().getUser(uid);
+    if (authUser.email === ADMIN_EMAIL) {
+      const adminDoc = await db.collection("config").doc("admin").get();
+      const tierOverride = adminDoc.data()?.tierOverride as string | undefined;
+      if (tierOverride === "pro") isPro = true;
+      else if (tierOverride === "free") isPro = false;
+    }
+    const showBranding = !isPro;
+
+    // QR code: use custom URL if set, otherwise profile URL
+    const showQrCode = resumeData.showQrCode === true;
+    const qrCodeUrl = showQrCode
+      ? resumeData.qrCodeUrl || `https://bragsheet-mvp.web.app/${username}`
+      : undefined;
 
     res.setHeader("Cache-Control", "public, max-age=300");
     res.json({
@@ -105,6 +121,7 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
       lastUpdated:
         resumeData.updatedAt?.toDate?.()?.toISOString?.() ?? null,
       showBranding,
+      qrCodeUrl: qrCodeUrl ?? null,
     });
   } catch (err) {
     console.error("profile/get: unexpected error", err);
@@ -146,10 +163,10 @@ router.get(
 
       res.setHeader("Cache-Control", "public, max-age=3600");
       res.json({
-        title: `${displayName} — Resume | BragSheet`,
+        title: `${displayName} — Resume | OneSheet`,
         description: `View ${displayName}'s one-page resume`,
-        url: `https://bragsheet.io/${username}`,
-        image: "https://bragsheet.io/og-default.png",
+        url: `https://onesheet.cv/${username}`,
+        image: "https://onesheet.cv/og-default.png",
       });
     } catch (err) {
       console.error("profile/meta: unexpected error", err);

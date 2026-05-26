@@ -50,7 +50,7 @@ router.post(
 
       const origin =
         (req.headers.origin as string | undefined) ??
-        "https://bragsheet.io";
+        "https://onesheet.cv";
 
       const stripe = getStripe();
 
@@ -113,7 +113,7 @@ router.post(
 
       const origin =
         (req.headers.origin as string | undefined) ??
-        "https://bragsheet.io";
+        "https://onesheet.cv";
 
       const stripe = getStripe();
 

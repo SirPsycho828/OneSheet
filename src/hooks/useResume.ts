@@ -273,9 +273,10 @@ export function useResume(resumeId?: string) {
   const debouncedPaperSize = useDebounce(paperSize, AUTO_SAVE_DELAY);
   const debouncedStyles = useDebounce(styles, AUTO_SAVE_DELAY);
 
-  // Write localStorage backup on every debounce tick (before attempting network save)
+  // Write localStorage backup only when there are unsaved changes
   useEffect(() => {
     if (isLoading) return;
+    if (saveStatus === "saved") return;
     const id = resumeIdRef.current;
     if (!id) return;
     writeLocalBackup(id, {
@@ -285,7 +286,7 @@ export function useResume(resumeId?: string) {
       paperSize: debouncedPaperSize,
       styles: debouncedStyles ?? undefined,
     });
-  }, [debouncedMarkdown, debouncedTitle, debouncedTemplateId, debouncedPaperSize, debouncedStyles, isLoading]);
+  }, [debouncedMarkdown, debouncedTitle, debouncedTemplateId, debouncedPaperSize, debouncedStyles, isLoading, saveStatus]);
 
   useEffect(() => {
     if (isLoading) return;

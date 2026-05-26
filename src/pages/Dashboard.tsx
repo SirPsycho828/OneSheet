@@ -59,7 +59,7 @@ function DashboardNav({ onSignOut }: DashboardNavProps) {
         to="/dashboard"
         className="text-sm font-semibold tracking-tight text-gray-950 hover:text-brand-500 transition-colors flex-shrink-0"
       >
-        BragSheet
+        OneSheet
       </Link>
 
       <div className="w-px h-5 bg-gray-200 flex-shrink-0" aria-hidden />

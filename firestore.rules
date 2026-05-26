@@ -34,6 +34,12 @@ service cloud.firestore {
         allow read, write: if request.auth != null
           && get(/databases/$(database)/documents/resumes/$(resumeId)).data.userId == request.auth.uid;
       }
+
+      // resumes/{resumeId}/scores/{scoreId}
+      match /scores/{scoreId} {
+        allow read, write: if request.auth != null
+          && get(/databases/$(database)/documents/resumes/$(resumeId)).data.userId == request.auth.uid;
+      }
     }
 
     // analytics/{docId} — view counts, not sensitive
@@ -78,6 +84,14 @@ service cloud.firestore {
     // rateLimits/{docId} — admin SDK only
     match /rateLimits/{docId} {
       allow read, write: if false;
+    }
+
+    // config/{docId} — admin-only (steve.petusky@gmail.com)
+    match /config/{docId} {
+      allow read: if request.auth != null
+        && request.auth.token.email == 'steve.petusky@gmail.com';
+      allow write: if request.auth != null
+        && request.auth.token.email == 'steve.petusky@gmail.com';
     }
   }
 }

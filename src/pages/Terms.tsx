@@ -14,14 +14,14 @@ export function Terms() {
               <strong>Last updated: May 2025</strong>
             </p>
             <p>
-              By using BragSheet ("the Service"), you agree to these Terms of
+              By using OneSheet ("the Service"), you agree to these Terms of
               Service. Please read them carefully.
             </p>
             <h2 className="text-xl font-semibold text-gray-950 mt-8 mb-2">
               Acceptable Use
             </h2>
             <p>
-              You may use BragSheet to create and share professional resume
+              You may use OneSheet to create and share professional resume
               content. You agree not to use the Service to post content that is
               unlawful, harmful, defamatory, or that infringes the rights of
               others. We reserve the right to remove content or suspend accounts
@@ -31,8 +31,8 @@ export function Terms() {
               Your Content
             </h2>
             <p>
-              You retain ownership of the resume content you create on BragSheet.
-              By making your profile public, you grant BragSheet a limited
+              You retain ownership of the resume content you create on OneSheet.
+              By making your profile public, you grant OneSheet a limited
               license to display and serve that content to visitors of your
               public profile URL.
             </p>
@@ -50,7 +50,7 @@ export function Terms() {
               Limitation of Liability
             </h2>
             <p>
-              BragSheet is provided "as is" without warranties of any kind. We
+              OneSheet is provided "as is" without warranties of any kind. We
               are not liable for any loss of data, revenue, or other damages
               arising from your use of the Service. Our total liability for any
               claim is limited to the amount you paid us in the 12 months
@@ -70,10 +70,10 @@ export function Terms() {
             <p>
               Questions? Email us at{" "}
               <a
-                href="mailto:hello@bragsheet.io"
+                href="mailto:hello@onesheet.cv"
                 className="text-brand-500 hover:underline"
               >
-                hello@bragsheet.io
+                hello@onesheet.cv
               </a>
               .
             </p>

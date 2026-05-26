@@ -8,6 +8,7 @@ import { ApiKeysCard } from "../components/settings/ApiKeysCard";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/useToast";
 import { checkUsernameAvailability, changeUsername } from "../services/usernames";
+import { getLinkedProviders, linkGoogle, linkGithub } from "../services/auth";
 
 // ---------------------------------------------------------------------------
 // Settings Nav
@@ -45,7 +46,7 @@ function SettingsNav() {
         to="/dashboard"
         className="text-sm font-semibold tracking-tight text-gray-950 hover:text-brand-500 transition-colors flex-shrink-0"
       >
-        BragSheet
+        OneSheet
       </Link>
 
       <div className="w-px h-5 bg-gray-200 flex-shrink-0" aria-hidden />
@@ -204,6 +205,75 @@ function UsernameChangeForm({
 }
 
 // ---------------------------------------------------------------------------
+// Linked Accounts
+// ---------------------------------------------------------------------------
+
+function LinkedAccounts() {
+  const [providers, setProviders] = React.useState<string[]>([]);
+  const [linking, setLinking] = React.useState<string | null>(null);
+  const toast = useToast();
+
+  React.useEffect(() => {
+    setProviders(getLinkedProviders());
+  }, []);
+
+  const hasGoogle = providers.includes("google.com");
+  const hasGithub = providers.includes("github.com");
+  const hasPassword = providers.includes("password");
+
+  async function handleLink(provider: "google" | "github") {
+    setLinking(provider);
+    try {
+      if (provider === "google") await linkGoogle();
+      else await linkGithub();
+      setProviders(getLinkedProviders());
+      toast.success(`${provider === "google" ? "Google" : "GitHub"} account linked!`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to link account.";
+      if (msg.includes("already-in-use")) {
+        toast.error("That account is already linked to a different user.");
+      } else {
+        toast.error(msg);
+      }
+    } finally {
+      setLinking(null);
+    }
+  }
+
+  const rows: { id: string; label: string; linked: boolean; action?: "google" | "github" }[] = [
+    { id: "password", label: "Email / Password", linked: hasPassword },
+    { id: "google", label: "Google", linked: hasGoogle, action: "google" },
+    { id: "github", label: "GitHub", linked: hasGithub, action: "github" },
+  ];
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-300 p-4 max-w-lg">
+      <ul className="divide-y divide-gray-100">
+        {rows.map((row) => (
+          <li key={row.id} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
+            <span className="text-sm text-gray-700">{row.label}</span>
+            {row.linked ? (
+              <span className="text-xs text-green-600 font-medium">Linked</span>
+            ) : row.action ? (
+              <button
+                type="button"
+                disabled={linking !== null}
+                onClick={() => handleLink(row.action!)}
+                className="rounded-md bg-gray-900 px-3 py-1 text-xs font-medium text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {linking === row.action ? "Linking..." : "Link"}
+              </button>
+            ) : (
+              <span className="text-xs text-gray-400">—</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Settings page
 // ---------------------------------------------------------------------------
 
@@ -289,6 +359,14 @@ export function Settings() {
               />
             )}
           </div>
+        </section>
+
+        {/* Linked Accounts section */}
+        <section className="mb-8">
+          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+            Linked Accounts
+          </h2>
+          <LinkedAccounts />
         </section>
 
         {/* Billing section */}

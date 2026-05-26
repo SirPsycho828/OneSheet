@@ -83,7 +83,7 @@ export function PaperContainer({
           className="bg-white shadow-lg border border-gray-200 overflow-hidden"
         >
           {/* Inner padding derived from styles.pageMargin */}
-          <div style={{ padding: pageMarginPx }}>
+          <div style={{ padding: pageMarginPx }} {...dataAttrs}>
             {/*
               Content scale wrapper — applies overflow shrinking (contentScaleFactor).
               Width is expanded to 100%/factor so scaled content still fills paper width.
@@ -104,7 +104,6 @@ export function PaperContainer({
               <div
                 className="resume-content"
                 style={cssVars as React.CSSProperties}
-                {...dataAttrs}
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
               />
             </div>

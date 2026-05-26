@@ -335,7 +335,7 @@ export function ApiKeysCard() {
           <div>
             <h2 className="text-sm font-semibold text-gray-900">Agent API</h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              Use API keys to access BragSheet programmatically.
+              Use API keys to access OneSheet programmatically.
             </p>
           </div>
           <Button

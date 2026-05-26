@@ -4,6 +4,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  linkWithPopup,
   signOut as firebaseSignOut,
   GoogleAuthProvider,
   GithubAuthProvider,
@@ -17,9 +18,16 @@ const githubProvider = new GithubAuthProvider();
 githubProvider.addScope("user:email");
 
 export class AccountExistsError extends Error {
-  constructor(public readonly email: string) {
+  constructor(
+    public readonly email: string,
+    public readonly attemptedProvider: "google" | "github"
+  ) {
+    const alternatives =
+      attemptedProvider === "google"
+        ? "GitHub or email/password"
+        : "Google or email/password";
     super(
-      `An account with this email already exists. Sign in with your original method to link your accounts.`
+      `An account with ${email || "this email"} already exists. Try signing in with ${alternatives}, then link accounts in Settings.`
     );
     this.name = "AccountExistsError";
   }
@@ -63,7 +71,7 @@ export async function signInWithGoogle(): Promise<void> {
     const authError = err as AuthError;
     if (authError.code === "auth/account-exists-with-different-credential") {
       const email = authError.customData?.email as string | undefined;
-      throw new AccountExistsError(email ?? "");
+      throw new AccountExistsError(email ?? "", "google");
     }
     throw err;
   }
@@ -76,7 +84,7 @@ export async function signInWithGithub(): Promise<void> {
     const authError = err as AuthError;
     if (authError.code === "auth/account-exists-with-different-credential") {
       const email = authError.customData?.email as string | undefined;
-      throw new AccountExistsError(email ?? "");
+      throw new AccountExistsError(email ?? "", "github");
     }
     throw err;
   }
@@ -94,4 +102,18 @@ export async function sendVerification(): Promise<void> {
 
 export async function resetPassword(email: string): Promise<void> {
   await sendPasswordResetEmail(auth, email);
+}
+
+export function getLinkedProviders(): string[] {
+  return auth.currentUser?.providerData.map((p) => p.providerId) ?? [];
+}
+
+export async function linkGoogle(): Promise<void> {
+  if (!auth.currentUser) throw new Error("Not authenticated");
+  await linkWithPopup(auth.currentUser, googleProvider);
+}
+
+export async function linkGithub(): Promise<void> {
+  if (!auth.currentUser) throw new Error("Not authenticated");
+  await linkWithPopup(auth.currentUser, githubProvider);
 }

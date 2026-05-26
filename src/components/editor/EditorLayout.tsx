@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Code, Eye, Palette } from "lucide-react";
+import { Code, Eye, Palette, Sparkles } from "lucide-react";
 import { MarkdownInput } from "./MarkdownInput";
 import { ResumePreview } from "./ResumePreview";
 import { DesignPanel } from "./DesignPanel";
@@ -14,6 +14,8 @@ interface EditorLayoutProps {
   onStylesChange: (styles: ResumeStyles) => void;
   /** Called after each overflow measurement in the preview panel. */
   onOverflowChange?: (state: OverflowState) => void;
+  /** Opens the AI tools panel (rendered in Editor.tsx). */
+  onOpenAI?: () => void;
 }
 
 type LeftMode = "source" | "design";
@@ -32,6 +34,7 @@ export function EditorLayout({
   styles,
   onStylesChange,
   onOverflowChange,
+  onOpenAI,
 }: EditorLayoutProps) {
   // ---------------------------------------------------------------------------
   // Desktop split state
@@ -135,6 +138,16 @@ export function EditorLayout({
               <Palette className="w-4 h-4" strokeWidth={1.5} />
               Design
             </button>
+            {onOpenAI && (
+              <button
+                type="button"
+                onClick={onOpenAI}
+                className={tabClass(false)}
+              >
+                <Sparkles className="w-4 h-4" strokeWidth={1.5} />
+                AI
+              </button>
+            )}
           </div>
 
           {/* Panel content */}
@@ -209,6 +222,16 @@ export function EditorLayout({
             <Eye className="w-4 h-4" strokeWidth={1.5} />
             Preview
           </button>
+          {onOpenAI && (
+            <button
+              type="button"
+              onClick={onOpenAI}
+              className={tabClass(false)}
+            >
+              <Sparkles className="w-4 h-4" strokeWidth={1.5} />
+              AI
+            </button>
+          )}
         </div>
 
         {/* Active panel */}

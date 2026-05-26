@@ -30,7 +30,7 @@ function ProfileNav() {
         to="/"
         className="text-base font-semibold tracking-tight text-gray-950 hover:text-brand-500 transition-colors"
       >
-        BragSheet
+        OneSheet
       </Link>
     </header>
   );
@@ -66,7 +66,7 @@ function ProfileNotFound() {
         to="/sign-up"
         className="mt-2 inline-flex items-center justify-center rounded-md bg-brand-500 px-5 py-2 text-sm font-medium text-white hover:bg-brand-600 transition-colors"
       >
-        Create your own BragSheet
+        Create your own OneSheet
       </Link>
     </div>
   );
@@ -133,7 +133,7 @@ export function PublicProfile() {
         if (cancelled) return;
 
         setData(json);
-        document.title = `${json.displayName} — Resume | BragSheet`;
+        document.title = `${json.displayName} — Resume | OneSheet`;
       } catch {
         if (!cancelled) setNotFound(true);
       } finally {
@@ -145,7 +145,7 @@ export function PublicProfile() {
 
     return () => {
       cancelled = true;
-      document.title = "BragSheet";
+      document.title = "OneSheet";
     };
   }, [username]);
 
@@ -154,7 +154,7 @@ export function PublicProfile() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <ProfileNav />
+      {(!data || data.showBranding) && <ProfileNav />}
 
       {loading && (
         <main className="flex-1 overflow-auto">
@@ -187,7 +187,7 @@ export function PublicProfile() {
             <footer className="text-xs text-gray-400 text-center py-4">
               Built with{" "}
               <Link to="/" className="hover:text-brand-500 transition-colors">
-                BragSheet
+                OneSheet
               </Link>{" "}
               —{" "}
               <Link

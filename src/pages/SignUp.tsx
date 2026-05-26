@@ -11,7 +11,7 @@ export function SignUp() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <Link to="/" className="text-2xl font-semibold tracking-tight text-gray-950">
-            BragSheet
+            OneSheet
           </Link>
           <h1 className="mt-2 text-xl font-medium text-gray-800">Create your account</h1>
         </div>

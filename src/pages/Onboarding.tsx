@@ -102,14 +102,14 @@ export function Onboarding() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <span className="text-2xl font-semibold tracking-tight text-gray-950">
-            BragSheet
+            OneSheet
           </span>
           <h1 className="mt-2 text-xl font-medium text-gray-800">Choose your username</h1>
           <p className="mt-1 text-sm text-gray-500">
             This will be your public profile URL:
           </p>
           <p className="mt-0.5 min-h-[1.25rem] font-mono text-sm text-gray-700">
-            bragsheet.com/{username || "yourname"}
+            onesheet.cv/{username || "yourname"}
           </p>
         </div>
 

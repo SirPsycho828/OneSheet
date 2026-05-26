@@ -5,6 +5,7 @@ import { ToastContainer } from "./components/ui/Toast";
 import { PublicRoute } from "./components/auth/PublicRoute";
 import { PrivateRoute } from "./components/auth/PrivateRoute";
 import { OnboardingRoute } from "./components/auth/OnboardingRoute";
+import { AdminRoute } from "./components/auth/AdminRoute";
 import { SignIn } from "./pages/SignIn";
 import { SignUp } from "./pages/SignUp";
 import { Onboarding } from "./pages/Onboarding";
@@ -16,12 +17,15 @@ import { Terms } from "./pages/Terms";
 import { PublicProfile } from "./pages/PublicProfile";
 import { Dashboard } from "./pages/Dashboard";
 import { Settings } from "./pages/Settings";
+import { Admin } from "./pages/Admin";
+import { ApiDocs } from "./pages/ApiDocs";
+import { AgentGuide } from "./pages/AgentGuide";
 
 
 function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 gap-3">
-      <span className="text-lg font-semibold tracking-tight text-gray-950">BragSheet</span>
+      <span className="text-lg font-semibold tracking-tight text-gray-950">OneSheet</span>
       <span className="text-6xl font-bold text-gray-200">404</span>
       <p className="text-gray-500">Page not found</p>
       <a
@@ -68,9 +72,16 @@ export default function App() {
               <Route path="/settings" element={<Settings />} />
             </Route>
 
+            {/* Admin — only accessible to admin user */}
+            <Route element={<AdminRoute />}>
+              <Route path="/admin" element={<Admin />} />
+            </Route>
+
             {/* Static public pages */}
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/docs" element={<ApiDocs />} />
+            <Route path="/agents" element={<AgentGuide />} />
 
             {/* Public profile catch-all — MUST be last */}
             <Route path="/:username" element={<PublicProfile />} />

@@ -9,6 +9,7 @@ import versionRoutes from "./routes/versions";
 import stripeRoutes from "./routes/stripe";
 import analyticsRoutes from "./routes/analytics";
 import agentRoutes from "./routes/agent";
+import aiRoutes from "./routes/ai";
 import { cleanupVersions } from "./scheduled/cleanupVersions";
 import { stripeSecretKey, stripeWebhookSecret, stripeProPriceId } from "./config";
 
@@ -18,10 +19,10 @@ admin.initializeApp();
 
 const app = express();
 
-// CORS: allow bragsheet.io, Firebase hosting, and localhost dev
+// CORS: allow onesheet.cv, Firebase hosting, and localhost dev
 app.use(cors({
   origin: [
-    /bragsheet\.io$/,
+    /onesheet\.cv$/,
     /bragsheet-mvp\.web\.app$/,
     /bragsheet-mvp\.firebaseapp\.com$/,
     /localhost:\d+$/,
@@ -49,6 +50,7 @@ app.use("/api/resumes/:resumeId/versions", versionRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/agent", agentRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Export as Firebase Function
 export const api = onRequest(

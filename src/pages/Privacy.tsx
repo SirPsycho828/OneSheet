@@ -14,7 +14,7 @@ export function Privacy() {
               <strong>Last updated: May 2025</strong>
             </p>
             <p>
-              BragSheet ("we", "us", or "our") is committed to protecting your
+              OneSheet ("we", "us", or "our") is committed to protecting your
               personal information. This Privacy Policy explains what data we
               collect, how we use it, and your rights with respect to that data.
             </p>
@@ -32,7 +32,7 @@ export function Privacy() {
               How We Use Your Data
             </h2>
             <p>
-              Your data is used solely to provide the BragSheet service: storing
+              Your data is used solely to provide the OneSheet service: storing
               and rendering your resume, generating PDFs, and serving your public
               profile page. We do not sell your data or use it for advertising.
             </p>
@@ -40,7 +40,7 @@ export function Privacy() {
               Third-Party Services
             </h2>
             <p>
-              BragSheet relies on Firebase (authentication and storage) and
+              OneSheet relies on Firebase (authentication and storage) and
               Stripe (payment processing). These services have their own privacy
               policies. We encourage you to review them.
             </p>
@@ -58,10 +58,10 @@ export function Privacy() {
             <p>
               Questions about this policy? Email us at{" "}
               <a
-                href="mailto:privacy@bragsheet.io"
+                href="mailto:privacy@onesheet.cv"
                 className="text-brand-500 hover:underline"
               >
-                privacy@bragsheet.io
+                privacy@onesheet.cv
               </a>
               .
             </p>

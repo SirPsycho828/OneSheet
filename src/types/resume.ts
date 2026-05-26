@@ -35,6 +35,9 @@ export interface Resume {
   paperSize: "us-letter" | "a4";
   styles?: ResumeStyles;
   overflow: Overflow;
+  showQrCode: boolean;
+  /** Custom QR code destination URL (Pro feature). Null = default profile URL. */
+  qrCodeUrl: string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
