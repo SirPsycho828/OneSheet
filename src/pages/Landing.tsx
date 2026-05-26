@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { LandingNav } from "../components/layout/LandingNav";
 import { Button } from "../components/ui/Button";
 import { PRO_PRICE_MONTHLY } from "../constants/pricing";
@@ -537,10 +537,10 @@ function TemplateShowcase() {
       <div className="max-w-5xl mx-auto text-center">
         <p className="text-accent font-semibold text-sm tracking-wide uppercase mb-2">Templates</p>
         <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-3">
-          Five templates. All one page.
+          Choose your format.
         </h2>
         <p className="text-muted-foreground max-w-lg mx-auto mb-10">
-          Classic serif, clean sans, monospace dev, high-density compact. Pick the voice that fits your career.
+          Five styles for different roles and industries. Each renders to a single, print-ready page.
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -553,6 +553,125 @@ function TemplateShowcase() {
               <p className="text-xs text-muted-foreground">{t.desc}</p>
             </div>
           ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Agents Section — terminal-centric, shows API in action
+// ---------------------------------------------------------------------------
+
+const AGENT_PROMPT = `# OneSheet Resume Agent
+# Paste this into your AI agent's system prompt
+
+You have access to the OneSheet API.
+Docs: https://onesheet.cv/docs
+
+When building or updating a resume:
+1. GET /api/agent/resumes to list existing resumes
+2. Ask the user for any missing details
+3. Never fabricate experience or skills
+4. PUT /api/agent/resumes/:id to update
+5. Show the draft for approval before publishing
+6. POST /api/agent/resumes/:id/export for PDF`;
+
+function AgentsSection() {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(AGENT_PROMPT);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <section className="py-20 px-6 bg-primary">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-10">
+          <p className="text-accent font-semibold text-sm tracking-wide uppercase mb-2">API + Agents</p>
+          <h2 className="font-heading text-3xl md:text-4xl font-semibold text-white leading-tight mb-3">
+            Your resume has an API.
+          </h2>
+          <p className="text-stone-400 max-w-lg mx-auto">
+            Create, update, and export resumes programmatically. Wire it into your AI agent, CI/CD pipeline, or custom tooling.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-5 gap-6 items-start">
+          {/* Terminal mockup — 3 cols */}
+          <div className="md:col-span-3 rounded-xl overflow-hidden border border-stone-700 shadow-2xl">
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-stone-800 border-b border-stone-700">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-500/70" />
+                <div className="w-3 h-3 rounded-full bg-amber-500/70" />
+                <div className="w-3 h-3 rounded-full bg-green-500/70" />
+              </div>
+              <span className="text-[11px] text-stone-500 font-mono ml-2">terminal</span>
+            </div>
+            <div className="bg-stone-900 p-5 font-mono text-[12px] md:text-[13px] leading-relaxed">
+              <div className="text-stone-500"># Create a tailored resume with one API call</div>
+              <div className="mt-2">
+                <span className="text-green-400">$</span>{" "}
+                <span className="text-stone-300">curl -X POST onesheet.cv/api/agent/resumes \</span>
+              </div>
+              <div className="text-stone-300 ml-4">-H &quot;X-Api-Key: $KEY&quot; \</div>
+              <div className="text-stone-300 ml-4">-d &apos;&#123;&quot;title&quot;: &quot;Acme Corp&quot;, &quot;markdown&quot;: &quot;# ...&quot;&#125;&apos;</div>
+              <div className="mt-3 text-stone-500">&#123;</div>
+              <div className="text-stone-500 ml-4">&quot;resumeId&quot;: <span className="text-amber-300">&quot;r_3kf9x&quot;</span>,</div>
+              <div className="text-stone-500 ml-4">&quot;status&quot;: <span className="text-green-400">&quot;created&quot;</span>,</div>
+              <div className="text-stone-500 ml-4">&quot;url&quot;: <span className="text-amber-300">&quot;onesheet.cv/alex&quot;</span></div>
+              <div className="text-stone-500">&#125;</div>
+              <div className="mt-3">
+                <span className="text-green-400">$</span>{" "}
+                <span className="text-stone-300">curl -X POST .../r_3kf9x/export \</span>
+              </div>
+              <div className="text-stone-300 ml-4">--output resume.pdf</div>
+              <div className="mt-1 text-green-400">&#10003; Saved resume.pdf (1 page, 142KB)</div>
+            </div>
+          </div>
+
+          {/* System prompt card — 2 cols */}
+          <div className="md:col-span-2 rounded-xl overflow-hidden border border-stone-700 shadow-2xl">
+            <div className="flex items-center justify-between px-4 py-2.5 bg-stone-800 border-b border-stone-700">
+              <span className="text-[11px] text-stone-400 font-mono">system-prompt.md</span>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 text-[11px] text-stone-400 hover:text-stone-200 transition-colors cursor-pointer"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3 h-3 text-green-400" />
+                    <span className="text-green-400">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3 h-3" />
+                    Copy
+                  </>
+                )}
+              </button>
+            </div>
+            <div className="bg-stone-900 p-5 font-mono text-[11px] md:text-[12px] leading-relaxed whitespace-pre-wrap">
+              {AGENT_PROMPT.split("\n").map((line, i) => {
+                if (line.startsWith("#")) return <div key={i} className="text-stone-500">{line}</div>;
+                if (/^\d\./.test(line)) return <div key={i} className="text-stone-300">{line}</div>;
+                if (line.startsWith("Docs:") || line.startsWith("You have")) return <div key={i} className="text-amber-300">{line}</div>;
+                if (line.startsWith("When")) return <div key={i} className="text-stone-300 mt-1">{line}</div>;
+                return <div key={i} className="text-stone-300">{line || "\u00A0"}</div>;
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 flex justify-center gap-4">
+          <Link to="/agents" className="inline-flex items-center gap-2 text-sm font-medium bg-white text-primary px-5 py-2.5 rounded-lg hover:bg-stone-100 transition-colors">
+            Agent guide
+          </Link>
+          <Link to="/docs" className="inline-flex items-center gap-2 text-sm font-medium border border-stone-600 text-stone-300 px-5 py-2.5 rounded-lg hover:bg-stone-800 transition-colors">
+            Full API docs
+          </Link>
         </div>
       </div>
     </section>
@@ -658,10 +777,10 @@ function FinalCTA() {
       <div className="absolute inset-0 bg-primary/90" />
       <div className="relative max-w-2xl mx-auto text-center">
         <h2 className="font-heading text-3xl md:text-4xl font-semibold text-white mb-4">
-          Your next opportunity starts with one page.
+          Stop overthinking your resume.
         </h2>
         <p className="text-white/60 mb-8 max-w-md mx-auto">
-          Join thousands of developers who write their resume in Markdown and never look back.
+          Markdown in, polished PDF out. Free to start, ready in minutes.
         </p>
         <Link to="/sign-up">
           <Button
@@ -710,6 +829,7 @@ export function Landing() {
       <InkDivider />
       <Features />
       <TemplateShowcase />
+      <AgentsSection />
       <Pricing />
       <FinalCTA />
       <Footer />

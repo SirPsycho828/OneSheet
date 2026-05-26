@@ -1,0 +1,212 @@
+# OneSheet — Platform Documentation for LLMs
+
+> OneSheet is a resume builder for developers. Users write resumes in Markdown,
+> pick a template, and export a pixel-perfect one-page PDF or share a public link.
+> Website: https://onesheet.cv
+
+---
+
+## API Overview
+
+Base URL: https://onesheet.cv
+Auth: X-Api-Key header (Pro subscription required)
+Rate limit: 60 requests/min per key, 10 PDF exports/hour
+OpenAPI spec: https://onesheet.cv/openapi.json
+
+---
+
+## Agent Workflow
+
+When helping a user build a resume with OneSheet:
+
+1. INTERVIEW — Ask about experience, education, skills, and target role.
+   Ask follow-up questions for anything vague. Get specific numbers and metrics.
+
+2. CHOOSE TEMPLATE — Suggest based on their role:
+   - "classic" — Traditional serif, ATS-friendly (corporate/finance/legal)
+   - "modern" — Clean sans-serif with color (tech/startups)
+   - "minimal" — Maximum whitespace (senior/executive)
+   - "technical" — Monospace (engineers/DevOps)
+   - "compact" — Two-column dense (lots of experience)
+
+3. DRAFT — Write in Markdown (see format below). Keep to one page.
+
+4. REVIEW — Show the draft. Ask for changes. Never proceed without approval.
+
+5. PUBLISH — POST /api/agent/resumes to create, PUT to update.
+
+6. EXPORT — POST /api/agent/resumes/:id/export for PDF.
+
+Rules:
+- Never fabricate experience, skills, education, or metrics
+- Always ask for specifics rather than guessing
+- Use quantified achievements (numbers, percentages, dollar amounts)
+- Use strong action verbs: Led, Built, Designed, Reduced, Increased
+- Do not publish or export until the user explicitly approves
+
+---
+
+## Markdown Format
+
+OneSheet resumes use standard Markdown with this structure:
+
+```
+# Full Name
+
+email@example.com | City, ST | linkedin.com/in/handle
+
+## Summary
+
+2-3 sentence professional overview.
+
+## Experience
+
+**Senior Software Engineer** | Acme Corp | 2022 -- Present
+
+- Led migration to React 19, reducing bundle size by 40%
+- Built real-time collaboration serving 50K daily active users
+- Mentored 6 engineers across 3 time zones
+
+**Software Engineer** | StartupCo | 2019 -- 2022
+
+- Architected design system used across 12 products
+- Improved Lighthouse score from 45 to 98
+
+## Education
+
+**B.S. Computer Science** | UC Berkeley | 2019
+
+## Skills
+
+**Languages:** TypeScript, Python, Go
+**Frameworks:** React, Node.js, Next.js
+**Infrastructure:** AWS, Docker, Kubernetes
+```
+
+Supported sections: Summary, Experience, Education, Skills, Projects,
+Certifications, Publications.
+Date separator: use -- between start and end dates.
+Links: standard Markdown [text](url) syntax.
+Bold: use **text** for job titles and degree names.
+
+---
+
+## Templates
+
+| ID         | Name      | Description                                    |
+|------------|-----------|------------------------------------------------|
+| classic    | Classic   | Traditional serif, ATS-friendly                |
+| modern     | Modern    | Clean sans-serif with color accents            |
+| minimal    | Minimal   | Maximum whitespace, understated                |
+| technical  | Technical | Monospace developer style                      |
+| compact    | Compact   | Two-column high density layout                 |
+
+Free users: Classic template only.
+Pro users: All 5 templates.
+
+---
+
+## API Endpoints
+
+### Authentication
+
+Two methods:
+1. API Key (for agents): X-Api-Key: os_sk_live_...
+2. Bearer Token (for web): Authorization: Bearer <firebase-id-token>
+
+API keys require Pro subscription. Generate at https://onesheet.cv/settings.
+
+### Resume Management
+
+GET /api/agent/resumes
+  List all resumes. Returns { resumes: [{ resumeId, title, templateId, paperSize, isDefault, createdAt, updatedAt }] }
+
+GET /api/agent/resumes/:resumeId
+  Get full resume content. Returns { resumeId, title, markdown, templateId, paperSize, isDefault, createdAt, updatedAt }
+
+POST /api/agent/resumes
+  Create a new resume.
+  Body: { title: string (required), templateId?: string, markdown?: string, paperSize?: "us-letter" | "a4" }
+  Returns: { resumeId: string }
+  Limits: Free users 1 resume, Pro users 3.
+
+PUT /api/agent/resumes/:resumeId
+  Update a resume. Partial updates supported.
+  Body: { title?: string, markdown?: string, templateId?: string }
+  Returns: { success: true }
+
+DELETE /api/agent/resumes/:resumeId
+  Delete a resume. Cannot delete the only resume.
+  Returns: { success: true, newDefaultId?: string }
+
+POST /api/agent/resumes/:resumeId/set-default
+  Set as default resume (shown on public profile).
+  Returns: { success: true }
+
+### PDF Export
+
+POST /api/agent/resumes/:resumeId/export
+  Export resume as PDF. Pro subscription required.
+  Returns: Binary PDF file (application/pdf).
+
+### Templates
+
+GET /api/agent/templates
+  List available templates.
+  Returns: { templates: [{ id: string, name: string }] }
+
+### Analytics
+
+GET /api/agent/analytics
+  Get analytics across all resumes.
+  Returns: { analytics: [{ resumeId, profileViews, pdfDownloads, lastViewedAt }] }
+
+### API Key Management
+
+POST /api/agent/keys/generate
+  Create a new API key. Bearer token auth only.
+  Body: { name: string }
+  Returns: { keyId, key, prefix, name, createdAt }
+  Limit: 3 active keys per user.
+
+GET /api/agent/keys
+  List API keys (no plaintext keys returned). Bearer token auth only.
+
+DELETE /api/agent/keys/:keyId
+  Delete an API key. Bearer token auth only.
+
+POST /api/agent/keys/:keyId/revoke
+  Revoke (soft delete) an API key. Bearer token auth only.
+
+---
+
+## Error Format
+
+All errors return:
+{
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable message"
+  }
+}
+
+Common codes: MISSING_TITLE, RESUME_NOT_FOUND, FORBIDDEN, RATE_LIMIT_EXCEEDED,
+SUBSCRIPTION_REQUIRED, VARIANT_LIMIT_REACHED, KEY_LIMIT_REACHED.
+
+---
+
+## Pricing
+
+Free: 1 resume, Classic template, public profile, version history.
+Pro ($8/mo): Up to 3 resumes, all 5 templates, PDF export, AI polish,
+job match scoring, custom QR code, API access, no OneSheet branding.
+
+---
+
+## Links
+
+Website: https://onesheet.cv
+API docs: https://onesheet.cv/docs
+Agent guide: https://onesheet.cv/agents
+OpenAPI spec: https://onesheet.cv/openapi.json
+Sign up: https://onesheet.cv/sign-up

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const API_BASE = "https://us-central1-bragsheet-mvp.cloudfunctions.net/api";
+const API_BASE = "https://onesheet.cv";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -112,7 +112,7 @@ export function ApiDocs() {
                 API Key (Pro subscription required)
               </p>
               <pre className="text-xs font-mono mt-1 text-muted-foreground">
-                X-Api-Key: brag_sk_live_...
+                X-Api-Key: os_sk_live_...
               </pre>
             </div>
           </div>
@@ -237,8 +237,8 @@ export function ApiDocs() {
             body={`{ "name": "My Integration" }`}
             response={`{
   "keyId": "key123",
-  "key": "brag_sk_live_...",
-  "prefix": "brag_sk_",
+  "key": "os_sk_live_...",
+  "prefix": "os_sk_live_x",
   "name": "My Integration",
   "createdAt": "2025-01-15T..."
 }`}
@@ -253,7 +253,7 @@ export function ApiDocs() {
     {
       "keyId": "key123",
       "name": "My Integration",
-      "prefix": "brag_sk_",
+      "prefix": "os_sk_live_x",
       "createdAt": "2025-01-15T...",
       "lastUsedAt": "2025-01-20T...",
       "isActive": true

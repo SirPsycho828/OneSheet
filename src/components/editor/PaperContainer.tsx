@@ -1,4 +1,5 @@
 import * as React from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { stylesToCssVars, stylesToDataAttrs } from "../../lib/styleUtils";
 import type { ResumeStyles } from "../../types/resume";
 
@@ -17,6 +18,8 @@ interface PaperContainerProps {
    * Defaults to 1.0 (no scaling).
    */
   contentScaleFactor?: number;
+  /** URL to encode as a QR code in the bottom-right corner. */
+  qrCodeUrl?: string;
 }
 
 /**
@@ -32,6 +35,7 @@ export function PaperContainer({
   styles,
   htmlContent,
   contentScaleFactor = 1.0,
+  qrCodeUrl,
 }: PaperContainerProps) {
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const [panelScale, setPanelScale] = React.useState(1);
@@ -79,6 +83,7 @@ export function PaperContainer({
             height: paperHeight,
             transformOrigin: "top left",
             transform: `scale(${panelScale})`,
+            position: "relative",
           }}
           className="bg-white shadow-lg border border-gray-200 overflow-hidden"
         >
@@ -108,6 +113,25 @@ export function PaperContainer({
               />
             </div>
           </div>
+
+          {/* QR code — bottom-right corner */}
+          {qrCodeUrl && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: pageMarginPx,
+                right: pageMarginPx,
+              }}
+            >
+              <QRCodeSVG
+                value={qrCodeUrl}
+                size={64}
+                level="M"
+                bgColor="transparent"
+                fgColor="#292524"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -41,6 +41,10 @@ export function Editor() {
     saveStatus,
     forceSave,
     setOverflow,
+    showQrCode,
+    setShowQrCode,
+    qrCodeUrl,
+    setQrCodeUrl,
     isOnline,
     isLocalBackupActive,
     showRecoveryBanner,
@@ -269,6 +273,11 @@ export function Editor() {
             onStylesChange={setStyles}
             onOverflowChange={setOverflow}
             onOpenAI={() => setIsAIPanelOpen(true)}
+            showQrCode={showQrCode}
+            onShowQrCodeChange={setShowQrCode}
+            qrCodeUrl={qrCodeUrl}
+            onQrCodeUrlChange={setQrCodeUrl}
+            isPaid={isPaid ?? false}
           />
         )}
       </main>

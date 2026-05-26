@@ -69,7 +69,7 @@ async function callOpenRouter(
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
-      "HTTP-Referer": "https://bragsheet-mvp.web.app",
+      "HTTP-Referer": "https://onesheet.cv",
       "X-Title": "OneSheet",
     },
     body: JSON.stringify({

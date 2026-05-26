@@ -107,7 +107,7 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
     // QR code: use custom URL if set, otherwise profile URL
     const showQrCode = resumeData.showQrCode === true;
     const qrCodeUrl = showQrCode
-      ? resumeData.qrCodeUrl || `https://bragsheet-mvp.web.app/${username}`
+      ? resumeData.qrCodeUrl || `https://onesheet.cv/${username}`
       : undefined;
 
     res.setHeader("Cache-Control", "public, max-age=300");

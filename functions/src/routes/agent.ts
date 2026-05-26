@@ -68,6 +68,11 @@ async function applyRateLimit(
 }
 
 // ---------------------------------------------------------------------------
+// Admin email (tier override support)
+// ---------------------------------------------------------------------------
+const ADMIN_EMAIL = "steve.petusky@gmail.com";
+
+// ---------------------------------------------------------------------------
 // Helper: require paid subscription (used inside route handlers)
 // ---------------------------------------------------------------------------
 async function requirePaidUser(
@@ -87,7 +92,20 @@ async function requirePaidUser(
   const userData = userDoc.data()!;
   const subscriptionStatus: string = userData?.subscription?.status ?? "free";
 
-  if (subscriptionStatus !== "active") {
+  // Check admin tier override (matches ai.ts / profile.ts pattern)
+  let isPro = subscriptionStatus === "active";
+  try {
+    const authUser = await admin.auth().getUser(userId);
+    if (authUser.email === ADMIN_EMAIL) {
+      const adminDoc = await db.collection("config").doc("admin").get();
+      const tierOverride = adminDoc.data()?.tierOverride as string | undefined;
+      isPro = tierOverride !== "free"; // admin defaults to pro unless explicitly "free"
+    }
+  } catch {
+    // If auth lookup fails, fall through to normal subscription check
+  }
+
+  if (!isPro) {
     res.status(403).json({
       error: {
         code: "SUBSCRIPTION_REQUIRED",
@@ -149,11 +167,11 @@ router.post(
         return;
       }
 
-      // Generate key: brag_sk_live_{32 hex chars}
+      // Generate key: os_sk_live_{32 hex chars}
       const randomHex = crypto.randomBytes(16).toString("hex"); // 32 hex chars
-      const plainKey = `brag_sk_live_${randomHex}`;
+      const plainKey = `os_sk_live_${randomHex}`;
       const keyHash = crypto.createHash("sha256").update(plainKey).digest("hex");
-      const keyPrefix = plainKey.substring(0, 8); // "brag_sk_"
+      const keyPrefix = plainKey.substring(0, 12); // "os_sk_live_x"
 
       const now = admin.firestore.FieldValue.serverTimestamp();
       const keyRef = db.collection("apiKeys").doc();
@@ -443,7 +461,18 @@ router.post(
       }
 
       const userData = userDoc.data()!;
-      const subscriptionStatus: string = userData?.subscription?.status ?? "free";
+      let subscriptionStatus: string = userData?.subscription?.status ?? "free";
+
+      // Admin tier override for resume limits
+      try {
+        const authUser = await admin.auth().getUser(userId);
+        if (authUser.email === ADMIN_EMAIL) {
+          const adminDoc = await db.collection("config").doc("admin").get();
+          const tierOverride = adminDoc.data()?.tierOverride as string | undefined;
+          if (tierOverride !== "free") subscriptionStatus = "active";
+        }
+      } catch { /* fall through */ }
+
       const limit = VARIANT_LIMITS[subscriptionStatus] ?? VARIANT_LIMITS["free"];
 
       const existingSnap = await db

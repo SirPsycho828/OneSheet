@@ -494,7 +494,7 @@ function AdminTierCard() {
           </span>
           <span
             className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform ${
-              tier === "pro" ? "translate-x-[64px]" : "translate-x-[4px]"
+              tier === "pro" ? "translate-x-[60px]" : "translate-x-[4px]"
             }`}
           />
         </button>

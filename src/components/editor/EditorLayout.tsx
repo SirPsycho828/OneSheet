@@ -16,6 +16,11 @@ interface EditorLayoutProps {
   onOverflowChange?: (state: OverflowState) => void;
   /** Opens the AI tools panel (rendered in Editor.tsx). */
   onOpenAI?: () => void;
+  showQrCode?: boolean;
+  onShowQrCodeChange?: (show: boolean) => void;
+  qrCodeUrl?: string | null;
+  onQrCodeUrlChange?: (url: string | null) => void;
+  isPaid?: boolean;
 }
 
 type LeftMode = "source" | "design";
@@ -35,6 +40,11 @@ export function EditorLayout({
   onStylesChange,
   onOverflowChange,
   onOpenAI,
+  showQrCode,
+  onShowQrCodeChange,
+  qrCodeUrl,
+  onQrCodeUrlChange,
+  isPaid,
 }: EditorLayoutProps) {
   // ---------------------------------------------------------------------------
   // Desktop split state
@@ -159,7 +169,15 @@ export function EditorLayout({
                 onForceSave={onForceSave}
               />
             ) : (
-              <DesignPanel styles={styles} onStylesChange={onStylesChange} />
+              <DesignPanel
+                styles={styles}
+                onStylesChange={onStylesChange}
+                showQrCode={showQrCode}
+                onShowQrCodeChange={onShowQrCodeChange}
+                qrCodeUrl={qrCodeUrl}
+                onQrCodeUrlChange={onQrCodeUrlChange}
+                isPaid={isPaid}
+              />
             )}
           </div>
         </div>
@@ -185,6 +203,7 @@ export function EditorLayout({
             markdown={markdown}
             styles={styles}
             onOverflowChange={onOverflowChange}
+            qrCodeUrl={showQrCode ? (qrCodeUrl || undefined) : undefined}
           />
         </div>
       </div>
