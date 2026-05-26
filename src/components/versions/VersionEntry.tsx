@@ -1,5 +1,5 @@
 import type { VersionEntry as VersionEntryType } from "../../services/versions";
-import { TEMPLATES } from "../../constants/templates";
+import { PRESET_LIST } from "../../constants/presets";
 
 interface VersionEntryProps {
   version: VersionEntryType;
@@ -21,8 +21,8 @@ export function VersionEntry({
   currentTemplateId,
   onClick,
 }: VersionEntryProps) {
-  const templateMeta = TEMPLATES.find((t) => t.id === version.templateId);
-  const templateName = templateMeta?.name ?? version.templateId;
+  const presetMeta = PRESET_LIST.find((p) => p.id === version.templateId);
+  const templateName = presetMeta?.name ?? version.templateId;
   const showTemplate = version.templateId !== currentTemplateId;
 
   const date = version.createdAt?.toDate?.() ?? new Date();
