@@ -1,6 +1,8 @@
 import { Router, Request, Response } from "express";
 import * as admin from "firebase-admin";
 import { renderMarkdown } from "../lib/markdown";
+import { deriveStyles } from "../lib/styleUtils";
+import { postProcessHtml } from "../lib/postProcess";
 
 const router = Router();
 
@@ -71,8 +73,14 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
     const resumeDoc = resumesSnap.docs[0];
     const resumeData = resumeDoc.data();
 
-    // 4. Render markdown to HTML
-    const resumeHtml = await renderMarkdown(resumeData.markdown ?? "");
+    // 4. Render markdown to HTML + post-process with styles
+    const paperSize: "us-letter" | "a4" =
+      resumeData.paperSize === "a4" ? "a4" : "us-letter";
+    const styles = resumeData.styles
+      ?? deriveStyles(resumeData.templateId ?? "classic", paperSize);
+
+    let resumeHtml = await renderMarkdown(resumeData.markdown ?? "");
+    resumeHtml = postProcessHtml(resumeHtml, styles);
 
     // 5. Increment analytics (fire-and-forget)
     db.collection("analytics")
@@ -90,6 +98,7 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
     res.json({
       displayName: userData.displayName ?? username,
       resumeHtml,
+      styles,
       templateId: resumeData.templateId ?? "classic",
       paperSize: resumeData.paperSize ?? "us-letter",
       scaleFactor: resumeData.overflow?.scaleFactor ?? 1,

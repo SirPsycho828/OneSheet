@@ -7,7 +7,9 @@ import { OverflowMenu } from "../ui/OverflowMenu";
 import { renderMarkdown } from "../../lib/markdown";
 import { updateResume, createResume, deleteResume } from "../../services/resumes";
 import { useToast } from "../../hooks/useToast";
-import type { Resume } from "../../types/resume";
+import { stylesToCssVars, stylesToDataAttrs } from "../../lib/styleUtils";
+import { deriveStyles } from "../../constants/presets";
+import type { Resume, ResumeStyles } from "../../types/resume";
 import type { Analytics } from "../../types/analytics";
 
 // ---------------------------------------------------------------------------
@@ -48,11 +50,10 @@ const THUMBNAIL_WIDTH = 260;
 
 interface ThumbnailProps {
   markdown: string;
-  templateId: string;
-  paperSize: "us-letter" | "a4";
+  styles: ResumeStyles;
 }
 
-function ResumeThumbnail({ markdown, templateId, paperSize }: ThumbnailProps) {
+function ResumeThumbnail({ markdown, styles }: ThumbnailProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [htmlContent, setHtmlContent] = React.useState("");
 
@@ -66,9 +67,11 @@ function ResumeThumbnail({ markdown, templateId, paperSize }: ThumbnailProps) {
     };
   }, [markdown]);
 
-  const { width: paperWidth, height: paperHeight } = PAPER_DIMENSIONS[paperSize];
+  const { width: paperWidth, height: paperHeight } =
+    PAPER_DIMENSIONS[styles.pageSize];
   const scale = THUMBNAIL_WIDTH / paperWidth;
   const scaledHeight = Math.round(paperHeight * scale);
+  const pageMarginPx = Math.round(styles.pageMargin * 96);
 
   return (
     <div
@@ -89,10 +92,13 @@ function ResumeThumbnail({ markdown, templateId, paperSize }: ThumbnailProps) {
         }}
         className="bg-white"
       >
-        <div style={{ padding: "48px" }}>
+        <div
+          style={{ padding: pageMarginPx }}
+          {...stylesToDataAttrs(styles)}
+        >
           <div
             className="resume-content"
-            data-template={templateId}
+            style={stylesToCssVars(styles) as React.CSSProperties}
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
         </div>
@@ -120,6 +126,9 @@ export function ResumeCard({
 }: ResumeCardProps) {
   const navigate = useNavigate();
   const toast = useToast();
+
+  const resolvedStyles: ResumeStyles =
+    resume.styles ?? deriveStyles(resume.templateId, resume.paperSize ?? "us-letter");
 
   const [isRenaming, setIsRenaming] = React.useState(false);
   const [renameValue, setRenameValue] = React.useState(resume.title);
@@ -188,6 +197,7 @@ export function ResumeCard({
         isDefault: false,
         paperSize: resume.paperSize,
         overflow: resume.overflow,
+        styles: resolvedStyles,
       });
       onResumesChange();
       toast.success("Resume duplicated.");
@@ -238,8 +248,7 @@ export function ResumeCard({
       <div className="hidden sm:block w-full overflow-hidden bg-gray-100 flex-shrink-0">
         <ResumeThumbnail
           markdown={resume.markdown}
-          templateId={resume.templateId}
-          paperSize={resume.paperSize}
+          styles={resolvedStyles}
         />
       </div>
 

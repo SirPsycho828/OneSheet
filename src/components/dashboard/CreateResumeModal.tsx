@@ -5,6 +5,7 @@ import { Button } from "../ui/Button";
 import { createResume } from "../../services/resumes";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../../hooks/useToast";
+import { PRESET_DEFAULTS } from "../../constants/presets";
 
 interface CreateResumeModalProps {
   isOpen: boolean;
@@ -33,14 +34,16 @@ export function CreateResumeModal({ isOpen, onClose }: CreateResumeModalProps) {
     const trimmedTitle = title.trim() || "Untitled Resume";
     setIsCreating(true);
     try {
+      const paperSize = user.paperSize ?? "us-letter";
       const newId = await createResume({
         userId: user.uid,
         title: trimmedTitle,
         markdown: "",
         templateId: "classic",
         isDefault: false,
-        paperSize: user.paperSize ?? "us-letter",
+        paperSize,
         overflow: { isOverflowing: false, scaleFactor: 1 },
+        styles: { ...PRESET_DEFAULTS.classic, pageSize: paperSize },
       });
       onClose();
       navigate(`/editor/${newId}`);

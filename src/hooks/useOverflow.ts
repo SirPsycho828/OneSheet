@@ -1,13 +1,11 @@
 import * as React from "react";
+import type { ResumeStyles } from "../types/resume";
 
 // Paper dimensions at 96 DPI
 const PAPER_DIMENSIONS = {
   "us-letter": { width: 816, height: 1056 },
   a4: { width: 794, height: 1123 },
 } as const;
-
-// Content padding inside paper (same as PaperContainer)
-const PAPER_PADDING = 48;
 
 // Scale steps to try when overflowing
 const SCALE_STEPS = [1.0, 0.95, 0.9, 0.85, 0.8, 0.75] as const;
@@ -31,8 +29,7 @@ export interface OverflowState {
  */
 export function useOverflow(
   htmlContent: string,
-  templateId: string,
-  paperSize: "us-letter" | "a4"
+  styles: ResumeStyles,
 ): OverflowState & { measureRef: React.RefObject<HTMLDivElement | null> } {
   const measureRef = React.useRef<HTMLDivElement | null>(null);
   const [isOverflowing, setIsOverflowing] = React.useState(false);
@@ -51,8 +48,9 @@ export function useOverflow(
       if (!measureRef.current) return;
 
       const el = measureRef.current;
-      const paperHeight = PAPER_DIMENSIONS[paperSize].height;
-      const containerHeight = paperHeight - PAPER_PADDING * 2;
+      const pageMarginPx = Math.round(styles.pageMargin * 96);
+      const paperHeight = PAPER_DIMENSIONS[styles.pageSize].height;
+      const containerHeight = paperHeight - pageMarginPx * 2;
       const contentHeight = el.scrollHeight;
 
       if (contentHeight <= containerHeight) {
@@ -83,7 +81,7 @@ export function useOverflow(
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [htmlContent, templateId, paperSize]);
+  }, [htmlContent, styles.pageSize, styles.pageMargin]);
 
   return { isOverflowing, scaleFactor, measureRef };
 }

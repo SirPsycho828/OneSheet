@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Code, Layout, Download, Check } from "lucide-react";
 import { LandingNav } from "../components/layout/LandingNav";
 import { Button } from "../components/ui/Button";
-import { TEMPLATES } from "../constants/templates";
+import { PRESET_LIST } from "../constants/presets";
 import { PRO_PRICE_MONTHLY } from "../constants/pricing";
 
 // ---------------------------------------------------------------------------
@@ -154,7 +154,7 @@ function TemplateShowcase() {
 
         {/* Mobile: horizontal scroll; Desktop: 5-column grid */}
         <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-5 md:overflow-visible md:pb-0">
-          {TEMPLATES.map((template) => (
+          {PRESET_LIST.map((template) => (
             <div
               key={template.id}
               className="flex-shrink-0 w-40 md:w-auto snap-start"

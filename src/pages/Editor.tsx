@@ -7,7 +7,6 @@ import { AppNav } from "../components/layout/AppNav";
 import { StatusBar } from "../components/layout/StatusBar";
 import { EditorLayout } from "../components/editor/EditorLayout";
 import { Skeleton } from "../components/ui/Skeleton";
-import { TemplatePicker } from "../components/templates/TemplatePicker";
 import { VersionPanel } from "../components/versions/VersionPanel";
 import { createSnapshot } from "../services/versions";
 import type { VersionEntry } from "../services/versions";
@@ -35,9 +34,9 @@ export function Editor() {
     title,
     setTitle,
     templateId,
-    setTemplateId,
     paperSize,
-    setPaperSize,
+    styles,
+    setStyles,
     saveStatus,
     forceSave,
     setOverflow,
@@ -47,8 +46,6 @@ export function Editor() {
     acceptRecovery,
     dismissRecovery,
   } = useResume(routeResumeId);
-
-  const [isPickerOpen, setIsPickerOpen] = React.useState(false);
 
   // ---------------------------------------------------------------------------
   // Version history state
@@ -100,13 +97,13 @@ export function Editor() {
         e.preventDefault();
         await forceSave();
         // Snapshot on every manual Ctrl+S
-        await takeSnapshot(markdown, templateId);
+        await takeSnapshot(markdown, styles?.preset ?? "classic");
       }
     }
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [forceSave, takeSnapshot, markdown, templateId]);
+  }, [forceSave, takeSnapshot, markdown, styles?.preset]);
 
   // ---------------------------------------------------------------------------
   // Idle detection: mark needsSnapshot when content is unchanged for 5+ minutes
@@ -115,7 +112,7 @@ export function Editor() {
     if (saveStatus === "unsaved") {
       lastChangedAtRef.current = Date.now();
     }
-  }, [markdown, title, templateId, paperSize, saveStatus]);
+  }, [markdown, title, styles, saveStatus]);
 
   // Check idle threshold on a 30-second interval
   React.useEffect(() => {
@@ -139,7 +136,7 @@ export function Editor() {
     const shouldSnapshot = isFirstAutoSaveRef.current || needsSnapshotRef.current;
     if (shouldSnapshot) {
       isFirstAutoSaveRef.current = false;
-      takeSnapshot(markdown, templateId);
+      takeSnapshot(markdown, styles?.preset ?? "classic");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [saveStatus]);
@@ -147,8 +144,12 @@ export function Editor() {
   // ---------------------------------------------------------------------------
   // Paper size toggle
   // ---------------------------------------------------------------------------
+  const effectivePaperSize = styles?.pageSize ?? paperSize;
+
   function handleTogglePaperSize() {
-    setPaperSize(paperSize === "us-letter" ? "a4" : "us-letter");
+    if (styles) {
+      setStyles({ ...styles, pageSize: effectivePaperSize === "us-letter" ? "a4" : "us-letter" });
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -245,30 +246,28 @@ export function Editor() {
 
   // When previewing a version, show its content in the preview pane
   const previewMarkdown = previewingVersion?.markdown ?? markdown;
-  const previewTemplateId = previewingVersion?.templateId ?? templateId;
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       <AppNav
         title={title}
         onTitleChange={setTitle}
-        templateId={templateId}
         username={user?.username}
-        onOpenTemplatePicker={() => setIsPickerOpen(true)}
         onOpenVersionHistory={() => setIsVersionPanelOpen(true)}
         resumeId={resolvedResumeId ?? undefined}
-        paperSize={paperSize}
       />
 
       <main className="flex-1 overflow-hidden">
-        <EditorLayout
-          markdown={previewMarkdown}
-          onMarkdownChange={previewingVersion ? () => {} : setMarkdown}
-          onForceSave={forceSave}
-          templateId={previewTemplateId}
-          paperSize={paperSize}
-          onOverflowChange={setOverflow}
-        />
+        {styles && (
+          <EditorLayout
+            markdown={previewMarkdown}
+            onMarkdownChange={previewingVersion ? () => {} : setMarkdown}
+            onForceSave={forceSave}
+            styles={styles}
+            onStylesChange={setStyles}
+            onOverflowChange={setOverflow}
+          />
+        )}
       </main>
 
       {showRecoveryBanner && (
@@ -295,31 +294,16 @@ export function Editor() {
 
       <StatusBar
         saveStatus={saveStatus}
-        paperSize={paperSize}
+        paperSize={effectivePaperSize}
         onTogglePaperSize={handleTogglePaperSize}
         isOnline={isOnline}
         isLocalBackupActive={isLocalBackupActive}
       />
 
-      <TemplatePicker
-        isOpen={isPickerOpen}
-        onClose={() => setIsPickerOpen(false)}
-        onApply={async (newId) => {
-          // Snapshot current state before switching template
-          await takeSnapshot(markdown, templateId);
-          setTemplateId(newId);
-          setIsPickerOpen(false);
-        }}
-        currentTemplateId={templateId}
-        markdown={markdown}
-        paperSize={paperSize}
-        isPaid={isPaid ?? false}
-      />
-
       {isVersionPanelOpen && resolvedResumeId && (
         <VersionPanel
           resumeId={resolvedResumeId}
-          currentTemplateId={templateId}
+          currentTemplateId={styles?.preset ?? templateId}
           isPaid={isPaid ?? false}
           onClose={() => {
             setIsVersionPanelOpen(false);

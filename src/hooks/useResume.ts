@@ -3,7 +3,8 @@ import { getResume, getDefaultResume, updateResume } from "../services/resumes";
 import { useAuth } from "./useAuth";
 import { useDebounce } from "./useDebounce";
 import { useOnlineStatus } from "./useOnlineStatus";
-import type { Resume, Overflow } from "../types/resume";
+import type { Resume, Overflow, ResumeStyles } from "../types/resume";
+import { deriveStyles } from "../constants/presets";
 
 export type SaveStatus = "saved" | "saving" | "unsaved" | "error" | "offline";
 
@@ -20,6 +21,7 @@ interface LocalBackup {
   title: string;
   templateId: string;
   paperSize: "us-letter" | "a4";
+  styles?: ResumeStyles;
   timestamp: number;
 }
 
@@ -67,6 +69,9 @@ export function useResume(resumeId?: string) {
   const [title, setTitle] = useState("");
   const [templateId, setTemplateId] = useState("classic");
   const [paperSize, setPaperSize] = useState<"us-letter" | "a4">("us-letter");
+  const [showQrCode, setShowQrCode] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [styles, setStyles] = useState<ResumeStyles | null>(null);
 
   // Overflow state — updated by the preview component on every measurement
   const overflowRef = useRef<Overflow>({ isOverflowing: false, scaleFactor: 1.0 });
@@ -84,6 +89,9 @@ export function useResume(resumeId?: string) {
     title: string;
     templateId: string;
     paperSize: "us-letter" | "a4";
+    showQrCode: boolean;
+    qrCodeUrl: string | null;
+    styles: ResumeStyles | null;
   } | null>(null);
 
   // Ref to the actual resume ID (may resolve asynchronously for default resume)
@@ -138,6 +146,10 @@ export function useResume(resumeId?: string) {
           setTitle(loaded.title);
           setTemplateId(loaded.templateId);
           setPaperSize(loaded.paperSize ?? "us-letter");
+          setShowQrCode(loaded.showQrCode ?? false);
+          setQrCodeUrl(loaded.qrCodeUrl ?? null);
+          const resolvedStyles = loaded.styles ?? deriveStyles(loaded.templateId, loaded.paperSize ?? "us-letter");
+          setStyles(resolvedStyles);
           resumeIdRef.current = loaded.id;
 
           // Seed last-saved ref so first auto-save only fires on real changes
@@ -146,6 +158,9 @@ export function useResume(resumeId?: string) {
             title: loaded.title,
             templateId: loaded.templateId,
             paperSize: loaded.paperSize ?? "us-letter",
+            showQrCode: loaded.showQrCode ?? false,
+            qrCodeUrl: loaded.qrCodeUrl ?? null,
+            styles: resolvedStyles,
           };
 
           setSaveStatus("saved");
@@ -172,10 +187,13 @@ export function useResume(resumeId?: string) {
       markdown !== lastSavedRef.current.markdown ||
       title !== lastSavedRef.current.title ||
       templateId !== lastSavedRef.current.templateId ||
-      paperSize !== lastSavedRef.current.paperSize;
+      paperSize !== lastSavedRef.current.paperSize ||
+      showQrCode !== lastSavedRef.current.showQrCode ||
+      qrCodeUrl !== lastSavedRef.current.qrCodeUrl ||
+      JSON.stringify(styles) !== JSON.stringify(lastSavedRef.current.styles);
 
     if (dirty) setSaveStatus(isOnline ? "unsaved" : "offline");
-  }, [markdown, title, templateId, paperSize, isLoading, isOnline]);
+  }, [markdown, title, templateId, paperSize, showQrCode, qrCodeUrl, styles, isLoading, isOnline]);
 
   // ---------------------------------------------------------------------------
   // Core save function (shared by auto-save and forceSave)
@@ -191,7 +209,15 @@ export function useResume(resumeId?: string) {
       return;
     }
 
-    const current = { markdown, title, templateId, paperSize };
+    const current = {
+      markdown,
+      title,
+      templateId: styles?.preset ?? templateId,
+      paperSize: styles?.pageSize ?? paperSize,
+      showQrCode,
+      qrCodeUrl,
+      styles: styles ?? undefined,
+    };
 
     // Deduplicate: skip if nothing changed since last successful save
     if (
@@ -199,7 +225,10 @@ export function useResume(resumeId?: string) {
       current.markdown === lastSavedRef.current.markdown &&
       current.title === lastSavedRef.current.title &&
       current.templateId === lastSavedRef.current.templateId &&
-      current.paperSize === lastSavedRef.current.paperSize
+      current.paperSize === lastSavedRef.current.paperSize &&
+      current.showQrCode === lastSavedRef.current.showQrCode &&
+      current.qrCodeUrl === lastSavedRef.current.qrCodeUrl &&
+      JSON.stringify(current.styles) === JSON.stringify(lastSavedRef.current.styles)
     ) {
       setSaveStatus("saved");
       return;
@@ -209,7 +238,7 @@ export function useResume(resumeId?: string) {
     try {
       // Include the latest overflow state from the preview measurement
       await updateResume(id, { ...current, overflow: overflowRef.current });
-      lastSavedRef.current = current;
+      lastSavedRef.current = { ...current, styles: current.styles ?? null };
       retryCountRef.current = 0;
       pendingSaveRef.current = false;
       setSaveStatus("saved");
@@ -233,7 +262,7 @@ export function useResume(resumeId?: string) {
       }, delay);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [markdown, title, templateId, paperSize, isOnline]);
+  }, [markdown, title, templateId, paperSize, showQrCode, qrCodeUrl, styles, isOnline]);
 
   // ---------------------------------------------------------------------------
   // Auto-save: debounced 1500ms after last change
@@ -242,6 +271,7 @@ export function useResume(resumeId?: string) {
   const debouncedTitle = useDebounce(title, AUTO_SAVE_DELAY);
   const debouncedTemplateId = useDebounce(templateId, AUTO_SAVE_DELAY);
   const debouncedPaperSize = useDebounce(paperSize, AUTO_SAVE_DELAY);
+  const debouncedStyles = useDebounce(styles, AUTO_SAVE_DELAY);
 
   // Write localStorage backup on every debounce tick (before attempting network save)
   useEffect(() => {
@@ -253,8 +283,9 @@ export function useResume(resumeId?: string) {
       title: debouncedTitle,
       templateId: debouncedTemplateId,
       paperSize: debouncedPaperSize,
+      styles: debouncedStyles ?? undefined,
     });
-  }, [debouncedMarkdown, debouncedTitle, debouncedTemplateId, debouncedPaperSize, isLoading]);
+  }, [debouncedMarkdown, debouncedTitle, debouncedTemplateId, debouncedPaperSize, debouncedStyles, isLoading]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -262,7 +293,7 @@ export function useResume(resumeId?: string) {
 
     save();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedMarkdown, debouncedTitle, debouncedTemplateId, debouncedPaperSize]);
+  }, [debouncedMarkdown, debouncedTitle, debouncedTemplateId, debouncedPaperSize, debouncedStyles]);
 
   // ---------------------------------------------------------------------------
   // Sync on reconnect: if there was a pending save, trigger immediately
@@ -328,6 +359,7 @@ export function useResume(resumeId?: string) {
     setTitle(recoveryBackup.title);
     setTemplateId(recoveryBackup.templateId);
     setPaperSize(recoveryBackup.paperSize);
+    if (recoveryBackup.styles) setStyles(recoveryBackup.styles);
     setShowRecoveryBanner(false);
     setRecoveryBackup(null);
     setSaveStatus("unsaved");
@@ -362,6 +394,12 @@ export function useResume(resumeId?: string) {
     setTemplateId,
     paperSize,
     setPaperSize,
+    showQrCode,
+    setShowQrCode,
+    qrCodeUrl,
+    setQrCodeUrl,
+    styles,
+    setStyles,
     saveStatus,
     forceSave,
     setOverflow,

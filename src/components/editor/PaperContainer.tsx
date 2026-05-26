@@ -1,4 +1,6 @@
 import * as React from "react";
+import { stylesToCssVars, stylesToDataAttrs } from "../../lib/styleUtils";
+import type { ResumeStyles } from "../../types/resume";
 
 // Paper dimensions at 96 DPI
 const PAPER_DIMENSIONS = {
@@ -7,8 +9,7 @@ const PAPER_DIMENSIONS = {
 } as const;
 
 interface PaperContainerProps {
-  paperSize: "us-letter" | "a4";
-  templateId: string;
+  styles: ResumeStyles;
   htmlContent: string;
   /**
    * Content-level scale factor for overflow shrinking (Task 8).
@@ -28,15 +29,17 @@ interface PaperContainerProps {
  * Content is clipped at paper boundaries (`overflow: hidden`).
  */
 export function PaperContainer({
-  paperSize,
-  templateId,
+  styles,
   htmlContent,
   contentScaleFactor = 1.0,
 }: PaperContainerProps) {
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const [panelScale, setPanelScale] = React.useState(1);
 
-  const { width: paperWidth, height: paperHeight } = PAPER_DIMENSIONS[paperSize];
+  const { width: paperWidth, height: paperHeight } = PAPER_DIMENSIONS[styles.pageSize];
+  const pageMarginPx = Math.round(styles.pageMargin * 96);
+  const cssVars = stylesToCssVars(styles);
+  const dataAttrs = stylesToDataAttrs(styles);
 
   // ---------------------------------------------------------------------------
   // ResizeObserver: scale paper to fit available panel width
@@ -79,8 +82,8 @@ export function PaperContainer({
           }}
           className="bg-white shadow-lg border border-gray-200 overflow-hidden"
         >
-          {/* Inner padding: 48px = ~0.5 inch at 96 DPI */}
-          <div style={{ padding: "48px" }}>
+          {/* Inner padding derived from styles.pageMargin */}
+          <div style={{ padding: pageMarginPx }}>
             {/*
               Content scale wrapper — applies overflow shrinking (contentScaleFactor).
               Width is expanded to 100%/factor so scaled content still fills paper width.
@@ -100,7 +103,8 @@ export function PaperContainer({
             >
               <div
                 className="resume-content"
-                data-template={templateId}
+                style={cssVars as React.CSSProperties}
+                {...dataAttrs}
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
               />
             </div>

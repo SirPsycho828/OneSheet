@@ -7,7 +7,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { RESERVED_WORDS } from "../constants/reserved-words";
-import { DEFAULT_TEMPLATE } from "../constants/templates";
+import { PRESET_DEFAULTS } from "../constants/presets";
 
 const USERNAME_REGEX = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$|^[a-z0-9]{3}$/;
 
@@ -73,7 +73,8 @@ export async function claimUsername(
     userId: uid,
     title: "My Resume",
     markdown: `# ${displayName}\n\n${email}\n\n## Experience\n\n## Education\n\n## Skills\n`,
-    templateId: DEFAULT_TEMPLATE,
+    templateId: "classic",
+    styles: PRESET_DEFAULTS.classic,
     isDefault: true,
     paperSize: "us-letter",
     overflow: { isOverflowing: false, scaleFactor: 1 },
