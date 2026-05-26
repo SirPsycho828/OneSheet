@@ -1,5 +1,6 @@
 import * as React from "react";
 import { renderMarkdown } from "../../lib/markdown";
+import { postProcessHtml } from "../../lib/postProcess";
 import { useDebounce } from "../../hooks/useDebounce";
 import { useOverflow } from "../../hooks/useOverflow";
 import { PaperContainer } from "./PaperContainer";
@@ -7,11 +8,11 @@ import { MeasureContainer } from "./MeasureContainer";
 import { OverflowWarning } from "./OverflowWarning";
 import { Skeleton } from "../ui/Skeleton";
 import type { OverflowState } from "../../hooks/useOverflow";
+import type { ResumeStyles } from "../../types/resume";
 
 interface ResumePreviewProps {
   markdown: string;
-  templateId: string;
-  paperSize: "us-letter" | "a4";
+  styles: ResumeStyles;
   /** Called after each overflow measurement so the editor can persist state. */
   onOverflowChange?: (state: OverflowState) => void;
 }
@@ -28,17 +29,17 @@ const RENDER_DEBOUNCE_MS = 150;
  */
 export function ResumePreview({
   markdown,
-  templateId,
-  paperSize,
+  styles,
   onOverflowChange,
 }: ResumePreviewProps) {
-  const [htmlContent, setHtmlContent] = React.useState("");
+  const [rawHtml, setRawHtml] = React.useState("");
   const [isRendering, setIsRendering] = React.useState(false);
   const [warningDismissed, setWarningDismissed] = React.useState(false);
 
   // Debounce the markdown string to avoid expensive remark pipeline on every keystroke
   const debouncedMarkdown = useDebounce(markdown, RENDER_DEBOUNCE_MS);
 
+  // Render markdown -> raw HTML
   React.useEffect(() => {
     let cancelled = false;
 
@@ -47,7 +48,7 @@ export function ResumePreview({
       try {
         const html = await renderMarkdown(debouncedMarkdown);
         if (!cancelled) {
-          setHtmlContent(html);
+          setRawHtml(html);
           // Reset dismiss state so the bar reappears after new content is measured
           setWarningDismissed(false);
         }
@@ -62,11 +63,16 @@ export function ResumePreview({
     return () => { cancelled = true; };
   }, [debouncedMarkdown]);
 
-  // Overflow detection — runs after htmlContent updates
+  // Post-process reactively when rawHtml or relevant styles change
+  const processedHtml = React.useMemo(
+    () => postProcessHtml(rawHtml, styles),
+    [rawHtml, styles.contactLayout, styles.skillsDisplay, styles.dateAlignment]
+  );
+
+  // Overflow detection — runs after processedHtml updates
   const { isOverflowing, scaleFactor, measureRef } = useOverflow(
-    htmlContent,
-    templateId,
-    paperSize
+    processedHtml,
+    styles,
   );
 
   // Notify parent of overflow state changes
@@ -89,8 +95,7 @@ export function ResumePreview({
       {/* Off-screen measurement container — hidden, not visible */}
       <MeasureContainer
         measureRef={measureRef}
-        paperSize={paperSize}
-        templateId={templateId}
+        styles={styles}
       />
 
       {/* Overflow warning bar — slides in from top when scaling is active */}
@@ -103,7 +108,7 @@ export function ResumePreview({
 
       {/* Scrollable paper area */}
       <div className="flex-1 overflow-y-auto" aria-live="polite">
-        {isRendering && !htmlContent ? (
+        {isRendering && !rawHtml ? (
           // First-load skeleton
           <div className="flex justify-center pt-8 px-4">
             <div className="flex flex-col gap-3" style={{ width: 600 }}>
@@ -120,9 +125,8 @@ export function ResumePreview({
         ) : (
           <div className="py-8">
             <PaperContainer
-              paperSize={paperSize}
-              templateId={templateId}
-              htmlContent={htmlContent}
+              styles={styles}
+              htmlContent={processedHtml}
               contentScaleFactor={scaleFactor}
             />
           </div>

@@ -1,4 +1,6 @@
 import * as React from "react";
+import { stylesToCssVars, stylesToDataAttrs } from "../../lib/styleUtils";
+import type { ResumeStyles } from "../../types/resume";
 
 // Paper dimensions at 96 DPI — must match PaperContainer and useOverflow
 const PAPER_DIMENSIONS = {
@@ -6,11 +8,8 @@ const PAPER_DIMENSIONS = {
   a4: { width: 794, height: 1123 },
 } as const;
 
-const PAPER_PADDING = 48;
-
 interface MeasureContainerProps {
-  paperSize: "us-letter" | "a4";
-  templateId: string;
+  styles: ResumeStyles;
   /** Ref that lands on the inner content div so useOverflow can read scrollHeight. */
   measureRef: React.RefObject<HTMLDivElement | null>;
 }
@@ -25,8 +24,12 @@ interface MeasureContainerProps {
  * - Exact paper dimensions and same padding as the visible PaperContainer.
  * - NO CSS transform — measurement must be at 1:1 scale.
  */
-export function MeasureContainer({ paperSize, templateId, measureRef }: MeasureContainerProps) {
-  const { width, height } = PAPER_DIMENSIONS[paperSize];
+export function MeasureContainer({ styles, measureRef }: MeasureContainerProps) {
+  const { width } = PAPER_DIMENSIONS[styles.pageSize];
+  const pageMarginPx = Math.round(styles.pageMargin * 96);
+  const contentWidth = width - pageMarginPx * 2;
+  const cssVars = stylesToCssVars(styles);
+  const dataAttrs = stylesToDataAttrs(styles);
 
   return (
     <div
@@ -35,12 +38,11 @@ export function MeasureContainer({ paperSize, templateId, measureRef }: MeasureC
         position: "fixed",
         left: -9999,
         top: 0,
-        width,
-        height,
-        overflow: "hidden",
+        width: contentWidth,
         visibility: "hidden",
-        // Intentionally NO transform — must stay at 1:1 for accurate measurement
-      }}
+        ...cssVars,
+      } as React.CSSProperties}
+      {...dataAttrs}
     >
       {/*
         Inner content div — matches the resume-content wrapper inside PaperContainer.
@@ -49,8 +51,6 @@ export function MeasureContainer({ paperSize, templateId, measureRef }: MeasureC
       <div
         ref={measureRef}
         className="resume-content w-full h-full"
-        data-template={templateId}
-        style={{ padding: PAPER_PADDING }}
       />
     </div>
   );
