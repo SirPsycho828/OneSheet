@@ -1,10 +1,12 @@
 import { Router } from "express";
 import * as admin from "firebase-admin";
+import { logger } from "firebase-functions";
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
 import { renderMarkdown } from "../lib/markdown";
 import { buildHtmlDocument, generatePdf } from "../lib/pdf";
 import { deriveStyles } from "../lib/styleUtils";
 import { postProcessHtml } from "../lib/postProcess";
+import { ADMIN_EMAIL } from "../lib/constants";
 import { Response } from "express";
 
 const router = Router();
@@ -50,10 +52,22 @@ router.post(
         return;
       }
 
-      const userData = userDoc.data()!;
+      const userData = userDoc.data()!; // safe: exists check above
       const subscriptionStatus: string = userData?.subscription?.status ?? "free";
 
-      if (subscriptionStatus !== "active") {
+      let isPro = subscriptionStatus === "active";
+      try {
+        const authUser = await admin.auth().getUser(userId);
+        if (authUser.email === ADMIN_EMAIL) {
+          const adminDoc = await db.collection("config").doc("admin").get();
+          const tierOverride = adminDoc.data()?.tierOverride as string | undefined;
+          isPro = tierOverride !== "free";
+        }
+      } catch {
+        // fall through to normal subscription check
+      }
+
+      if (!isPro) {
         res.status(403).json({
           error: {
             code: "SUBSCRIPTION_REQUIRED",
@@ -65,7 +79,7 @@ router.post(
 
       username = userData?.username ?? "resume";
     } catch (err) {
-      console.error("pdf/generate: error fetching user doc", err);
+      logger.error("pdf/generate: error fetching user doc", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "PDF generation failed. Please try again." },
       });
@@ -85,7 +99,7 @@ router.post(
         return;
       }
 
-      resumeData = resumeDoc.data()!;
+      resumeData = resumeDoc.data()!; // safe: exists check above
 
       if (resumeData.userId !== userId) {
         res.status(403).json({
@@ -94,7 +108,7 @@ router.post(
         return;
       }
     } catch (err) {
-      console.error("pdf/generate: error fetching resume doc", err);
+      logger.error("pdf/generate: error fetching resume doc", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "PDF generation failed. Please try again." },
       });
@@ -134,7 +148,7 @@ router.post(
           "analytics.pdfDownloads": admin.firestore.FieldValue.increment(1),
         })
         .catch((err: unknown) => {
-          console.error("pdf/generate: failed to increment pdfDownloads", err);
+          logger.error("pdf/generate: failed to increment pdfDownloads", err);
         });
 
       // ------------------------------------------------------------------
@@ -149,7 +163,7 @@ router.post(
       res.setHeader("Cache-Control", "no-store");
       res.send(pdfBuffer);
     } catch (err) {
-      console.error("pdf/generate: Puppeteer error", err);
+      logger.error("pdf/generate: Puppeteer error", err);
       res.status(500).json({
         error: { code: "PDF_GENERATION_FAILED", message: "PDF generation failed. Please try again." },
       });

@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin";
 import * as crypto from "crypto";
 import { Request, Response, NextFunction } from "express";
+import { logger } from "firebase-functions";
 
 export interface AuthenticatedRequest extends Request {
   userId?: string;
@@ -64,7 +65,7 @@ export async function requireAuth(
         return;
       }
 
-      const userData = userDoc.data()!;
+      const userData = userDoc.data()!; // safe: exists check above
       const subscriptionStatus: string = userData?.subscription?.status ?? "free";
 
       if (subscriptionStatus !== "active") {
@@ -81,14 +82,14 @@ export async function requireAuth(
       keyDoc.ref
         .update({ lastUsedAt: admin.firestore.FieldValue.serverTimestamp() })
         .catch((err: unknown) => {
-          console.error("auth: failed to update lastUsedAt", err);
+          logger.error("auth: failed to update lastUsedAt", err);
         });
 
       req.userId = userId;
       req.authMethod = "apikey";
       return next();
     } catch (err) {
-      console.error("auth: API key verification error", err);
+      logger.error("auth: API key verification error", err);
       res.status(401).json({
         error: { code: "INVALID_API_KEY", message: "API key verification failed" },
       });

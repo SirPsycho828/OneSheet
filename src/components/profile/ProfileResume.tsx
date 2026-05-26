@@ -65,6 +65,7 @@ export function ProfileResume({
                 <div
                   className="resume-content"
                   style={cssVars as React.CSSProperties}
+                  {/* SAFE: resumeHtml is sanitized server-side by rehype-sanitize */}
                   dangerouslySetInnerHTML={{ __html: resumeHtml }}
                 />
               </div>
@@ -82,6 +83,7 @@ export function ProfileResume({
               <div
                 className="resume-content"
                 style={cssVars as React.CSSProperties}
+                {/* SAFE: resumeHtml is sanitized server-side by rehype-sanitize */}
                 dangerouslySetInnerHTML={{ __html: resumeHtml }}
               />
             </div>

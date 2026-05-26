@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+import { logger } from "firebase-functions";
 
 /**
  * Firestore-based rate limiter for API keys.
@@ -33,7 +34,7 @@ export async function checkRateLimit(keyHash: string): Promise<RateLimitResult> 
 
     await db.runTransaction(async (tx) => {
       const snap = await tx.get(docRef);
-      const count: number = snap.exists ? (snap.data()!.count as number) : 0;
+      const count: number = snap.exists ? (snap.data()!.count as number) : 0; // safe: exists check
 
       if (count < LIMIT) {
         const expireAt = new Date((minuteWindow + 1) * 60_000 + 5_000); // window end + 5s buffer
@@ -63,7 +64,7 @@ export async function checkRateLimit(keyHash: string): Promise<RateLimitResult> 
     return { allowed: false, retryAfterSeconds };
   } catch (err) {
     // On error, allow the request to avoid blocking legitimate traffic
-    console.error("rateLimit: Firestore error, allowing request", err);
+    logger.error("rateLimit: Firestore error, allowing request", err);
     return { allowed: true };
   }
 }

@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import * as admin from "firebase-admin";
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
+import { logger } from "firebase-functions";
 
 const router = Router();
 
@@ -16,7 +17,7 @@ router.get("/:resumeId", requireAuth, async (req: AuthenticatedRequest, res: Res
       return;
     }
 
-    const data = analyticsDoc.data()!;
+    const data = analyticsDoc.data()!; // safe: exists check above
     if (data.userId !== userId) {
       res.status(403).json({ error: { code: "FORBIDDEN", message: "Not authorized" } });
       return;
@@ -28,7 +29,7 @@ router.get("/:resumeId", requireAuth, async (req: AuthenticatedRequest, res: Res
       lastViewedAt: data.lastViewedAt?.toDate?.()?.toISOString?.() ?? null,
     });
   } catch (err) {
-    console.error("analytics: error", err);
+    logger.error("analytics: error", err);
     res.status(500).json({ error: { code: "INTERNAL_ERROR", message: "Failed to fetch analytics" } });
   }
 });

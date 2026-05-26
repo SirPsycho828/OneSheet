@@ -11,7 +11,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../config/firebase";
 import type { User, AuthState } from "../types/user";
 
-const ADMIN_EMAIL = "steve.petusky@gmail.com";
+import { ADMIN_EMAIL } from "../constants/admin";
 
 interface AuthContextValue {
   authState: AuthState;
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData);
       setAuthState("authenticated");
     } catch (error) {
-      console.error("AuthContext: error fetching user doc", error);
+
       setUser(null);
       setAuthState("unauthenticated");
     }

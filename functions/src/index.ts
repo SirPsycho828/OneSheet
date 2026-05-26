@@ -34,7 +34,7 @@ app.use((req, res, next) => {
   if (req.path === "/api/stripe/webhook") {
     next(); // Skip JSON parsing for Stripe (needs raw body)
   } else {
-    express.json()(req, res, next);
+    express.json({ limit: "2mb" })(req, res, next);
   }
 });
 

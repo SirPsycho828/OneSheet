@@ -40,6 +40,7 @@ export function useOverflow(
     if (!container) return;
 
     // Inject content into the measurement container
+    // SAFE: htmlContent is sanitized by rehype-sanitize in the markdown rendering pipeline
     container.innerHTML = htmlContent;
 
     // Allow the browser to perform layout before measuring

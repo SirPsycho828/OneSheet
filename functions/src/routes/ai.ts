@@ -1,10 +1,10 @@
 import { Router, Response } from "express";
 import * as admin from "firebase-admin";
+import { logger } from "firebase-functions";
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
+import { ADMIN_EMAIL } from "../lib/constants";
 
 const router = Router();
-
-const ADMIN_EMAIL = "steve.petusky@gmail.com";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -81,7 +81,7 @@ async function callOpenRouter(
 
   if (!response.ok) {
     const errorBody = await response.text();
-    console.error("OpenRouter API error:", response.status, errorBody);
+    logger.error("OpenRouter API error:", response.status, errorBody);
 
     // Parse OpenRouter error for user-friendly message
     let userMessage = `AI service error (${response.status})`;
@@ -170,7 +170,7 @@ Rules:
 
       res.json({ polished });
     } catch (err) {
-      console.error("ai/polish error:", err);
+      logger.error("ai/polish error:", err);
       const message = err instanceof Error ? err.message : "Failed to polish bullets. Please try again.";
       const status = (err as Error & { statusCode?: number }).statusCode === 429 ? 429 : 500;
       res.status(status).json({
@@ -248,7 +248,7 @@ Rules:
 
       res.json(parsed);
     } catch (err) {
-      console.error("ai/score error:", err);
+      logger.error("ai/score error:", err);
       const message = err instanceof Error ? err.message : "Failed to score resume. Please try again.";
       const status = (err as Error & { statusCode?: number }).statusCode === 429 ? 429 : 500;
       res.status(status).json({
@@ -275,7 +275,21 @@ router.post(
     }
 
     try {
-      new URL(url);
+      const parsed = new URL(url);
+      const hostname = parsed.hostname.toLowerCase();
+      const blocked =
+        hostname === "localhost" ||
+        hostname === "127.0.0.1" ||
+        hostname === "0.0.0.0" ||
+        hostname === "::1" ||
+        hostname.endsWith(".local") ||
+        /^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(hostname);
+      if (blocked || !["http:", "https:"].includes(parsed.protocol)) {
+        res.status(400).json({
+          error: { code: "INVALID_URL", message: "URL not allowed" },
+        });
+        return;
+      }
     } catch {
       res.status(400).json({
         error: { code: "INVALID_URL", message: "Invalid URL format" },
@@ -333,7 +347,7 @@ router.post(
       const truncated = text.length > 10000 ? text.substring(0, 10000) : text;
       res.json({ text: truncated });
     } catch (err) {
-      console.error("ai/extract-job error:", err);
+      logger.error("ai/extract-job error:", err);
       res.status(422).json({
         error: {
           code: "FETCH_FAILED",
@@ -394,7 +408,7 @@ Rules:
       const markdown = result.replace(/^```(?:markdown)?\n?/g, "").replace(/\n?```$/g, "").trim();
       res.json({ markdown });
     } catch (err) {
-      console.error("ai/import-text error:", err);
+      logger.error("ai/import-text error:", err);
       const message = err instanceof Error ? err.message : "Failed to parse resume. Please try again.";
       const status = (err as Error & { statusCode?: number }).statusCode === 429 ? 429 : 500;
       res.status(status).json({

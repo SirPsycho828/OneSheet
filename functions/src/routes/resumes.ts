@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import * as admin from "firebase-admin";
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
+import { logger } from "firebase-functions";
 
 const router = Router();
 
@@ -54,7 +55,7 @@ router.post(
         return;
       }
 
-      const userData = userDoc.data()!;
+      const userData = userDoc.data()! // safe: exists check above;
       const subscriptionStatus: string =
         userData?.subscription?.status ?? "free";
 
@@ -115,7 +116,7 @@ router.post(
 
       res.status(201).json({ resumeId: resumeRef.id });
     } catch (err) {
-      console.error("resumes/create: unexpected error", err);
+      logger.error("resumes/create: unexpected error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to create resume" },
       });
@@ -157,7 +158,7 @@ router.post(
         return;
       }
 
-      const resumeData = resumeDoc.data()!;
+      const resumeData = resumeDoc.data()! // safe: exists check above;
       if (resumeData.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this resume" },
@@ -191,7 +192,7 @@ router.post(
 
       res.json({ success: true });
     } catch (err) {
-      console.error("resumes/set-default: unexpected error", err);
+      logger.error("resumes/set-default: unexpected error", err);
       res.status(500).json({
         error: {
           code: "INTERNAL_ERROR",
@@ -230,7 +231,7 @@ router.delete(
         return;
       }
 
-      const resumeData = resumeDoc.data()!;
+      const resumeData = resumeDoc.data()! // safe: exists check above;
       if (resumeData.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this resume" },
@@ -310,7 +311,7 @@ router.delete(
 
       res.json(response);
     } catch (err) {
-      console.error("resumes/delete: unexpected error", err);
+      logger.error("resumes/delete: unexpected error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to delete resume" },
       });

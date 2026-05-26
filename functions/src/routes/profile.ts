@@ -1,12 +1,12 @@
 import { Router, Request, Response } from "express";
 import * as admin from "firebase-admin";
+import { logger } from "firebase-functions";
 import { renderMarkdown } from "../lib/markdown";
 import { deriveStyles } from "../lib/styleUtils";
 import { postProcessHtml } from "../lib/postProcess";
+import { ADMIN_EMAIL } from "../lib/constants";
 
 const router = Router();
-
-const ADMIN_EMAIL = "steve.petusky@gmail.com";
 
 /**
  * GET /api/profile/:username
@@ -34,7 +34,7 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
 
       if (redirectDoc.exists) {
         const newUsername = redirectDoc.data()!.redirectTo;
-        res.redirect(301, `/api/profile/${newUsername}`);
+        res.redirect(301, `/api/profile/${encodeURIComponent(newUsername)}`);
         return;
       }
 
@@ -55,7 +55,7 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const userData = userDoc.data()!;
+    const userData = userDoc.data()! // safe: exists check above;
 
     // 3. Get default resume
     const resumesSnap = await db
@@ -124,7 +124,7 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
       qrCodeUrl: qrCodeUrl ?? null,
     });
   } catch (err) {
-    console.error("profile/get: unexpected error", err);
+    logger.error("profile/get: unexpected error", err);
     res.status(500).json({
       error: { code: "INTERNAL_ERROR", message: "Failed to load profile" },
     });
@@ -169,7 +169,7 @@ router.get(
         image: "https://onesheet.cv/og-default.png",
       });
     } catch (err) {
-      console.error("profile/meta: unexpected error", err);
+      logger.error("profile/meta: unexpected error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to load profile meta" },
       });

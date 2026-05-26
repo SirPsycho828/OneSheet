@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import * as admin from "firebase-admin";
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
+import { logger } from "firebase-functions";
 
 const router = Router({ mergeParams: true });
 
@@ -85,7 +86,7 @@ router.get(
 
       res.json({ versions, hasMore: versions.length === pageSize });
     } catch (err) {
-      console.error("versions/list: unexpected error", err);
+      logger.error("versions/list: unexpected error", err);
       res
         .status(500)
         .json({ error: { code: "INTERNAL_ERROR", message: "Failed to list versions" } });
@@ -143,7 +144,7 @@ router.post(
         return;
       }
 
-      const resumeData = resumeDoc.data()!;
+      const resumeData = resumeDoc.data()! // safe: exists check above;
       if (resumeData.userId !== userId) {
         res
           .status(403)
@@ -162,7 +163,7 @@ router.post(
         return;
       }
 
-      const versionData = versionDoc.data()!;
+      const versionData = versionDoc.data()! // safe: exists check above;
 
       // 3. Snapshot current state before overwriting (makes restore reversible)
       const versionsRef = resumeRef.collection("versions");
@@ -181,7 +182,7 @@ router.post(
 
       res.json({ success: true });
     } catch (err) {
-      console.error("versions/restore: unexpected error", err);
+      logger.error("versions/restore: unexpected error", err);
       res
         .status(500)
         .json({ error: { code: "INTERNAL_ERROR", message: "Failed to restore version" } });

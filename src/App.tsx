@@ -20,6 +20,7 @@ import { Settings } from "./pages/Settings";
 import { Admin } from "./pages/Admin";
 import { ApiDocs } from "./pages/ApiDocs";
 import { AgentGuide } from "./pages/AgentGuide";
+import { ErrorBoundary } from "./components/ui/ErrorBoundary";
 
 
 function NotFound() {
@@ -66,10 +67,10 @@ export default function App() {
 
             {/* Private routes — require authenticated state */}
             <Route element={<PrivateRoute />}>
-              <Route path="/editor" element={<Editor />} />
-              <Route path="/editor/:resumeId" element={<Editor />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/settings" element={<Settings />} />
+              <Route path="/editor" element={<ErrorBoundary><Editor /></ErrorBoundary>} />
+              <Route path="/editor/:resumeId" element={<ErrorBoundary><Editor /></ErrorBoundary>} />
+              <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
+              <Route path="/settings" element={<ErrorBoundary><Settings /></ErrorBoundary>} />
             </Route>
 
             {/* Admin — only accessible to admin user */}
@@ -84,7 +85,7 @@ export default function App() {
             <Route path="/agents" element={<AgentGuide />} />
 
             {/* Public profile catch-all — MUST be last */}
-            <Route path="/:username" element={<PublicProfile />} />
+            <Route path="/:username" element={<ErrorBoundary><PublicProfile /></ErrorBoundary>} />
 
             {/* 404 fallback */}
             <Route path="*" element={<NotFound />} />

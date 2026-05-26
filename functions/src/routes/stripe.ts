@@ -1,9 +1,18 @@
 import { Router, Response, Request } from "express";
 import * as admin from "firebase-admin";
+import { logger } from "firebase-functions";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const StripeLib = require("stripe");
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
 import { stripeSecretKey, stripeWebhookSecret, stripeProPriceId } from "../config";
+
+interface StripeWebhookEvent {
+  id: string;
+  type: string;
+  // Stripe event shapes vary by type; typed loosely to avoid per-event-type casting
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: { object: Record<string, any> };
+}
 
 const router = Router();
 
@@ -35,7 +44,7 @@ router.post(
         return;
       }
 
-      const userData = userDoc.data()!;
+      const userData = userDoc.data()!; // safe: exists check above
       const userEmail: string = userData.email ?? "";
 
       const priceId: string =
@@ -66,7 +75,7 @@ router.post(
 
       res.json({ sessionId: session.id, url: session.url });
     } catch (err) {
-      console.error("stripe/create-checkout-session: error", err);
+      logger.error("stripe/create-checkout-session: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to create checkout session" },
       });
@@ -96,10 +105,9 @@ router.post(
         return;
       }
 
-      const userData = userDoc.data()!;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const userData = userDoc.data()!; // safe: exists check above
       const stripeCustomerId: string | null =
-        (userData as any)?.subscription?.stripeCustomerId ?? null;
+        (userData as { subscription?: { stripeCustomerId?: string } })?.subscription?.stripeCustomerId ?? null;
 
       if (!stripeCustomerId) {
         res.status(400).json({
@@ -124,7 +132,7 @@ router.post(
 
       res.json({ url: portalSession.url });
     } catch (err) {
-      console.error("stripe/create-portal-session: error", err);
+      logger.error("stripe/create-portal-session: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to create portal session" },
       });
@@ -145,22 +153,20 @@ router.post(
     const webhookSec = stripeWebhookSecret.value();
 
     if (!sig) {
-      res.status(400).json({ error: "Missing stripe-signature header" });
+      res.status(400).json({ error: { code: "MISSING_SIGNATURE", message: "Missing stripe-signature header" } });
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let event: any;
+    let event: StripeWebhookEvent;
 
     try {
       // Firebase Functions v2 exposes rawBody on the request
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rawBody: Buffer | string = (req as any).rawBody ?? req.body;
+      const rawBody: Buffer | string = (req as Request & { rawBody?: Buffer }).rawBody ?? req.body;
       const stripe = getStripe();
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSec);
     } catch (err) {
-      console.error("stripe/webhook: signature verification failed", err);
-      res.status(400).json({ error: "Webhook signature verification failed" });
+      logger.error("stripe/webhook: signature verification failed", err);
+      res.status(400).json({ error: { code: "SIGNATURE_FAILED", message: "Webhook signature verification failed" } });
       return;
     }
 
@@ -186,7 +192,7 @@ router.post(
         type: event.type,
       });
     } catch (err) {
-      console.error(`stripe/webhook: error handling ${event.type}`, err);
+      logger.error(`stripe/webhook: error handling ${event.type}`, err);
       // Still return 200 so Stripe doesn't retry — log the error
     }
 
@@ -195,8 +201,7 @@ router.post(
 );
 
 async function handleStripeEvent(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  event: any,
+  event: StripeWebhookEvent,
   db: admin.firestore.Firestore
 ): Promise<void> {
   switch (event.type) {
@@ -205,7 +210,7 @@ async function handleStripeEvent(
       const uid: string | null =
         session.metadata?.firebaseUid ?? session.client_reference_id ?? null;
       if (!uid) {
-        console.warn("checkout.session.completed: no firebaseUid in metadata");
+        logger.warn("checkout.session.completed: no firebaseUid in metadata");
         return;
       }
 
@@ -223,7 +228,7 @@ async function handleStripeEvent(
           const periodEnd: number = subscription.current_period_end;
           currentPeriodEnd = admin.firestore.Timestamp.fromMillis(periodEnd * 1000);
         } catch (err) {
-          console.warn("checkout.session.completed: could not fetch subscription", err);
+          logger.warn("checkout.session.completed: could not fetch subscription", err);
         }
       }
 
@@ -263,7 +268,7 @@ async function handleStripeEvent(
 
       const uid = await getUidByCustomerId(db, customerId);
       if (!uid) {
-        console.warn(
+        logger.warn(
           "customer.subscription.updated: no user found for customer",
           customerId
         );
@@ -294,7 +299,7 @@ async function handleStripeEvent(
 
       const uid = await getUidByCustomerId(db, customerId);
       if (!uid) {
-        console.warn(
+        logger.warn(
           "customer.subscription.deleted: no user found for customer",
           customerId
         );
@@ -318,7 +323,7 @@ async function handleStripeEvent(
 
       const uid = await getUidByCustomerId(db, customerId);
       if (!uid) {
-        console.warn(
+        logger.warn(
           "invoice.payment_failed: no user found for customer",
           customerId
         );
@@ -334,7 +339,7 @@ async function handleStripeEvent(
 
     default:
       // Unknown event — log and ignore
-      console.log(`stripe/webhook: unhandled event type ${event.type}`);
+      logger.info(`stripe/webhook: unhandled event type ${event.type}`);
   }
 }
 

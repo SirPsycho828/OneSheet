@@ -1,12 +1,14 @@
 import { Router, Response } from "express";
 import * as admin from "firebase-admin";
 import * as crypto from "crypto";
+import { logger } from "firebase-functions";
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
 import { checkRateLimit } from "../middleware/rateLimit";
 import { renderMarkdown } from "../lib/markdown";
 import { buildHtmlDocument, generatePdf } from "../lib/pdf";
 import { deriveStyles } from "../lib/styleUtils";
 import { postProcessHtml } from "../lib/postProcess";
+import { ADMIN_EMAIL } from "../lib/constants";
 
 const router = Router();
 
@@ -68,11 +70,6 @@ async function applyRateLimit(
 }
 
 // ---------------------------------------------------------------------------
-// Admin email (tier override support)
-// ---------------------------------------------------------------------------
-const ADMIN_EMAIL = "steve.petusky@gmail.com";
-
-// ---------------------------------------------------------------------------
 // Helper: require paid subscription (used inside route handlers)
 // ---------------------------------------------------------------------------
 async function requirePaidUser(
@@ -89,7 +86,7 @@ async function requirePaidUser(
     return null;
   }
 
-  const userData = userDoc.data()!;
+  const userData = userDoc.data()! // safe: exists check above;
   const subscriptionStatus: string = userData?.subscription?.status ?? "free";
 
   // Check admin tier override (matches ai.ts / profile.ts pattern)
@@ -194,7 +191,7 @@ router.post(
         createdAt: new Date().toISOString(),
       });
     } catch (err) {
-      console.error("agent/keys/generate: error", err);
+      logger.error("agent/keys/generate: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to generate API key" },
       });
@@ -216,10 +213,12 @@ router.get(
     const db = admin.firestore();
 
     try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
       const snap = await db
         .collection("apiKeys")
         .where("userId", "==", userId)
         .orderBy("createdAt", "desc")
+        .limit(limit)
         .get();
 
       const keys = snap.docs.map((doc) => {
@@ -236,7 +235,7 @@ router.get(
 
       res.json({ keys });
     } catch (err) {
-      console.error("agent/keys: error", err);
+      logger.error("agent/keys: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to list API keys" },
       });
@@ -277,7 +276,7 @@ router.delete(
       await keyDoc.ref.delete();
       res.json({ success: true });
     } catch (err) {
-      console.error("agent/keys/delete: error", err);
+      logger.error("agent/keys/delete: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to delete API key" },
       });
@@ -318,7 +317,7 @@ router.post(
       await keyDoc.ref.update({ isActive: false });
       res.json({ success: true });
     } catch (err) {
-      console.error("agent/keys/revoke: error", err);
+      logger.error("agent/keys/revoke: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to revoke API key" },
       });
@@ -344,10 +343,12 @@ router.get(
     const db = admin.firestore();
 
     try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
       const snap = await db
         .collection("resumes")
         .where("userId", "==", userId)
         .orderBy("updatedAt", "desc")
+        .limit(limit)
         .get();
 
       const resumes = snap.docs.map((doc) => {
@@ -365,7 +366,7 @@ router.get(
 
       res.json({ resumes });
     } catch (err) {
-      console.error("agent/resumes: error", err);
+      logger.error("agent/resumes: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to list resumes" },
       });
@@ -396,7 +397,7 @@ router.get(
         return;
       }
 
-      const data = resumeDoc.data()!;
+      const data = resumeDoc.data()! // safe: exists check above;
       if (data.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this resume" },
@@ -415,7 +416,7 @@ router.get(
         updatedAt: data.updatedAt?.toDate?.()?.toISOString?.() ?? null,
       });
     } catch (err) {
-      console.error("agent/resumes/:resumeId: error", err);
+      logger.error("agent/resumes/:resumeId: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to fetch resume" },
       });
@@ -460,7 +461,7 @@ router.post(
         return;
       }
 
-      const userData = userDoc.data()!;
+      const userData = userDoc.data()! // safe: exists check above;
       let subscriptionStatus: string = userData?.subscription?.status ?? "free";
 
       // Admin tier override for resume limits
@@ -521,7 +522,7 @@ router.post(
 
       res.status(201).json({ resumeId: resumeRef.id });
     } catch (err) {
-      console.error("agent/resumes/create: error", err);
+      logger.error("agent/resumes/create: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to create resume" },
       });
@@ -593,7 +594,7 @@ router.put(
       await resumeDoc.ref.update(updates);
       res.json({ success: true });
     } catch (err) {
-      console.error("agent/resumes/update: error", err);
+      logger.error("agent/resumes/update: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to update resume" },
       });
@@ -624,7 +625,7 @@ router.delete(
         return;
       }
 
-      const resumeData = resumeDoc.data()!;
+      const resumeData = resumeDoc.data()! // safe: exists check above;
       if (resumeData.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this resume" },
@@ -682,7 +683,7 @@ router.delete(
       if (newDefaultId) response.newDefaultId = newDefaultId;
       res.json(response);
     } catch (err) {
-      console.error("agent/resumes/delete: error", err);
+      logger.error("agent/resumes/delete: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to delete resume" },
       });
@@ -713,7 +714,7 @@ router.post(
         return;
       }
 
-      const resumeData = resumeDoc.data()!;
+      const resumeData = resumeDoc.data()! // safe: exists check above;
       if (resumeData.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this resume" },
@@ -739,7 +740,7 @@ router.post(
 
       res.json({ success: true });
     } catch (err) {
-      console.error("agent/resumes/set-default: error", err);
+      logger.error("agent/resumes/set-default: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to set default resume" },
       });
@@ -777,7 +778,7 @@ router.post(
         return;
       }
 
-      const resumeData = resumeDoc.data()!;
+      const resumeData = resumeDoc.data()! // safe: exists check above;
       if (resumeData.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this resume" },
@@ -803,7 +804,7 @@ router.post(
         .doc(resumeId)
         .update({ pdfDownloads: admin.firestore.FieldValue.increment(1) })
         .catch((err: unknown) => {
-          console.error("agent/export: failed to increment pdfDownloads", err);
+          logger.error("agent/export: failed to increment pdfDownloads", err);
         });
 
       const safeUsername = username.replace(/[^a-z0-9_-]/gi, "").toLowerCase() || "resume";
@@ -812,7 +813,7 @@ router.post(
       res.setHeader("Cache-Control", "no-store");
       res.send(pdfBuffer);
     } catch (err) {
-      console.error("agent/resumes/export: error", err);
+      logger.error("agent/resumes/export: error", err);
       res.status(500).json({
         error: { code: "PDF_GENERATION_FAILED", message: "PDF generation failed. Please try again." },
       });
@@ -838,9 +839,11 @@ router.get(
     const db = admin.firestore();
 
     try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
       const snap = await db
         .collection("analytics")
         .where("userId", "==", userId)
+        .limit(limit)
         .get();
 
       const analytics = snap.docs.map((doc) => {
@@ -855,7 +858,7 @@ router.get(
 
       res.json({ analytics });
     } catch (err) {
-      console.error("agent/analytics: error", err);
+      logger.error("agent/analytics: error", err);
       res.status(500).json({
         error: { code: "INTERNAL_ERROR", message: "Failed to fetch analytics" },
       });

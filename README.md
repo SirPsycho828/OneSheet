@@ -1,164 +1,315 @@
 <div align="center">
 
-# BragSheet
+<img src="public/logo.png" alt="OneSheet" width="420" />
 
-**Markdown-powered one-page resumes with live preview, PDF export, and public profiles.**
+<br />
 
-![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
-![Firebase](https://img.shields.io/badge/Firebase-11-DD2C00?logo=firebase&logoColor=white)
-![Stripe](https://img.shields.io/badge/Stripe-Billing-635BFF?logo=stripe&logoColor=white)
+**Markdown in. Polished resume out.**
+
+The resume builder developers actually use.
+
+<br />
+
+[![Live](https://img.shields.io/badge/live-onesheet.cv-EA580C?style=for-the-badge)](https://onesheet.cv)
+&nbsp;
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev)
+&nbsp;
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+&nbsp;
+[![Firebase](https://img.shields.io/badge/Firebase-11-DD2C00?style=for-the-badge&logo=firebase&logoColor=white)](https://firebase.google.com)
+&nbsp;
+[![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 
 </div>
 
+<br />
+
 ---
 
-## Overview
+<br />
 
-BragSheet is a SaaS resume builder where you write in Markdown and get a pixel-perfect one-page resume. Choose from 5 professionally designed templates, preview changes in real-time, export to PDF, and share a public profile link — all from a clean, distraction-free editor.
+## What is OneSheet?
+
+OneSheet is a full-stack SaaS resume builder where you write in **Markdown** and get a pixel-perfect, **one-page PDF**. No drag-and-drop, no formatting toolbars, no clutter. Choose from 5 professionally designed templates, preview changes in real time, run your resume through AI polish, score it against a job posting, and share a public profile at `onesheet.cv/you`.
+
+It also ships with a **REST API** so AI agents can create and manage resumes programmatically.
+
+> **Try it** &rarr; [onesheet.cv](https://onesheet.cv)
+
+<br />
 
 ## Features
 
 <table>
 <tr>
-<td width="50%">
+<td width="50%" valign="top">
 
-**Markdown Editor**
-Split-pane editor with live preview. Write in Markdown, see your formatted resume instantly. Auto-saves every 1.5 seconds.
-
-</td>
-<td width="50%">
-
-**One-Page Constraint**
-Automatic content scaling ensures your resume always fits on one page. Visual overflow warnings guide you to trim content.
+### Markdown-first editor
+Split-pane editor with a live-rendered preview. Write Markdown on the left, see your formatted resume on the right. Auto-saves every 1.5&nbsp;seconds.
 
 </td>
-</tr>
-<tr>
-<td>
+<td width="50%" valign="top">
 
-**5 Templates**
-Classic (serif), Modern (blue accents), Minimal (tight spacing), Technical (monospace), and Compact (two-column). CSS-only — no JavaScript rendering overhead.
-
-</td>
-<td>
-
-**PDF Export**
-Server-side Puppeteer rendering produces pixel-perfect PDFs matching the preview. US Letter and A4 paper sizes supported.
+### One-page constraint engine
+Automatic content scaling guarantees your resume fits on a single page. A real-time overflow indicator shows exactly how close you are to the edge.
 
 </td>
 </tr>
 <tr>
-<td>
+<td valign="top">
 
-**Public Profiles**
-Every user gets a shareable URL at `bragsheet.io/{username}`. No login required to view. Renders the default resume with full template styling.
+### 5 template system
+**Classic** (serif, ATS-optimized) &middot; **Modern** (color accents, pill badges) &middot; **Minimal** (maximum whitespace) &middot; **Technical** (monospace, dev-style) &middot; **Compact** (two-column, high density). All CSS-only with zero JS rendering overhead.
 
 </td>
-<td>
+<td valign="top">
 
-**Version History**
-Automatic snapshots on manual save, template switches, and idle intervals. Browse, preview, and restore any previous version.
+### Server-side PDF export
+Puppeteer + headless Chromium running on Cloud Functions produces PDFs that match the preview pixel-for-pixel. US Letter and A4 supported. ATS parsers love them.
 
 </td>
 </tr>
 <tr>
-<td>
+<td valign="top">
 
-**Resume Variants**
-Maintain up to 3 tailored resumes (Frontend, Backend, Startup) with independent content, templates, and analytics. One serves as the public default.
+### AI bullet polish + job match
+Paste a weak bullet and get a quantified, action-driven rewrite. Paste a job posting URL and get a match score with actionable suggestions to close the gap.
 
 </td>
-<td>
+<td valign="top">
 
-**Agent API**
-REST API with API key auth for AI agents. Create, update, export, and manage resumes programmatically. Rate-limited and subscription-gated.
+### Public profiles
+Every user gets a shareable page at `onesheet.cv/{username}`. No login required to view. Renders the default resume with full template styling, optional QR code, and view analytics.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### Resume variants
+Maintain up to 3 tailored resumes (e.g., Frontend, Backend, Startup) with independent content, templates, and analytics. One serves as the public default.
+
+</td>
+<td valign="top">
+
+### Agent API
+Full REST API with API key auth. AI agents can list, create, update, export, and publish resumes. Rate-limited and subscription-gated.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### Version history
+Automatic snapshots on manual save, template switches, and idle intervals. Browse, preview, and restore any previous version of any resume.
+
+</td>
+<td valign="top">
+
+### Stripe billing
+Free tier with a generous feature set. Pro tier ($8/mo) unlocks all templates, PDF export, AI tools, API access, and branding removal. Powered by Stripe Checkout + Webhooks.
 
 </td>
 </tr>
 </table>
 
+<br />
+
+## How it works
+
+```
+ +-----------+       +-----------+       +------------+
+ |           |       |           |       |            |
+ | Markdown  | ----> |  unified  | ----> |  Template  |
+ |  (input)  |       |  pipeline |       |   (CSS)    |
+ |           |       |           |       |            |
+ +-----------+       +-----------+       +------------+
+                          |                     |
+                          v                     v
+                    +---------------------------+
+                    |                           |
+                    |    Live Preview (DOM)      |
+                    |                           |
+                    +---------------------------+
+                          |
+                          | Export
+                          v
+                    +---------------------------+
+                    |                           |
+                    |  Puppeteer (Cloud Fn)     | ---> PDF
+                    |  Headless Chromium        |
+                    |                           |
+                    +---------------------------+
+```
+
+The Markdown rendering pipeline uses **remark** (parse) &rarr; **remark-gfm** (tables, strikethrough) &rarr; **remark-breaks** (soft line breaks) &rarr; **remark-rehype** (to HTML AST) &rarr; **rehype-sanitize** (XSS prevention) &rarr; **rehype-stringify** (HTML string). The same pipeline runs both client-side for preview and server-side for PDF generation, ensuring exact parity.
+
+<br />
+
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, TypeScript, Vite 6 |
-| Styling | Tailwind CSS 4 |
-| Backend | Firebase Cloud Functions v2 (Express) |
-| Database | Cloud Firestore |
-| Auth | Firebase Auth (Email, Google, GitHub) |
-| PDF | Puppeteer + @sparticuz/chromium |
-| Markdown | unified (remark + rehype) |
-| Billing | Stripe Checkout + Webhooks |
-| Hosting | Firebase Hosting |
-| Icons | Lucide React |
-| Fonts | Inter, JetBrains Mono, Crimson Text |
+| Layer | Tech | Why |
+|---|---|---|
+| **Frontend** | React 19, TypeScript, Vite 6 | React 19 compiler, instant HMR, strong types |
+| **Styling** | Tailwind CSS 4 | Design tokens via `@theme`, zero-runtime CSS |
+| **Backend** | Firebase Cloud Functions v2 (Express) | Serverless, auto-scales, integrated auth |
+| **Database** | Cloud Firestore | Real-time sync, offline support, security rules |
+| **Auth** | Firebase Auth | Email/password + Google OAuth, zero backend |
+| **PDF** | Puppeteer + @sparticuz/chromium | Pixel-perfect server-side rendering |
+| **Markdown** | unified (remark + rehype) | Extensible pipeline, SSR-safe |
+| **AI** | OpenRouter | Model-agnostic, swap models from admin panel |
+| **Billing** | Stripe Checkout + Webhooks | PCI-compliant, subscription lifecycle |
+| **Hosting** | Firebase Hosting | CDN-backed, custom domain (onesheet.cv) |
+
+<br />
+
+## Design System: Paper & Ink
+
+OneSheet uses a custom **Paper & Ink** design language. Editorial craft meets developer precision.
+
+```
+Palette
+ ├── Primary     #292524  warm charcoal (ink)
+ ├── Accent      #EA580C  terracotta (signature highlight)
+ ├── Background  #FAF9F6  warm ivory (paper)
+ ├── Card        #FFFFFF  bright white
+ └── Muted       #F0EDE8  parchment
+
+Typography
+ ├── Headings    Fraunces (variable serif, optical sizing 9-144)
+ └── Body        Public Sans (geometric sans-serif)
+
+Resume templates bring their own fonts:
+ ├── Classic     Crimson Text + Lora
+ ├── Modern      Montserrat + Raleway
+ ├── Minimal     Source Sans 3
+ ├── Technical   JetBrains Mono
+ └── Compact     Source Sans 3
+
+Signature elements:
+ ├── Ink-bleed SVG section dividers
+ └── Paper dog-ear hover effect on resume cards
+```
+
+Design tokens live in `src/styles/index.css` via Tailwind v4's `@theme` block. One file, one source of truth.
+
+<br />
+
+## Agent API
+
+OneSheet exposes a REST API for AI agents and automation. Authenticated via API key, rate-limited, and subscription-gated.
+
+```bash
+# List resumes
+curl -H "X-Api-Key: $KEY" https://onesheet.cv/api/agent/resumes
+
+# Create a tailored resume
+curl -X POST https://onesheet.cv/api/agent/resumes \
+  -H "X-Api-Key: $KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Acme Corp", "markdown": "# Alex Chen\n..."}'
+
+# Export to PDF
+curl -X POST https://onesheet.cv/api/agent/resumes/r_3kf9x/export \
+  -H "X-Api-Key: $KEY" \
+  --output resume.pdf
+```
+
+Full API docs at [onesheet.cv/docs](https://onesheet.cv/docs). Agent integration guide at [onesheet.cv/agents](https://onesheet.cv/agents).
+
+<br />
 
 ## Architecture
 
 ```
-bragsheet/
-├── src/                          # React SPA
+onesheet/
+├── src/                              # React SPA
 │   ├── components/
-│   │   ├── auth/                 # PublicRoute, PrivateRoute, OAuth
-│   │   ├── dashboard/            # ResumeCard, ResumeGrid, CreateModal
-│   │   ├── editor/               # MarkdownInput, PaperContainer, Preview
-│   │   ├── layout/               # AppNav, StatusBar
-│   │   ├── profile/              # ProfileResume, ProfileActions
-│   │   ├── settings/             # SubscriptionCard, ApiKeysCard
-│   │   ├── templates/            # TemplatePicker, TemplateCard
-│   │   ├── ui/                   # Button, Input, Modal, Toast, etc.
-│   │   └── versions/             # VersionPanel, VersionEntry
-│   ├── contexts/                 # AuthContext, ToastContext
-│   ├── hooks/                    # useAuth, useResume, useOverflow, etc.
-│   ├── services/                 # Firestore CRUD, Stripe client
-│   ├── lib/                      # Markdown rendering pipeline
-│   ├── types/                    # TypeScript interfaces
-│   ├── constants/                # Templates, pricing, reserved words
-│   ├── styles/templates/         # 5 template CSS files + base
-│   └── pages/                    # Landing, Editor, Dashboard, Settings, etc.
-├── functions/                    # Firebase Cloud Functions
+│   │   ├── auth/                     # PublicRoute, PrivateRoute, OAuth
+│   │   ├── dashboard/                # ResumeCard, ResumeGrid, CreateModal
+│   │   ├── editor/                   # MarkdownInput, PaperContainer, Preview
+│   │   ├── layout/                   # AppNav, LandingNav, StatusBar
+│   │   ├── profile/                  # ProfileResume, ProfileActions
+│   │   ├── settings/                 # SubscriptionCard, ApiKeysCard
+│   │   ├── templates/                # TemplatePicker, TemplateCard
+│   │   ├── ui/                       # Button, Input, Modal, Toast, etc.
+│   │   └── versions/                 # VersionPanel, VersionEntry
+│   ├── config/                       # Firebase init, feature flags
+│   ├── constants/                    # Templates, pricing, reserved words
+│   ├── contexts/                     # AuthContext, ToastContext
+│   ├── hooks/                        # useAuth, useResume, useOverflow, etc.
+│   ├── lib/                          # Markdown rendering pipeline
+│   ├── pages/                        # 14 route-level pages
+│   ├── services/                     # Firestore CRUD, Stripe client, admin
+│   ├── styles/
+│   │   ├── index.css                 # Design tokens (@theme)
+│   │   └── templates/                # Per-template CSS
+│   └── types/                        # TypeScript interfaces
+│
+├── functions/                        # Firebase Cloud Functions v2
 │   └── src/
-│       ├── routes/               # pdf, profile, resumes, versions, stripe, analytics, agent
-│       ├── middleware/            # auth, rateLimit
-│       ├── lib/                  # markdown, pdf
-│       ├── scheduled/            # cleanupVersions
-│       └── config.ts             # Stripe secrets
-├── firestore.rules               # Security rules
-├── firestore.indexes.json        # Composite indexes
-├── storage.rules                 # Storage security rules
-└── firebase.json                 # Hosting + Functions config
+│       ├── routes/
+│       │   ├── agent.ts              # Agent API (CRUD + export)
+│       │   ├── ai.ts                 # Bullet polish, job match, import
+│       │   ├── analytics.ts          # View tracking
+│       │   ├── pdf.ts                # Puppeteer PDF generation
+│       │   ├── profile.ts            # Public profile data
+│       │   ├── resumes.ts            # Resume CRUD
+│       │   ├── stripe.ts             # Checkout, portal, webhooks
+│       │   └── versions.ts           # Version history
+│       ├── middleware/                # Auth verification, rate limiting
+│       ├── lib/                      # Shared markdown + PDF utils
+│       ├── scheduled/                # Cron: version cleanup
+│       └── config.ts                 # Environment + secrets
+│
+├── firestore.rules                   # Per-collection security rules
+├── firestore.indexes.json            # Composite query indexes
+├── storage.rules                     # Storage bucket security
+└── firebase.json                     # Hosting + Functions config
 ```
+
+<br />
+
+## Security
+
+Firestore rules enforce **per-user isolation** on every collection:
+
+- Users can only read/write their own `users/{uid}` document
+- Resumes, versions, scores, and API keys are gated to the owning `userId`
+- Usernames are globally readable but only creatable by auth'd users (with uniqueness check)
+- Stripe customer records are read-only to the owning user, write-only via admin SDK
+- Rate limits and Stripe events are admin-SDK-only (no client access)
+- Admin config is gated to a specific email
+
+All Cloud Function routes verify Firebase Auth tokens via middleware. The Agent API validates API keys against Firestore and checks subscription status before serving requests. AI and PDF routes enforce per-user rate limits.
+
+<br />
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 20+
-- npm 10+
-- Firebase CLI (`npm i -g firebase-tools`)
-- A Firebase project on the Blaze plan (for Cloud Functions)
+- **Node.js 22+** and **npm 10+**
+- **Firebase CLI**: `npm i -g firebase-tools`
+- A **Firebase project** on the Blaze plan (required for Cloud Functions)
+- A **Stripe** account with a Pro product/price configured
 
 ### Install
 
 ```bash
-git clone <repo-url> bragsheet
-cd bragsheet
+git clone https://github.com/SirPsycho828/OneSheet.git
+cd OneSheet
 npm install
 cd functions && npm install && cd ..
 ```
 
-### Environment Setup
-
-Copy the example env file and fill in your Firebase project config:
+### Environment
 
 ```bash
 cp .env.example .env.local
 ```
 
-Required variables:
+Fill in your Firebase project config:
 
 ```env
 VITE_FIREBASE_API_KEY=
@@ -182,10 +333,9 @@ firebase functions:secrets:set STRIPE_PRO_PRICE_ID
 ### Development
 
 ```bash
-npm run dev          # Start Vite dev server
-npm run test         # Run tests
-npm run test:watch   # Watch mode
-npm run build        # Production build
+npm run dev            # Vite dev server (http://localhost:5173)
+npm run test           # Run tests (Vitest)
+npm run build          # Production build (tsc + Vite)
 ```
 
 ### Deploy
@@ -196,30 +346,31 @@ cd functions && npm run build && cd ..
 firebase deploy
 ```
 
-## Manual Setup Steps
+### Post-deploy checklist
 
-After deploying, complete these steps in the Firebase Console:
+1. Enable Auth providers in Firebase Console (Email/Password, Google)
+2. Initialize Storage default bucket
+3. Configure Stripe webhook to point at your Cloud Function URL
+4. Set all three Stripe secrets via `firebase functions:secrets:set`
 
-1. **Enable Auth providers**: Email/Password, Google, GitHub
-2. **Enable Storage**: Initialize default bucket in the Firebase Console
-3. **Upgrade to Blaze plan**: Required for Cloud Functions deployment
-4. **Configure Stripe**: Create a Pro product/price, set up webhook endpoint pointing to your Cloud Function URL
-5. **Set Stripe secrets**: Use `firebase functions:secrets:set` for all three Stripe keys
+<br />
 
 ## Pricing
 
-| | Free | Pro ($8/mo) |
-|--|------|------------|
-| Markdown editor | Yes | Yes |
-| Live preview | Yes | Yes |
-| Public profile | With branding | Clean |
-| Templates | Classic only | All 5 |
-| PDF export | No | Yes |
+| | **Free** | **Pro** ($8/mo) |
+|:--|:--|:--|
+| Markdown editor + live preview | Yes | Yes |
+| Public profile page | With branding | Clean (no branding) |
+| Templates | Classic | All 5 |
 | Resume variants | 1 | Up to 3 |
-| Version history | No | Yes |
-| Profile analytics | No | Yes |
-| Agent API | No | Yes |
+| PDF export | &mdash; | ATS-optimized |
+| AI bullet polish + job match | &mdash; | Yes |
+| Version history | &mdash; | Yes |
+| Custom QR code | &mdash; | Yes |
+| Agent API access | &mdash; | Yes |
+
+<br />
 
 ## License
 
-Private. All rights reserved.
+All rights reserved.

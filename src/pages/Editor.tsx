@@ -73,6 +73,14 @@ export function Editor() {
     user?.subscription?.status === "active" ||
     user?.subscription?.status === "past_due";
 
+  // Effective QR code URL: custom URL if set, otherwise public profile
+  const defaultQrUrl = user?.username
+    ? `${window.location.origin}/${user.username}`
+    : undefined;
+  const effectiveQrUrl = showQrCode
+    ? (qrCodeUrl || defaultQrUrl)
+    : undefined;
+
   // ---------------------------------------------------------------------------
   // Snapshot helper: fire-and-forget, uses current editor state
   // ---------------------------------------------------------------------------
@@ -85,7 +93,7 @@ export function Editor() {
         lastSnapshotAtRef.current = Date.now();
         needsSnapshotRef.current = false;
       } catch (err) {
-        console.error("Editor: snapshot failed", err);
+        // snapshot failed — non-critical
       }
     },
     [resolvedResumeId]
@@ -278,6 +286,7 @@ export function Editor() {
             qrCodeUrl={qrCodeUrl}
             onQrCodeUrlChange={setQrCodeUrl}
             isPaid={isPaid ?? false}
+            effectiveQrUrl={effectiveQrUrl}
           />
         )}
       </main>
