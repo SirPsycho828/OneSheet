@@ -1,0 +1,225 @@
+/* ==========================================================================
+   resume.css — Unified resume stylesheet using CSS custom properties.
+   All styling values are injected via inline CSS vars (set by stylesToCssVars()).
+   [data-preset="X"] selectors handle structural differences only.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Base styles
+   -------------------------------------------------------------------------- */
+
+.resume-content {
+  box-sizing: border-box;
+  font-family: var(--font-body);
+  font-size: var(--font-size-base, 14px);
+  line-height: var(--line-height, 1.4);
+  color: #000;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.resume-content *,
+.resume-content *::before,
+.resume-content *::after {
+  box-sizing: border-box;
+}
+
+/* Links — no blue underlined links on resumes */
+.resume-content a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Tables */
+.resume-content table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.resume-content td,
+.resume-content th {
+  padding: 2px 8px;
+  text-align: left;
+}
+
+/* Reset margins */
+.resume-content p,
+.resume-content ul,
+.resume-content ol,
+.resume-content h1,
+.resume-content h2,
+.resume-content h3 {
+  margin: 0;
+  padding: 0;
+}
+
+/* Lists */
+.resume-content ul,
+.resume-content ol {
+  padding-left: 18px;
+}
+
+.resume-content li {
+  margin-bottom: var(--spacing-item, 2px);
+  list-style-type: var(--bullet-style, disc);
+}
+
+/* --------------------------------------------------------------------------
+   Headings
+   -------------------------------------------------------------------------- */
+
+.resume-content h1 {
+  font-family: var(--font-display);
+  font-size: calc(var(--font-size-base, 14px) * 1.6);
+  font-weight: 700;
+  text-align: var(--header-align, left);
+  margin-bottom: 4px;
+}
+
+.resume-content h2 {
+  font-size: calc(var(--font-size-base, 14px) * 1.05);
+  font-weight: 600;
+  color: var(--accent-color, #000);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-top: var(--spacing-section, 16px);
+  margin-bottom: calc(var(--spacing-section, 16px) * 0.4);
+  border-bottom: var(--section-divider, 1px) solid currentColor;
+  padding-bottom: 2px;
+}
+
+.resume-content h3 {
+  font-size: var(--font-size-base, 14px);
+  font-weight: 600;
+  margin-top: calc(var(--spacing-section, 16px) * 0.5);
+  margin-bottom: 2px;
+}
+
+.resume-content p {
+  margin-bottom: var(--spacing-item, 3px);
+}
+
+.resume-content hr {
+  border: none;
+  border-top: var(--section-divider, 1px) solid #d1d5db;
+  margin: var(--spacing-section, 16px) 0;
+}
+
+/* --------------------------------------------------------------------------
+   Header divider (name → contact line)
+   -------------------------------------------------------------------------- */
+
+.resume-content h1 + p {
+  padding-bottom: 4px;
+  border-bottom: var(--header-divider-width, 0) solid var(--accent-color, #000);
+}
+
+/* --------------------------------------------------------------------------
+   Preset-specific structural overrides
+   -------------------------------------------------------------------------- */
+
+/* Modern: hide hr, use left-border on ul instead of bullets */
+[data-preset="modern"] .resume-content hr {
+  display: none;
+}
+
+[data-preset="modern"] .resume-content ul {
+  list-style: none;
+  padding-left: 12px;
+  border-left: 2px solid #e5e7eb;
+}
+
+/* Technical: ">" prefix via ::before, no standard bullets */
+[data-preset="technical"] .resume-content li {
+  list-style: none;
+  padding-left: 0;
+}
+
+[data-preset="technical"] .resume-content ul {
+  padding-left: 18px;
+}
+
+[data-preset="technical"] .resume-content li::before {
+  content: "> ";
+}
+
+/* Compact: two-column layout */
+[data-preset="compact"] .resume-content {
+  column-count: 2;
+  column-gap: 24px;
+}
+
+/* h1 spans full width above the columns */
+[data-preset="compact"] .resume-content h1 {
+  column-span: all;
+}
+
+/* Contact/summary line spans full width */
+[data-preset="compact"] .resume-content h1 + p {
+  column-span: all;
+}
+
+/* First hr triggers column split — hide it but keep the span */
+[data-preset="compact"] .resume-content hr:first-of-type {
+  column-span: all;
+  visibility: hidden;
+  height: 0;
+  margin: 0;
+}
+
+/* Prevent headings from breaking across columns */
+[data-preset="compact"] .resume-content h2,
+[data-preset="compact"] .resume-content h3 {
+  break-inside: avoid;
+}
+
+/* --------------------------------------------------------------------------
+   Contact layout styles
+   -------------------------------------------------------------------------- */
+
+.contact-stacked .contact-item,
+.contact-icons .contact-item {
+  display: inline-block;
+  margin-right: 12px;
+  margin-bottom: 2px;
+}
+
+.contact-stacked .contact-item {
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   Skills display styles
+   -------------------------------------------------------------------------- */
+
+.skill-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  margin: 2px 4px 2px 0;
+  font-size: calc(var(--font-size-base, 14px) * 0.85);
+  background: #f3f4f6;
+  border-radius: 4px;
+  line-height: 1.6;
+}
+
+.skills-columns {
+  column-count: 2;
+  column-gap: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   Date alignment styles
+   -------------------------------------------------------------------------- */
+
+h3.date-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.date-right {
+  font-weight: 400;
+  white-space: nowrap;
+  margin-left: 8px;
+}
