@@ -5,6 +5,26 @@ export interface Overflow {
   scaleFactor: number;
 }
 
+export interface ResumeStyles {
+  preset: 'classic' | 'modern' | 'minimal' | 'technical' | 'compact';
+  displayFont: string;
+  bodyFont: string;
+  fontSize: number;
+  lineHeight: number;
+  accentColor: string;
+  headerAlignment: 'left' | 'center' | 'right';
+  density: 'compact' | 'standard' | 'relaxed';
+  sectionSpacing: 'tight' | 'normal' | 'relaxed';
+  pageMargin: number;
+  showHeaderDivider: boolean;
+  showSectionDividers: boolean;
+  bulletStyle: 'disc' | 'dash' | 'arrow' | 'square' | 'none';
+  contactLayout: 'inline' | 'stacked' | 'icons';
+  skillsDisplay: 'inline' | 'tags' | 'columns';
+  dateAlignment: 'right' | 'inline';
+  pageSize: 'us-letter' | 'a4';
+}
+
 export interface Resume {
   id: string;
   userId: string;
@@ -13,6 +33,7 @@ export interface Resume {
   templateId: string;
   isDefault: boolean;
   paperSize: "us-letter" | "a4";
+  styles?: ResumeStyles;
   overflow: Overflow;
   createdAt: Timestamp;
   updatedAt: Timestamp;
