@@ -5,6 +5,8 @@ import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
 import { checkRateLimit } from "../middleware/rateLimit";
 import { renderMarkdown } from "../lib/markdown";
 import { buildHtmlDocument, generatePdf } from "../lib/pdf";
+import { deriveStyles } from "../lib/styleUtils";
+import { postProcessHtml } from "../lib/postProcess";
 
 const router = Router();
 
@@ -755,13 +757,17 @@ router.post(
       }
 
       const markdown: string = resumeData.markdown ?? "";
-      const templateId: string = resumeData.templateId ?? "classic";
       const paperSize: "us-letter" | "a4" = resumeData.paperSize === "a4" ? "a4" : "us-letter";
       const scaleFactor: number = resumeData.overflow?.scaleFactor ?? 1;
 
-      const renderedHtml = await renderMarkdown(markdown);
-      const html = buildHtmlDocument({ renderedHtml, templateId, scaleFactor, paperSize });
-      const pdfBuffer = await generatePdf(html, paperSize);
+      const styles = resumeData.styles
+        ?? deriveStyles(resumeData.templateId ?? "classic", paperSize);
+
+      let renderedHtml = await renderMarkdown(markdown);
+      renderedHtml = postProcessHtml(renderedHtml, styles);
+
+      const html = buildHtmlDocument({ renderedHtml, styles, scaleFactor });
+      const pdfBuffer = await generatePdf(html, styles.pageSize);
 
       // Fire-and-forget analytics increment
       db.collection("analytics")

@@ -3,6 +3,8 @@ import * as admin from "firebase-admin";
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
 import { renderMarkdown } from "../lib/markdown";
 import { buildHtmlDocument, generatePdf } from "../lib/pdf";
+import { deriveStyles } from "../lib/styleUtils";
+import { postProcessHtml } from "../lib/postProcess";
 import { Response } from "express";
 
 const router = Router();
@@ -104,21 +106,24 @@ router.post(
     // ------------------------------------------------------------------
     try {
       const markdown: string = resumeData.markdown ?? "";
-      const templateId: string = resumeData.templateId ?? "classic";
       const paperSize: "us-letter" | "a4" =
         resumeData.paperSize === "a4" ? "a4" : "us-letter";
       const scaleFactor: number = resumeData.overflow?.scaleFactor ?? 1;
 
-      const renderedHtml = await renderMarkdown(markdown);
+      // Derive styles: use stored styles if present, otherwise fall back
+      const styles = resumeData.styles
+        ?? deriveStyles(resumeData.templateId ?? "classic", paperSize);
+
+      let renderedHtml = await renderMarkdown(markdown);
+      renderedHtml = postProcessHtml(renderedHtml, styles);
 
       const html = buildHtmlDocument({
         renderedHtml,
-        templateId,
+        styles,
         scaleFactor,
-        paperSize,
       });
 
-      const pdfBuffer = await generatePdf(html, paperSize);
+      const pdfBuffer = await generatePdf(html, styles.pageSize);
 
       // ------------------------------------------------------------------
       // 5. Increment analytics.pdfDownloads (fire-and-forget)
