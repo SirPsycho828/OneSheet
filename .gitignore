@@ -19,3 +19,6 @@ Thumbs.db
 # Vite
 dist-ssr/
 *.local
+
+# Worktrees
+.worktrees/
