@@ -41,17 +41,17 @@ function SettingsNav() {
   ];
 
   return (
-    <header className="h-14 flex items-center gap-3 px-4 border-b border-gray-200 bg-white flex-shrink-0">
+    <header className="h-14 flex items-center gap-3 px-4 border-b border-border bg-card/90 backdrop-blur-sm flex-shrink-0">
       <Link
         to="/dashboard"
-        className="text-sm font-semibold tracking-tight text-gray-950 hover:text-brand-500 transition-colors flex-shrink-0"
+        className="font-heading text-sm font-semibold tracking-tight text-foreground hover:text-primary transition-colors flex-shrink-0"
       >
         OneSheet
       </Link>
 
-      <div className="w-px h-5 bg-gray-200 flex-shrink-0" aria-hidden />
+      <div className="w-px h-5 bg-border flex-shrink-0" aria-hidden />
 
-      <span className="text-sm font-medium text-gray-700 flex-1">
+      <span className="text-sm font-medium text-foreground flex-1">
         Settings
       </span>
 
@@ -59,7 +59,7 @@ function SettingsNav() {
         {user?.username && (
           <a
             href={`/${user.username}`}
-            className="text-xs text-gray-500 hover:text-brand-500 transition-colors hidden sm:inline"
+            className="text-xs text-muted-foreground hover:text-primary transition-colors hidden sm:inline"
           >
             View profile
           </a>
@@ -141,7 +141,7 @@ function UsernameChangeForm({
       <button
         type="button"
         onClick={() => setEditing(true)}
-        className="mt-3 text-xs text-gray-500 hover:text-brand-500 transition-colors"
+        className="mt-3 text-xs text-muted-foreground hover:text-primary transition-colors"
       >
         Change username
       </button>
@@ -153,11 +153,11 @@ function UsernameChangeForm({
       ? "text-green-600"
       : checkStatus === "taken"
         ? "text-red-600"
-        : "text-gray-400";
+        : "text-muted-foreground";
 
   return (
-    <div className="mt-3 border-t border-gray-200 pt-3">
-      <label htmlFor="new-username" className="text-xs font-medium text-gray-600">
+    <div className="mt-3 border-t border-border pt-3">
+      <label htmlFor="new-username" className="text-xs font-medium text-muted-foreground">
         New username
       </label>
       <div className="flex items-center gap-2 mt-1">
@@ -168,13 +168,13 @@ function UsernameChangeForm({
           onChange={(e) => handleChange(e.target.value)}
           placeholder={currentUsername}
           maxLength={30}
-          className="flex-1 rounded-md border border-gray-300 px-2.5 py-1.5 text-sm font-mono outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200"
+          className="flex-1 rounded-md border border-input px-2.5 py-1.5 text-sm font-mono outline-none focus:border-ring focus:ring-2 focus:ring-ring/20"
         />
         <button
           type="button"
           disabled={saving || checkStatus !== "available"}
           onClick={handleSave}
-          className="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? "Saving..." : "Save"}
         </button>
@@ -186,7 +186,7 @@ function UsernameChangeForm({
             setCheckStatus("idle");
             setError("");
           }}
-          className="text-xs text-gray-400 hover:text-gray-600"
+          className="text-xs text-muted-foreground hover:text-foreground"
         >
           Cancel
         </button>
@@ -197,7 +197,7 @@ function UsernameChangeForm({
           : checkMsg || "\u00A0"}
       </p>
       {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
-      <p className="text-xs text-gray-400 mt-0.5">
+      <p className="text-xs text-muted-foreground mt-0.5">
         Old profile links will automatically redirect to your new username.
       </p>
     </div>
@@ -247,11 +247,11 @@ function LinkedAccounts() {
   ];
 
   return (
-    <div className="bg-white rounded-lg border border-gray-300 p-4 max-w-lg">
-      <ul className="divide-y divide-gray-100">
+    <div className="bg-card rounded-lg border border-input p-4 max-w-lg">
+      <ul className="divide-y divide-border">
         {rows.map((row) => (
           <li key={row.id} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
-            <span className="text-sm text-gray-700">{row.label}</span>
+            <span className="text-sm text-foreground">{row.label}</span>
             {row.linked ? (
               <span className="text-xs text-green-600 font-medium">Linked</span>
             ) : row.action ? (
@@ -259,12 +259,12 @@ function LinkedAccounts() {
                 type="button"
                 disabled={linking !== null}
                 onClick={() => handleLink(row.action!)}
-                className="rounded-md bg-gray-900 px-3 py-1 text-xs font-medium text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {linking === row.action ? "Linking..." : "Link"}
               </button>
             ) : (
-              <span className="text-xs text-gray-400">—</span>
+              <span className="text-xs text-muted-foreground">-</span>
             )}
           </li>
         ))}
@@ -299,14 +299,14 @@ export function Settings() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-background">
       <SettingsNav />
 
       <main className="flex-1 w-full max-w-2xl mx-auto px-4 py-8">
         {showSuccessBanner && (
           <div className="flex items-start justify-between gap-2 p-4 mb-6 rounded-md bg-green-50 border border-green-200 text-sm text-green-800">
             <p className="font-medium">
-              Welcome to Pro! Your subscription is being activated — this may take a moment.
+              Welcome to Pro! Your subscription is being activated. This may take a moment.
             </p>
             <button
               type="button"
@@ -319,14 +319,14 @@ export function Settings() {
           </div>
         )}
 
-        <h1 className="text-lg font-semibold text-gray-900 mb-6">Account Settings</h1>
+        <h1 className="text-lg font-semibold text-foreground mb-6">Account Settings</h1>
 
         {/* Profile section */}
         <section className="mb-8">
-          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
             Profile
           </h2>
-          <div className="bg-white rounded-lg border border-gray-300 p-4 max-w-lg">
+          <div className="bg-card rounded-lg border border-input p-4 max-w-lg">
             <div className="flex items-center gap-3">
               {user?.photoURL ? (
                 <img
@@ -340,12 +340,12 @@ export function Settings() {
                 </div>
               )}
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user?.displayName || "—"}
+                <p className="text-sm font-medium text-foreground truncate">
+                  {user?.displayName || "-"}
                 </p>
-                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                 {user?.username && (
-                  <p className="text-xs text-brand-500 truncate">
+                  <p className="text-xs text-primary truncate">
                     @{user.username}
                   </p>
                 )}
@@ -363,7 +363,7 @@ export function Settings() {
 
         {/* Linked Accounts section */}
         <section className="mb-8">
-          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
             Linked Accounts
           </h2>
           <LinkedAccounts />
@@ -371,7 +371,7 @@ export function Settings() {
 
         {/* Billing section */}
         <section className="mb-8">
-          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
             Billing
           </h2>
           <SubscriptionCard
@@ -382,7 +382,7 @@ export function Settings() {
 
         {/* API section */}
         <section>
-          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
             API
           </h2>
           <ApiKeysCard />

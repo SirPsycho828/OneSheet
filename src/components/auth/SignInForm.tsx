@@ -2,6 +2,9 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { signInWithEmail, resetPassword } from "../../services/auth";
 
+const inputClass =
+  "rounded-md border border-input bg-card px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20 placeholder:text-muted-foreground";
+
 export function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,7 +18,6 @@ export function SignInForm() {
     setLoading(true);
     try {
       await signInWithEmail(email, password);
-      // Navigation handled by AuthContext / route guards
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
       if (
@@ -51,16 +53,16 @@ export function SignInForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {error && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+        <p className="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p>
       )}
       {resetSent && (
-        <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
+        <p className="rounded-md bg-success/10 px-4 py-3 text-sm text-success">
           Password reset email sent. Check your inbox.
         </p>
       )}
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-sm font-medium text-gray-700">
+        <label htmlFor="email" className="text-sm font-medium text-foreground">
           Email
         </label>
         <input
@@ -70,13 +72,13 @@ export function SignInForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200"
+          className={inputClass}
           placeholder="you@example.com"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-sm font-medium text-gray-700">
+        <label htmlFor="password" className="text-sm font-medium text-foreground">
           Password
         </label>
         <input
@@ -86,7 +88,7 @@ export function SignInForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200"
+          className={inputClass}
           placeholder="••••••••"
         />
       </div>
@@ -95,7 +97,7 @@ export function SignInForm() {
         <button
           type="button"
           onClick={handleForgotPassword}
-          className="text-sm text-gray-500 underline-offset-2 hover:text-gray-700 hover:underline"
+          className="text-sm text-accent hover:text-accent/80 transition-colors"
         >
           Forgot password?
         </button>
@@ -104,14 +106,14 @@ export function SignInForm() {
       <button
         type="submit"
         disabled={loading}
-        className="rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? "Signing in..." : "Sign in"}
       </button>
 
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <Link to="/sign-up" className="font-medium text-gray-900 hover:underline">
+        <Link to="/sign-up" className="font-medium text-foreground hover:underline">
           Sign up
         </Link>
       </p>

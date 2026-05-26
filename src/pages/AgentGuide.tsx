@@ -13,11 +13,11 @@ function Step({
 }) {
   return (
     <div className="flex gap-4 mb-8 last:mb-0">
-      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold">
+      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-secondary text-primary flex items-center justify-center text-xs font-bold">
         {number}
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-semibold text-gray-900 mb-2">{title}</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-2">{title}</h3>
         {children}
       </div>
     </div>
@@ -26,7 +26,7 @@ function Step({
 
 function CodeBlock({ children }: { children: string }) {
   return (
-    <pre className="text-xs bg-gray-50 rounded-md p-3 overflow-x-auto border border-gray-200 font-mono text-gray-800 mb-3">
+    <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto border border-border font-mono text-foreground mb-3">
       {children}
     </pre>
   );
@@ -34,37 +34,37 @@ function CodeBlock({ children }: { children: string }) {
 
 export function AgentGuide() {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <header className="h-14 flex items-center gap-3 px-4 border-b border-gray-200 bg-white flex-shrink-0">
+    <div className="flex flex-col min-h-screen bg-background">
+      <header className="h-14 flex items-center gap-3 px-4 border-b border-border bg-card/90 backdrop-blur-sm flex-shrink-0">
         <Link
           to="/"
-          className="text-sm font-semibold tracking-tight text-gray-950 hover:text-brand-500 transition-colors"
+          className="text-sm font-semibold font-heading tracking-tight text-foreground hover:text-primary transition-colors"
         >
           OneSheet
         </Link>
-        <div className="w-px h-5 bg-gray-200" aria-hidden />
-        <span className="text-sm font-medium text-gray-700">Agent Guide</span>
+        <div className="w-px h-5 bg-border" aria-hidden />
+        <span className="text-sm font-medium text-muted-foreground">Agent Guide</span>
       </header>
 
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl font-bold text-foreground mb-2">
           Agent Integration Guide
         </h1>
-        <p className="text-sm text-gray-500 mb-8">
+        <p className="text-sm text-muted-foreground mb-8">
           Connect AI agents, CI/CD pipelines, and custom integrations to
           OneSheet via the REST API.
         </p>
 
         {/* Overview */}
         <section className="mb-10">
-          <h2 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+          <h2 className="text-base font-semibold text-foreground mb-4 pb-2 border-b border-border">
             Overview
           </h2>
-          <p className="text-sm text-gray-600 mb-3">
+          <p className="text-sm text-muted-foreground mb-3">
             The OneSheet API lets you programmatically manage resumes, generate
             PDFs, and keep your public profile up to date. Common use cases:
           </p>
-          <ul className="text-sm text-gray-600 space-y-1.5 list-disc list-inside mb-3">
+          <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside mb-3">
             <li>
               AI agents that tailor your resume for each job application
             </li>
@@ -80,23 +80,23 @@ export function AgentGuide() {
 
         {/* Quick Start */}
         <section className="mb-10">
-          <h2 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+          <h2 className="text-base font-semibold text-foreground mb-4 pb-2 border-b border-border">
             Quick Start
           </h2>
 
           <Step number={1} title="Get an API Key">
-            <p className="text-sm text-gray-600 mb-2">
+            <p className="text-sm text-muted-foreground mb-2">
               Go to{" "}
               <Link
                 to="/settings"
-                className="text-brand-500 hover:text-brand-600 font-medium"
+                className="text-primary hover:text-brand-600 font-medium"
               >
                 Settings
               </Link>{" "}
               and generate an API key under the "API Access" section. You need a
               Pro subscription to create API keys.
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Your key looks like:{" "}
               <code className="font-mono">brag_sk_live_...</code>
             </p>
@@ -107,7 +107,7 @@ export function AgentGuide() {
               {`curl ${API_BASE}/api/agent/resumes \\
   -H "X-Api-Key: brag_sk_live_YOUR_KEY"`}
             </CodeBlock>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Returns an array of resume metadata (IDs, titles, template info).
             </p>
           </Step>
@@ -119,8 +119,8 @@ export function AgentGuide() {
   -H "Content-Type: application/json" \\
   -d '{"markdown": "# Your Name\\n\\n## Experience\\n..."}'`}
             </CodeBlock>
-            <p className="text-sm text-gray-600">
-              Send a partial update — only the fields you include will change.
+            <p className="text-sm text-muted-foreground">
+              Send a partial update. Only the fields you include will change.
             </p>
           </Step>
 
@@ -130,7 +130,7 @@ export function AgentGuide() {
   -H "X-Api-Key: brag_sk_live_YOUR_KEY" \\
   --output resume.pdf`}
             </CodeBlock>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Downloads a rendered PDF using your chosen template and paper size.
             </p>
           </Step>
@@ -138,19 +138,19 @@ export function AgentGuide() {
 
         {/* Authentication */}
         <section className="mb-10">
-          <h2 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+          <h2 className="text-base font-semibold text-foreground mb-4 pb-2 border-b border-border">
             Authentication
           </h2>
-          <p className="text-sm text-gray-600 mb-3">
+          <p className="text-sm text-muted-foreground mb-3">
             The API supports two authentication methods:
           </p>
 
           <div className="space-y-3 mb-4">
-            <div className="bg-white rounded-md border border-gray-200 p-3">
-              <p className="text-sm font-medium text-gray-800 mb-1">
+            <div className="bg-card rounded-md border border-border p-3">
+              <p className="text-sm font-medium text-foreground mb-1">
                 API Key (recommended for agents)
               </p>
-              <p className="text-xs text-gray-500 mb-2">
+              <p className="text-xs text-muted-foreground mb-2">
                 Pass your key in the <code className="font-mono">X-Api-Key</code>{" "}
                 header. Keys are scoped to your account and can be revoked at any
                 time.
@@ -158,18 +158,18 @@ export function AgentGuide() {
               <CodeBlock>{`X-Api-Key: brag_sk_live_...`}</CodeBlock>
             </div>
 
-            <div className="bg-white rounded-md border border-gray-200 p-3">
-              <p className="text-sm font-medium text-gray-800 mb-1">
+            <div className="bg-card rounded-md border border-border p-3">
+              <p className="text-sm font-medium text-foreground mb-1">
                 Bearer Token (for browser-based integrations)
               </p>
-              <p className="text-xs text-gray-500 mb-2">
+              <p className="text-xs text-muted-foreground mb-2">
                 Use a Firebase ID token from your authenticated session.
               </p>
               <CodeBlock>{`Authorization: Bearer <firebase-id-token>`}</CodeBlock>
             </div>
           </div>
 
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-muted-foreground">
             Base URL:{" "}
             <code className="font-mono">{API_BASE}</code>
           </p>
@@ -177,16 +177,16 @@ export function AgentGuide() {
 
         {/* Agent Examples */}
         <section className="mb-10">
-          <h2 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+          <h2 className="text-base font-semibold text-foreground mb-4 pb-2 border-b border-border">
             Agent Examples
           </h2>
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">
+              <h3 className="text-sm font-semibold text-foreground mb-2">
                 Job-Tailored Resume Agent
               </h3>
-              <p className="text-sm text-gray-600 mb-2">
+              <p className="text-sm text-muted-foreground mb-2">
                 An agent that reads a job description, fetches your resume, and
                 creates a tailored version:
               </p>
@@ -210,10 +210,10 @@ curl -X POST ${API_BASE}/api/agent/resumes \\
             </div>
 
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">
+              <h3 className="text-sm font-semibold text-foreground mb-2">
                 CI/CD PDF Pipeline
               </h3>
-              <p className="text-sm text-gray-600 mb-2">
+              <p className="text-sm text-muted-foreground mb-2">
                 Export a fresh PDF on every deploy and upload it as an artifact:
               </p>
               <CodeBlock>
@@ -235,10 +235,10 @@ curl -X POST ${API_BASE}/api/agent/resumes \\
 
         {/* Rate Limits */}
         <section className="mb-10">
-          <h2 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+          <h2 className="text-base font-semibold text-foreground mb-4 pb-2 border-b border-border">
             Rate Limits & Best Practices
           </h2>
-          <ul className="text-sm text-gray-600 space-y-1.5 list-disc list-inside">
+          <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
             <li>API keys are limited to 60 requests per minute</li>
             <li>PDF exports are limited to 10 per hour per user</li>
             <li>You can have up to 3 active API keys at a time</li>
@@ -247,15 +247,15 @@ curl -X POST ${API_BASE}/api/agent/resumes \\
               possible
             </li>
             <li>
-              Cache template IDs locally — they rarely change
+              Cache template IDs locally (they rarely change)
             </li>
           </ul>
         </section>
 
-        <div className="mt-12 pt-6 border-t border-gray-200 text-center">
+        <div className="mt-12 pt-6 border-t border-border text-center">
           <Link
             to="/docs"
-            className="text-sm text-brand-500 hover:text-brand-600 font-medium"
+            className="text-sm text-primary hover:text-brand-600 font-medium"
           >
             View Full API Reference &rarr;
           </Link>

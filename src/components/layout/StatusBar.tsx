@@ -21,7 +21,7 @@ const SAVE_STATUS_CONFIG: Record<
   saving: { label: "Saving...", className: "text-gray-500" },
   unsaved: { label: "Unsaved", className: "text-warning" },
   error: { label: "Save failed", className: "text-error" },
-  offline: { label: "Offline — changes stored locally", className: "text-warning" },
+  offline: { label: "Offline: changes stored locally", className: "text-warning" },
 };
 
 /**
@@ -41,7 +41,7 @@ export function StatusBar({
 
   if (!isOnline && saveStatus !== "offline") {
     // Transition period: already offline but saveStatus hasn't flipped yet
-    label = "Offline — changes stored locally";
+    label = "Offline: changes stored locally";
     className = "text-warning";
   }
 

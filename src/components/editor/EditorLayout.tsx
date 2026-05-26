@@ -101,8 +101,8 @@ export function EditorLayout({
     return [
       "flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors",
       active
-        ? "border-b-2 border-brand-500 text-brand-500"
-        : "border-b-2 border-transparent text-gray-500 hover:text-gray-700",
+        ? "border-b-2 border-primary text-primary"
+        : "border-b-2 border-transparent text-muted-foreground hover:text-foreground",
     ].join(" ");
   }
 
@@ -117,11 +117,11 @@ export function EditorLayout({
       >
         {/* Left panel: Source/Design toggle + content */}
         <div
-          className="h-full overflow-hidden border-r border-gray-200 flex flex-col"
+          className="h-full overflow-hidden border-r border-border flex flex-col"
           style={{ width: `${splitPercent}%`, flexShrink: 0 }}
         >
           {/* Tab bar */}
-          <div className="flex border-b border-gray-200 bg-white flex-shrink-0">
+          <div className="flex border-b border-border bg-card flex-shrink-0">
             <button
               type="button"
               onClick={() => setLeftMode("source")}
@@ -166,7 +166,7 @@ export function EditorLayout({
 
         {/* Drag handle */}
         <div
-          className="relative z-10 flex-shrink-0 w-1 bg-gray-200 hover:bg-brand-500 transition-colors duration-150 cursor-col-resize select-none"
+          className="relative z-10 flex-shrink-0 w-1 bg-border hover:bg-primary transition-colors duration-150 cursor-col-resize select-none"
           style={{ width: "4px" }}
           onMouseDown={handleDragStart}
           role="separator"
@@ -194,7 +194,7 @@ export function EditorLayout({
       {/* ------------------------------------------------------------------ */}
       <div className="flex lg:hidden flex-col h-full w-full">
         {/* Tab switcher */}
-        <div className="flex border-b border-gray-200 bg-white flex-shrink-0">
+        <div className="flex border-b border-border bg-card flex-shrink-0">
           <button
             type="button"
             onClick={() => setMobileTab("edit")}

@@ -48,10 +48,10 @@ export function OAuthButtons({ onError, disabled }: OAuthButtonsProps) {
         type="button"
         onClick={handleGoogle}
         disabled={disabled || isLoading}
-        className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-3 rounded-md border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loadingGoogle ? (
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" />
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-foreground" />
         ) : (
           <GoogleIcon />
         )}
@@ -62,10 +62,10 @@ export function OAuthButtons({ onError, disabled }: OAuthButtonsProps) {
         type="button"
         onClick={handleGithub}
         disabled={disabled || isLoading}
-        className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-3 rounded-md border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loadingGithub ? (
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" />
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-foreground" />
         ) : (
           <GithubIcon />
         )}

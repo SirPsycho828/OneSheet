@@ -1,4 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="4" fill="#2563EB"/>
-  <text x="16" y="22" font-family="system-ui" font-size="18" font-weight="600" fill="white" text-anchor="middle">B</text>
+  <rect width="32" height="32" rx="6" fill="#292524"/>
+  <!-- Pen nib body -->
+  <path d="M16 5 L21 18 L16 26 L11 18 Z" fill="#FAFAF9" opacity="0.9"/>
+  <!-- Nib slit -->
+  <line x1="16" y1="14" x2="16" y2="23" stroke="#292524" stroke-width="0.8" opacity="0.3"/>
+  <!-- Ink tip -->
+  <circle cx="16" cy="26" r="1.2" fill="#EA580C"/>
+  <!-- Nib shoulders -->
+  <path d="M11 18 Q13 20, 16 26 Q19 20, 21 18" fill="none" stroke="#FAFAF9" stroke-width="0.5" opacity="0.4"/>
 </svg>

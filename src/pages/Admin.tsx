@@ -24,15 +24,15 @@ import type { AIConfig } from "../services/adminConfig";
 
 function AdminNav() {
   return (
-    <header className="h-14 flex items-center gap-3 px-4 border-b border-gray-200 bg-white flex-shrink-0">
+    <header className="h-14 flex items-center gap-3 px-4 border-b border-border bg-card/90 backdrop-blur-sm flex-shrink-0">
       <Link
         to="/dashboard"
-        className="text-sm font-semibold tracking-tight text-gray-950 hover:text-brand-500 transition-colors flex-shrink-0"
+        className="text-sm font-semibold font-heading tracking-tight text-foreground hover:text-primary transition-colors flex-shrink-0"
       >
         OneSheet
       </Link>
-      <div className="w-px h-5 bg-gray-200 flex-shrink-0" aria-hidden />
-      <span className="text-sm font-medium text-gray-700 flex-1">Admin</span>
+      <div className="w-px h-5 bg-border flex-shrink-0" aria-hidden />
+      <span className="text-sm font-medium text-muted-foreground flex-1">Admin</span>
     </header>
   );
 }
@@ -76,16 +76,16 @@ function ApiKeyCard() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-300 p-4 animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-1/3 mb-3" />
-        <div className="h-9 bg-gray-100 rounded" />
+      <div className="bg-card rounded-lg border border-border p-4 animate-pulse">
+        <div className="h-4 bg-muted rounded w-1/3 mb-3" />
+        <div className="h-9 bg-muted rounded" />
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-300 p-4">
-      <label className="text-sm font-medium text-gray-700 block mb-2">
+    <div className="bg-card rounded-lg border border-border p-4">
+      <label className="text-sm font-medium text-muted-foreground block mb-2">
         OpenRouter API Key
       </label>
       <div className="flex gap-2">
@@ -95,12 +95,12 @@ function ApiKeyCard() {
             value={key}
             onChange={(e) => setKey(e.target.value)}
             placeholder="sk-or-..."
-            className="w-full h-9 px-3 pr-9 text-sm font-mono rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+            className="w-full h-9 px-3 pr-9 text-sm font-mono rounded-md border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
           />
           <button
             type="button"
             onClick={() => setShow(!show)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             aria-label={show ? "Hide key" : "Show key"}
           >
             {show ? (
@@ -120,7 +120,7 @@ function ApiKeyCard() {
           Save
         </Button>
       </div>
-      <p className="text-xs text-gray-400 mt-1.5">
+      <p className="text-xs text-muted-foreground mt-1.5">
         Used for AI features (bullet polish, job scoring, resume import).
       </p>
     </div>
@@ -252,38 +252,38 @@ function ModelSelectorCard() {
     return (
       <div
         key={model.id}
-        className={`flex items-center gap-2 px-3 py-2 text-xs border-b border-gray-100 last:border-0 ${
-          isFree ? "bg-green-50" : isPro ? "bg-brand-50" : ""
+        className={`flex items-center gap-2 px-3 py-2 text-xs border-b border-border last:border-0 ${
+          isFree ? "bg-success/10" : isPro ? "bg-secondary" : ""
         }`}
       >
         <button
           type="button"
           onClick={() => handleToggleFavorite(model.id)}
-          className={`flex-shrink-0 ${isFav ? "text-amber-500" : "text-gray-300 hover:text-amber-400"}`}
+          className={`flex-shrink-0 ${isFav ? "text-amber-500" : "text-muted-foreground hover:text-amber-400"}`}
           title={isFav ? "Remove from favorites" : "Add to favorites"}
         >
           <Star className="w-3.5 h-3.5" fill={isFav ? "currentColor" : "none"} strokeWidth={1.5} />
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <p className="text-gray-900 truncate font-medium">{model.name}</p>
+            <p className="text-foreground truncate font-medium">{model.name}</p>
             {isFree && (
               <span className="flex-shrink-0 text-[10px] font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
                 FREE TIER
               </span>
             )}
             {isPro && (
-              <span className="flex-shrink-0 text-[10px] font-semibold bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded">
+              <span className="flex-shrink-0 text-[10px] font-semibold bg-secondary text-primary px-1.5 py-0.5 rounded">
                 PRO TIER
               </span>
             )}
           </div>
-          <p className="text-gray-400 truncate">{model.id}</p>
+          <p className="text-muted-foreground truncate">{model.id}</p>
         </div>
-        <span className="text-gray-500 flex-shrink-0 text-right w-28">
+        <span className="text-muted-foreground flex-shrink-0 text-right w-28">
           {costLabel}
         </span>
-        <span className="text-gray-400 flex-shrink-0 w-14 text-right">
+        <span className="text-muted-foreground flex-shrink-0 w-14 text-right">
           {Math.round(model.context_length / 1000)}K
         </span>
         <div className="flex gap-1 flex-shrink-0">
@@ -294,7 +294,7 @@ function ModelSelectorCard() {
             className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
               isFree
                 ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-500 hover:bg-green-50 hover:text-green-700"
+                : "bg-muted text-muted-foreground hover:bg-success/10 hover:text-success"
             }`}
             title="Set as Free tier model"
           >
@@ -313,8 +313,8 @@ function ModelSelectorCard() {
             disabled={isPro}
             className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
               isPro
-                ? "bg-brand-100 text-brand-700"
-                : "bg-gray-100 text-gray-500 hover:bg-brand-50 hover:text-brand-700"
+                ? "bg-secondary text-primary"
+                : "bg-muted text-muted-foreground hover:bg-secondary hover:text-primary"
             }`}
             title="Set as Pro tier model"
           >
@@ -333,30 +333,30 @@ function ModelSelectorCard() {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-300 p-4">
+    <div className="bg-card rounded-lg border border-border p-4">
       {/* Active models display */}
       {!isLoadingConfig && (
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="p-3 bg-green-50 rounded-md border border-green-200">
+          <div className="p-3 bg-success/10 rounded-md border border-green-200">
             <p className="text-[10px] font-semibold text-green-600 uppercase tracking-wider mb-1">
               Free Tier Model
             </p>
-            <p className="text-sm font-medium text-gray-900 truncate">
+            <p className="text-sm font-medium text-foreground truncate">
               {aiConfig.freeModelName ?? "Not configured"}
             </p>
             {aiConfig.freeModelId && (
-              <p className="text-[10px] text-gray-400 font-mono truncate">{aiConfig.freeModelId}</p>
+              <p className="text-[10px] text-muted-foreground font-mono truncate">{aiConfig.freeModelId}</p>
             )}
           </div>
-          <div className="p-3 bg-brand-50 rounded-md border border-brand-200">
-            <p className="text-[10px] font-semibold text-brand-600 uppercase tracking-wider mb-1">
+          <div className="p-3 bg-secondary rounded-md border border-primary/20">
+            <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-1">
               Pro Tier Model
             </p>
-            <p className="text-sm font-medium text-gray-900 truncate">
+            <p className="text-sm font-medium text-foreground truncate">
               {aiConfig.proModelName ?? "Not configured"}
             </p>
             {aiConfig.proModelId && (
-              <p className="text-[10px] text-gray-400 font-mono truncate">{aiConfig.proModelId}</p>
+              <p className="text-[10px] text-muted-foreground font-mono truncate">{aiConfig.proModelId}</p>
             )}
           </div>
         </div>
@@ -373,7 +373,7 @@ function ModelSelectorCard() {
           {models.length > 0 ? "Refresh Models" : "Fetch Models"}
         </Button>
         {models.length > 0 && (
-          <span className="text-xs text-gray-400">{models.length} models</span>
+          <span className="text-xs text-muted-foreground">{models.length} models</span>
         )}
       </div>
 
@@ -385,15 +385,15 @@ function ModelSelectorCard() {
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Filter models..."
-            className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 mb-3 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+            className="w-full h-8 px-3 text-xs rounded-md border border-input mb-3 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
           />
 
-          <p className="text-xs text-gray-400 mb-2">
+          <p className="text-xs text-muted-foreground mb-2">
             Click <strong>Free</strong> or <strong>Pro</strong> to assign a model to each tier. Free users get the Free model; Pro subscribers get the Pro model.
           </p>
 
           {/* Model list */}
-          <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-md">
+          <div className="max-h-96 overflow-y-auto border border-border rounded-md">
             {favorites.length > 0 && (
               <>
                 <div className="px-3 py-1.5 bg-amber-50 text-xs font-semibold text-amber-700 sticky top-0 z-10">
@@ -404,7 +404,7 @@ function ModelSelectorCard() {
             )}
             {freeModels.length > 0 && (
               <>
-                <div className="px-3 py-1.5 bg-green-50 text-xs font-semibold text-green-700 sticky top-0 z-10">
+                <div className="px-3 py-1.5 bg-success/10 text-xs font-semibold text-green-700 sticky top-0 z-10">
                   Free Models
                 </div>
                 {freeModels.map(renderModelRow)}
@@ -412,7 +412,7 @@ function ModelSelectorCard() {
             )}
             {otherModels.length > 0 && (
               <>
-                <div className="px-3 py-1.5 bg-gray-50 text-xs font-semibold text-gray-600 sticky top-0 z-10">
+                <div className="px-3 py-1.5 bg-muted text-xs font-semibold text-muted-foreground sticky top-0 z-10">
                   All Models
                 </div>
                 {otherModels.map(renderModelRow)}
@@ -457,8 +457,8 @@ function AdminTierCard() {
       await refreshUser();
       toast.success(
         next === "pro"
-          ? "Switched to Pro — full paid experience"
-          : "Switched to Free — seeing what free users see"
+          ? "Switched to Pro: full paid experience"
+          : "Switched to Free: seeing what free users see"
       );
     } catch {
       toast.error("Failed to update tier");
@@ -468,11 +468,11 @@ function AdminTierCard() {
   if (isLoading) return null;
 
   return (
-    <div className="bg-white rounded-lg border border-gray-300 p-4">
+    <div className="bg-card rounded-lg border border-border p-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-700">Account Experience</p>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-sm font-medium text-foreground">Account Experience</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Switch your entire account between Free and Pro for testing.
             Affects AI models, templates, PDF export, QR customization, and all gated features.
           </p>
@@ -481,12 +481,12 @@ function AdminTierCard() {
           type="button"
           onClick={handleToggle}
           className={`relative inline-flex h-7 w-[88px] items-center rounded-full transition-colors ${
-            tier === "pro" ? "bg-brand-500" : "bg-green-500"
+            tier === "pro" ? "bg-primary" : "bg-green-500"
           }`}
         >
           <span className="sr-only">Toggle tier</span>
           <span
-            className={`absolute text-[10px] font-bold text-white uppercase tracking-wider ${
+            className={`absolute text-[10px] font-bold text-primary-foreground uppercase tracking-wider ${
               tier === "pro" ? "left-2.5" : "right-3"
             }`}
           >
@@ -509,22 +509,22 @@ function AdminTierCard() {
 
 export function Admin() {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-background">
       <AdminNav />
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-lg font-semibold text-gray-900 mb-6">
+        <h1 className="text-lg font-semibold text-foreground mb-6">
           Admin Settings
         </h1>
 
         <section className="mb-8">
-          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
             Testing
           </h2>
           <AdminTierCard />
         </section>
 
         <section className="mb-8">
-          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
             AI Configuration
           </h2>
           <div className="flex flex-col gap-4">

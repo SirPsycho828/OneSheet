@@ -53,19 +53,19 @@ function DashboardNav({ onSignOut }: DashboardNavProps) {
     : undefined;
 
   return (
-    <header className="h-14 flex items-center gap-3 px-4 border-b border-gray-200 bg-white flex-shrink-0">
+    <header className="h-14 flex items-center gap-3 px-4 border-b border-border bg-card/90 backdrop-blur-sm flex-shrink-0">
       {/* Logo — reloads dashboard */}
       <Link
         to="/dashboard"
-        className="text-sm font-semibold tracking-tight text-gray-950 hover:text-brand-500 transition-colors flex-shrink-0"
+        className="font-heading text-sm font-semibold tracking-tight text-foreground hover:text-primary transition-colors flex-shrink-0"
       >
         OneSheet
       </Link>
 
-      <div className="w-px h-5 bg-gray-200 flex-shrink-0" aria-hidden />
+      <div className="w-px h-5 bg-border flex-shrink-0" aria-hidden />
 
       {/* Page title */}
-      <span className="text-sm font-medium text-gray-700 flex-1">
+      <span className="text-sm font-medium text-muted-foreground flex-1">
         My Resumes
       </span>
 
@@ -74,7 +74,7 @@ function DashboardNav({ onSignOut }: DashboardNavProps) {
         {profileUrl && (
           <a
             href={profileUrl}
-            className="text-xs text-gray-500 hover:text-brand-500 transition-colors hidden sm:inline"
+            className="text-xs text-muted-foreground hover:text-primary transition-colors hidden sm:inline"
           >
             View profile
           </a>
@@ -102,8 +102,8 @@ function SortDropdown({ value, onChange }: SortDropdownProps) {
         onChange={(e) => onChange(e.target.value as SortOption)}
         className={[
           "appearance-none h-9 pl-3 pr-8 text-sm rounded-md",
-          "border border-gray-300 bg-white text-gray-700",
-          "focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent",
+          "border border-border bg-card text-muted-foreground",
+          "focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent",
           "cursor-pointer",
         ].join(" ")}
         aria-label="Sort resumes"
@@ -115,7 +115,7 @@ function SortDropdown({ value, onChange }: SortDropdownProps) {
         ))}
       </select>
       <ChevronDown
-        className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
+        className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
         strokeWidth={1.5}
       />
     </div>
@@ -192,7 +192,7 @@ export function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-background">
       <DashboardNav onSignOut={handleSignOut} />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8">

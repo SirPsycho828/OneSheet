@@ -77,7 +77,7 @@ function ResumeThumbnail({ markdown, styles }: ThumbnailProps) {
   return (
     <div
       style={{ width: THUMBNAIL_WIDTH, height: scaledHeight, overflow: "hidden" }}
-      className="bg-gray-100"
+      className="bg-muted"
       aria-hidden="true"
     >
       {/* Hidden full-size paper, scaled down */}
@@ -91,7 +91,7 @@ function ResumeThumbnail({ markdown, styles }: ThumbnailProps) {
           pointerEvents: "none",
           userSelect: "none",
         }}
-        className="bg-white"
+        className="bg-card"
       >
         <div
           style={{ padding: pageMarginPx }}
@@ -246,9 +246,9 @@ export function ResumeCard({
   ];
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-lg border border-border overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-shadow">
       {/* Thumbnail — hidden on mobile */}
-      <div className="hidden sm:block w-full overflow-hidden bg-gray-100 flex-shrink-0">
+      <div className="hidden sm:block w-full overflow-hidden bg-muted flex-shrink-0">
         <ResumeThumbnail
           markdown={resume.markdown}
           styles={resolvedStyles}
@@ -266,12 +266,12 @@ export function ResumeCard({
             onChange={(e) => setRenameValue(e.target.value)}
             onBlur={commitRename}
             onKeyDown={handleRenameKeyDown}
-            className="text-base font-semibold text-gray-900 border-b border-brand-500 outline-none bg-transparent w-full pb-0.5"
+            className="text-base font-semibold text-foreground border-b border-primary outline-none bg-transparent w-full pb-0.5"
             aria-label="Rename resume"
           />
         ) : (
           <p
-            className="text-base font-semibold text-gray-900 truncate"
+            className="text-base font-semibold text-foreground truncate"
             title={resume.title}
           >
             {isSavingRename ? renameValue : resume.title}
@@ -280,20 +280,20 @@ export function ResumeCard({
 
         {/* Default badge */}
         {resume.isDefault && (
-          <p className="text-xs text-gray-500 flex items-center gap-1">
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
             <span className="text-yellow-500">★</span>
             Default
           </p>
         )}
 
         {/* Analytics */}
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           {profileViews} view{profileViews !== 1 ? "s" : ""} &middot;{" "}
           {pdfDownloads} download{pdfDownloads !== 1 ? "s" : ""}
         </p>
 
         {/* Updated */}
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           Updated {relativeTime(updatedDate)}
         </p>
 

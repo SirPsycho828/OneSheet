@@ -128,7 +128,7 @@ export function SubscriptionCard({ onSubscriptionActive, pollOnMount = false }: 
   function renderBadge() {
     if (status === "free") {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
           Free
         </span>
       );
@@ -142,7 +142,7 @@ export function SubscriptionCard({ onSubscriptionActive, pollOnMount = false }: 
     }
     if (status === "active") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success">
           <CheckCircle2 className="w-3 h-3" strokeWidth={2} />
           Pro
         </span>
@@ -150,7 +150,7 @@ export function SubscriptionCard({ onSubscriptionActive, pollOnMount = false }: 
     }
     if (status === "past_due") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive">
           <AlertTriangle className="w-3 h-3" strokeWidth={2} />
           Past Due
         </span>
@@ -162,14 +162,14 @@ export function SubscriptionCard({ onSubscriptionActive, pollOnMount = false }: 
   function renderPeriodLine() {
     if (status === "active" && cancelAtPeriodEnd && subscription?.currentPeriodEnd) {
       return (
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Active until {formatDate(subscription.currentPeriodEnd)}
         </p>
       );
     }
     if (status === "active" && !cancelAtPeriodEnd && subscription?.currentPeriodEnd) {
       return (
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Renews {formatDate(subscription.currentPeriodEnd)}
         </p>
       );
@@ -180,7 +180,7 @@ export function SubscriptionCard({ onSubscriptionActive, pollOnMount = false }: 
   function renderPastDueBanner() {
     if (status !== "past_due") return null;
     return (
-      <div className="flex items-start gap-2 p-3 rounded-md bg-red-50 border border-red-200 text-sm text-red-700 mb-4">
+      <div className="flex items-start gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20 text-sm text-destructive mb-4">
         <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" strokeWidth={2} />
         <p>
           Your last payment failed. Update your payment method to keep access to Pro features.
@@ -194,8 +194,8 @@ export function SubscriptionCard({ onSubscriptionActive, pollOnMount = false }: 
     return (
       <ul className="space-y-1.5 mb-4">
         {features.map((f) => (
-          <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
-            <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" strokeWidth={2} />
+          <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" strokeWidth={2} />
             {f}
           </li>
         ))}
@@ -219,7 +219,7 @@ export function SubscriptionCard({ onSubscriptionActive, pollOnMount = false }: 
           onClick={handleUpgrade}
           isLoading={isLoadingCheckout}
         >
-          Upgrade to Pro — ${PRO_PRICE_MONTHLY}/mo
+          Upgrade to Pro (${PRO_PRICE_MONTHLY}/mo)
         </Button>
       );
     }
@@ -267,7 +267,7 @@ export function SubscriptionCard({ onSubscriptionActive, pollOnMount = false }: 
     <Card className="max-w-lg">
       <div className="flex items-start justify-between mb-3">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900">Subscription</h2>
+          <h2 className="text-sm font-semibold text-foreground">Subscription</h2>
           <div className="flex items-center gap-2 mt-1">
             {renderBadge()}
           </div>

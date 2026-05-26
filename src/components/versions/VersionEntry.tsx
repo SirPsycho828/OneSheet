@@ -35,8 +35,8 @@ export function VersionEntry({
       onClick={onClick}
       className={[
         "w-full text-left flex items-start gap-3 px-4 py-3 transition-colors",
-        "hover:bg-gray-50 focus:outline-none focus-visible:bg-gray-50",
-        isSelected ? "bg-brand-50" : "",
+        "hover:bg-muted focus:outline-none focus-visible:bg-muted",
+        isSelected ? "bg-secondary" : "",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -45,9 +45,9 @@ export function VersionEntry({
       {/* Dot indicator */}
       <span className="mt-1 flex-shrink-0">
         {isSelected ? (
-          <span className="block w-2 h-2 rounded-full bg-brand-500" />
+          <span className="block w-2 h-2 rounded-full bg-primary" />
         ) : (
-          <span className="block w-2 h-2 rounded-full border border-gray-300" />
+          <span className="block w-2 h-2 rounded-full border border-border" />
         )}
       </span>
 
@@ -56,13 +56,13 @@ export function VersionEntry({
         <span
           className={[
             "text-sm truncate",
-            isSelected ? "font-medium text-gray-900" : "text-gray-700",
+            isSelected ? "font-medium text-foreground" : "text-muted-foreground",
           ].join(" ")}
         >
           {relativeLabel}
         </span>
         {showTemplate && (
-          <span className="text-xs text-gray-400 truncate">{templateName}</span>
+          <span className="text-xs text-muted-foreground/60 truncate">{templateName}</span>
         )}
       </span>
     </button>

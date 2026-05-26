@@ -35,19 +35,19 @@ const variantStyles: Record<
     ),
   },
   error: {
-    border: "border-l-4 border-error",
+    border: "border-l-4 border-destructive",
     icon: (
       <XCircle
-        className="w-5 h-5 text-error flex-shrink-0"
+        className="w-5 h-5 text-destructive flex-shrink-0"
         strokeWidth={1.5}
       />
     ),
   },
   info: {
-    border: "border-l-4 border-brand-500",
+    border: "border-l-4 border-primary",
     icon: (
       <Info
-        className="w-5 h-5 text-brand-500 flex-shrink-0"
+        className="w-5 h-5 text-primary flex-shrink-0"
         strokeWidth={1.5}
       />
     ),
@@ -62,7 +62,7 @@ function ToastCard({ toast, onDismiss }: ToastCardProps) {
       role="alert"
       aria-live="assertive"
       className={[
-        "flex items-start gap-3 bg-white rounded-lg shadow-lg px-4 py-3 max-w-sm w-full",
+        "flex items-start gap-3 bg-card rounded-lg shadow-lg px-4 py-3 max-w-sm w-full",
         border,
         "transition-all",
         toast.leaving
@@ -73,13 +73,13 @@ function ToastCard({ toast, onDismiss }: ToastCardProps) {
         .join(" ")}
     >
       {icon}
-      <p className="flex-1 text-sm text-gray-950 leading-snug">
+      <p className="flex-1 text-sm text-foreground leading-snug">
         {toast.message}
       </p>
       <button
         onClick={() => onDismiss(toast.id)}
         aria-label="Dismiss notification"
-        className="ml-1 -mt-0.5 p-0.5 rounded text-gray-400 hover:text-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+        className="ml-1 -mt-0.5 p-0.5 rounded text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <X className="w-4 h-4" strokeWidth={1.5} />
       </button>

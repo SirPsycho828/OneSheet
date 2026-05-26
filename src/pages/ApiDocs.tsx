@@ -5,7 +5,7 @@ const API_BASE = "https://us-central1-bragsheet-mvp.cloudfunctions.net/api";
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-10">
-      <h2 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+      <h2 className="text-base font-semibold text-foreground mb-4 pb-2 border-b border-border">
         {title}
       </h2>
       {children}
@@ -30,12 +30,12 @@ function Endpoint({
 }) {
   const methodColor =
     method === "GET"
-      ? "bg-green-100 text-green-700"
+      ? "bg-success/10 text-success"
       : method === "POST"
-        ? "bg-blue-100 text-blue-700"
+        ? "bg-primary/10 text-primary"
         : method === "PUT"
-          ? "bg-amber-100 text-amber-700"
-          : "bg-red-100 text-red-700";
+          ? "bg-warning/10 text-warning"
+          : "bg-destructive/10 text-destructive";
 
   return (
     <div className="mb-6 last:mb-0">
@@ -45,22 +45,22 @@ function Endpoint({
         >
           {method}
         </span>
-        <code className="text-sm font-mono text-gray-800">{path}</code>
+        <code className="text-sm font-mono text-foreground">{path}</code>
       </div>
-      <p className="text-sm text-gray-600 mb-2">{description}</p>
-      <p className="text-xs text-gray-400 mb-2">Auth: {auth}</p>
+      <p className="text-sm text-muted-foreground mb-2">{description}</p>
+      <p className="text-xs text-muted-foreground mb-2">Auth: {auth}</p>
       {body && (
         <div className="mb-2">
-          <p className="text-xs font-medium text-gray-500 mb-1">Request Body</p>
-          <pre className="text-xs bg-gray-50 rounded-md p-3 overflow-x-auto border border-gray-200 font-mono">
+          <p className="text-xs font-medium text-muted-foreground mb-1">Request Body</p>
+          <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto border border-border font-mono">
             {body}
           </pre>
         </div>
       )}
       {response && (
         <div>
-          <p className="text-xs font-medium text-gray-500 mb-1">Response</p>
-          <pre className="text-xs bg-gray-50 rounded-md p-3 overflow-x-auto border border-gray-200 font-mono">
+          <p className="text-xs font-medium text-muted-foreground mb-1">Response</p>
+          <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto border border-border font-mono">
             {response}
           </pre>
         </div>
@@ -71,52 +71,52 @@ function Endpoint({
 
 export function ApiDocs() {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <header className="h-14 flex items-center gap-3 px-4 border-b border-gray-200 bg-white flex-shrink-0">
+    <div className="flex flex-col min-h-screen bg-background">
+      <header className="h-14 flex items-center gap-3 px-4 border-b border-border bg-card/90 backdrop-blur-sm flex-shrink-0">
         <Link
           to="/"
-          className="text-sm font-semibold tracking-tight text-gray-950 hover:text-brand-500 transition-colors"
+          className="text-sm font-semibold font-heading tracking-tight text-foreground hover:text-primary transition-colors"
         >
           OneSheet
         </Link>
-        <div className="w-px h-5 bg-gray-200" aria-hidden />
-        <span className="text-sm font-medium text-gray-700">
+        <div className="w-px h-5 bg-border" aria-hidden />
+        <span className="text-sm font-medium text-muted-foreground">
           API Documentation
         </span>
       </header>
 
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl font-bold text-foreground mb-2">
           OneSheet API
         </h1>
-        <p className="text-sm text-gray-500 mb-8">
+        <p className="text-sm text-muted-foreground mb-8">
           Programmatic access to manage resumes, templates, and exports.
         </p>
 
         {/* Authentication */}
         <Section title="Authentication">
-          <p className="text-sm text-gray-600 mb-3">
+          <p className="text-sm text-muted-foreground mb-3">
             All API endpoints require authentication via one of two methods:
           </p>
           <div className="space-y-3">
-            <div className="bg-white rounded-md border border-gray-200 p-3">
-              <p className="text-sm font-medium text-gray-800">
+            <div className="bg-card rounded-md border border-border p-3">
+              <p className="text-sm font-medium text-foreground">
                 Bearer Token (Firebase ID Token)
               </p>
-              <pre className="text-xs font-mono mt-1 text-gray-500">
+              <pre className="text-xs font-mono mt-1 text-muted-foreground">
                 Authorization: Bearer &lt;firebase-id-token&gt;
               </pre>
             </div>
-            <div className="bg-white rounded-md border border-gray-200 p-3">
-              <p className="text-sm font-medium text-gray-800">
+            <div className="bg-card rounded-md border border-border p-3">
+              <p className="text-sm font-medium text-foreground">
                 API Key (Pro subscription required)
               </p>
-              <pre className="text-xs font-mono mt-1 text-gray-500">
+              <pre className="text-xs font-mono mt-1 text-muted-foreground">
                 X-Api-Key: brag_sk_live_...
               </pre>
             </div>
           </div>
-          <p className="text-xs text-gray-400 mt-3">
+          <p className="text-xs text-muted-foreground mt-3">
             Base URL: <code className="font-mono">{API_BASE}</code>
           </p>
         </Section>
@@ -316,10 +316,10 @@ export function ApiDocs() {
           />
         </Section>
 
-        <div className="mt-12 pt-6 border-t border-gray-200 text-center">
+        <div className="mt-12 pt-6 border-t border-border text-center">
           <Link
             to="/agents"
-            className="text-sm text-brand-500 hover:text-brand-600 font-medium"
+            className="text-sm text-primary hover:text-brand-600 font-medium"
           >
             View the Agent Guide &rarr;
           </Link>

@@ -110,17 +110,17 @@ export function VersionPanel({
   // ---------------------------------------------------------------------------
   return (
     <aside
-      className="fixed top-0 right-0 h-full w-80 bg-white border-l border-gray-200 shadow-xl z-40 flex flex-col"
+      className="fixed top-0 right-0 h-full w-80 bg-card border-l border-border shadow-xl z-40 flex flex-col"
       role="complementary"
       aria-label="Version History"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 flex-shrink-0">
-        <h2 className="text-sm font-semibold text-gray-900">Version History</h2>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
+        <h2 className="text-sm font-semibold text-foreground">Version History</h2>
         <button
           type="button"
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 transition-colors rounded p-1 -mr-1"
+          className="text-muted-foreground hover:text-foreground transition-colors rounded p-1 -mr-1"
           aria-label="Close version history"
         >
           <X className="w-4 h-4" strokeWidth={1.5} />
@@ -132,14 +132,14 @@ export function VersionPanel({
         {!isPaid ? (
           /* Free tier upsell */
           <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-              <Lock className="w-5 h-5 text-gray-400" strokeWidth={1.5} />
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+              <Lock className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-medium text-foreground">
                 Upgrade to Pro for version history
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Keep up to 50 snapshots of your resume and restore any previous
                 version instantly.
               </p>
@@ -154,10 +154,10 @@ export function VersionPanel({
           </div>
         ) : error ? (
           <div className="px-4 py-6 text-center">
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-destructive">{error}</p>
             <button
               type="button"
-              className="mt-2 text-xs text-brand-500 hover:underline"
+              className="mt-2 text-xs text-primary hover:underline"
               onClick={() => window.location.reload()}
             >
               Retry
@@ -168,23 +168,23 @@ export function VersionPanel({
           <div className="px-4 py-3 space-y-2">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="flex items-start gap-3 py-2 animate-pulse">
-                <span className="mt-1 block w-2 h-2 rounded-full bg-gray-200 flex-shrink-0" />
+                <span className="mt-1 block w-2 h-2 rounded-full bg-muted flex-shrink-0" />
                 <div className="flex flex-col gap-1.5 flex-1">
-                  <div className="h-3 bg-gray-200 rounded w-2/3" />
+                  <div className="h-3 bg-muted rounded w-2/3" />
                 </div>
               </div>
             ))}
           </div>
         ) : versions.length === 0 ? (
           <div className="px-4 py-6 text-center">
-            <p className="text-sm text-gray-500">No versions saved yet.</p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-sm text-muted-foreground">No versions saved yet.</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">
               Versions are created automatically when you save.
             </p>
           </div>
         ) : (
           <>
-            <ul role="list" className="divide-y divide-gray-100">
+            <ul role="list" className="divide-y divide-border">
               {versions.map((v) => (
                 <li key={v.id}>
                   <VersionEntry
@@ -205,7 +205,7 @@ export function VersionPanel({
                   type="button"
                   onClick={handleLoadMore}
                   disabled={isLoading}
-                  className="w-full text-xs text-brand-500 hover:text-brand-600 disabled:opacity-50 disabled:cursor-not-allowed py-1"
+                  className="w-full text-xs text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed py-1"
                 >
                   {isLoading ? "Loading..." : "Load more"}
                 </button>
@@ -217,8 +217,8 @@ export function VersionPanel({
 
       {/* Preview banner — shown when a version is being previewed */}
       {previewingVersion && (
-        <div className="flex-shrink-0 border-t border-gray-200 bg-amber-50 px-4 py-3 space-y-2">
-          <p className="text-xs text-amber-800 font-medium">
+        <div className="flex-shrink-0 border-t border-border bg-warning/10 px-4 py-3 space-y-2">
+          <p className="text-xs text-warning font-medium">
             Viewing version from{" "}
             {previewingVersion.createdAt?.toDate?.().toLocaleString() ??
               "unknown time"}

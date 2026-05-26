@@ -180,16 +180,16 @@ export function AppNav({
   ];
 
   return (
-    <header className="h-14 flex items-center gap-3 px-4 border-b border-gray-200 bg-white flex-shrink-0">
+    <header className="h-14 flex items-center gap-3 px-4 border-b border-border bg-card/90 backdrop-blur-sm flex-shrink-0">
       {/* Logo */}
       <Link
         to="/dashboard"
-        className="text-sm font-semibold tracking-tight text-gray-950 hover:text-brand-500 transition-colors flex-shrink-0"
+        className="font-heading text-sm font-semibold tracking-tight text-foreground hover:text-primary transition-colors flex-shrink-0"
       >
         OneSheet
       </Link>
 
-      <div className="w-px h-5 bg-gray-200 flex-shrink-0" aria-hidden />
+      <div className="w-px h-5 bg-border flex-shrink-0" aria-hidden />
 
       {/* Resume title — inline editable */}
       <div className="flex-1 min-w-0 flex justify-center">
@@ -202,8 +202,8 @@ export function AppNav({
             onBlur={handleTitleBlur}
             onKeyDown={handleTitleKeyDown}
             className={[
-              "w-full max-w-xs text-center text-sm font-medium text-gray-900",
-              "bg-transparent border-b border-brand-500 outline-none",
+              "w-full max-w-xs text-center text-sm font-medium text-foreground",
+              "bg-transparent border-b border-primary outline-none",
               "pb-0.5",
             ].join(" ")}
             aria-label="Resume title"
@@ -213,8 +213,8 @@ export function AppNav({
             type="button"
             onClick={handleTitleClick}
             className={[
-              "max-w-xs truncate text-sm font-medium text-gray-900",
-              "hover:text-brand-500 transition-colors",
+              "max-w-xs truncate text-sm font-medium text-foreground",
+              "hover:text-primary transition-colors",
               "rounded px-1 py-0.5",
             ].join(" ")}
             title="Click to rename"

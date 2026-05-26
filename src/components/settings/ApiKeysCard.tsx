@@ -32,7 +32,7 @@ async function getBearerToken(): Promise<string> {
 }
 
 function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -124,7 +124,7 @@ function CopyButton({ text }: { text: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="inline-flex items-center gap-1.5 text-xs text-brand-500 hover:text-brand-600 font-medium transition-colors"
+      className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-brand-600 font-medium transition-colors"
       aria-label="Copy API key"
     >
       {copied ? (
@@ -198,8 +198,8 @@ function GenerateModal({ isOpen, onClose, onCreated }: GenerateModalProps) {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1.5 block">Your new API key</label>
-            <div className="flex items-center gap-2 p-2.5 bg-gray-50 rounded-md border border-gray-200 font-mono text-xs text-gray-800 break-all">
+            <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Your new API key</label>
+            <div className="flex items-center gap-2 p-2.5 bg-muted rounded-md border border-border font-mono text-xs text-foreground break-all">
               <span className="flex-1 select-all">{newKey}</span>
             </div>
             <div className="mt-2">
@@ -311,10 +311,10 @@ export function ApiKeysCard() {
     return (
       <Card className="max-w-lg">
         <div className="flex items-start gap-3">
-          <KeyRound className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+          <KeyRound className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" strokeWidth={1.5} />
           <div>
-            <h2 className="text-sm font-semibold text-gray-900 mb-1">Agent API</h2>
-            <p className="text-sm text-gray-500">
+            <h2 className="text-sm font-semibold text-foreground mb-1">Agent API</h2>
+            <p className="text-sm text-muted-foreground">
               Upgrade to Pro to use the API and automate your resume workflow.
             </p>
           </div>
@@ -333,8 +333,8 @@ export function ApiKeysCard() {
       <Card className="max-w-lg">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">Agent API</h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <h2 className="text-sm font-semibold text-foreground">Agent API</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
               Use API keys to access OneSheet programmatically.
             </p>
           </div>
@@ -349,7 +349,7 @@ export function ApiKeysCard() {
         </div>
 
         {activeKeys.length >= 3 && (
-          <p className="text-xs text-gray-500 mb-3">
+          <p className="text-xs text-muted-foreground mb-3">
             Maximum of 3 active keys reached. Revoke or delete a key to create a new one.
           </p>
         )}
@@ -357,50 +357,50 @@ export function ApiKeysCard() {
         {isLoadingKeys ? (
           <div className="space-y-2">
             {[1, 2].map((i) => (
-              <div key={i} className="h-10 rounded-md bg-gray-100 animate-pulse" />
+              <div key={i} className="h-10 rounded-md bg-muted animate-pulse" />
             ))}
           </div>
         ) : keys.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-4">
+          <p className="text-sm text-muted-foreground text-center py-4">
             No API keys yet. Generate one to get started.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">Name</th>
-                  <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">Key</th>
-                  <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">Created</th>
-                  <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">Last Used</th>
-                  <th className="text-left text-xs font-medium text-gray-500 pb-2">Status</th>
+                <tr className="border-b border-border">
+                  <th className="text-left text-xs font-medium text-muted-foreground pb-2 pr-4">Name</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground pb-2 pr-4">Key</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground pb-2 pr-4">Created</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground pb-2 pr-4">Last Used</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground pb-2">Status</th>
                   <th className="pb-2" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-border">
                 {keys.map((key) => (
                   <tr key={key.keyId} className={key.isActive ? "" : "opacity-50"}>
-                    <td className="py-2.5 pr-4 font-medium text-gray-800 whitespace-nowrap">
+                    <td className="py-2.5 pr-4 font-medium text-foreground whitespace-nowrap">
                       {key.name}
                     </td>
                     <td className="py-2.5 pr-4">
-                      <span className="font-mono text-xs text-gray-500">
+                      <span className="font-mono text-xs text-muted-foreground">
                         {maskPrefix(key.prefix)}
                       </span>
                     </td>
-                    <td className="py-2.5 pr-4 text-xs text-gray-500 whitespace-nowrap">
+                    <td className="py-2.5 pr-4 text-xs text-muted-foreground whitespace-nowrap">
                       {formatDate(key.createdAt)}
                     </td>
-                    <td className="py-2.5 pr-4 text-xs text-gray-500 whitespace-nowrap">
+                    <td className="py-2.5 pr-4 text-xs text-muted-foreground whitespace-nowrap">
                       {formatDate(key.lastUsedAt)}
                     </td>
                     <td className="py-2.5 pr-4">
                       {key.isActive ? (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-success/10 text-success">
                           Active
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground">
                           Revoked
                         </span>
                       )}
@@ -412,7 +412,7 @@ export function ApiKeysCard() {
                             type="button"
                             onClick={() => handleRevoke(key.keyId)}
                             disabled={actionLoading !== null}
-                            className="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded transition-colors disabled:opacity-50"
+                            className="p-1.5 text-muted-foreground hover:text-yellow-600 hover:bg-yellow-50 rounded transition-colors disabled:opacity-50"
                             aria-label={`Revoke ${key.name}`}
                             title="Revoke"
                           >
@@ -427,12 +427,12 @@ export function ApiKeysCard() {
                           type="button"
                           onClick={() => handleDelete(key.keyId)}
                           disabled={actionLoading !== null}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                          className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors disabled:opacity-50"
                           aria-label={`Delete ${key.name}`}
                           title="Delete"
                         >
                           {actionLoading === key.keyId + "_delete" ? (
-                            <span className="w-3.5 h-3.5 block rounded-full border-2 border-red-400 border-t-transparent animate-spin" />
+                            <span className="w-3.5 h-3.5 block rounded-full border-2 border-destructive border-t-transparent animate-spin" />
                           ) : (
                             <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
                           )}
@@ -446,8 +446,8 @@ export function ApiKeysCard() {
           </div>
         )}
 
-        <p className="text-xs text-gray-400 mt-4">
-          Send your key in the <code className="font-mono bg-gray-100 px-1 rounded">X-API-Key</code> header.
+        <p className="text-xs text-muted-foreground mt-4">
+          Send your key in the <code className="font-mono bg-muted px-1 rounded">X-API-Key</code> header.
           Keys are shown only once at creation.
         </p>
       </Card>

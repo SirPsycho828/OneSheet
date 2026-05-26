@@ -1,139 +1,223 @@
+import * as React from "react";
 import { Link } from "react-router-dom";
-import { Code, Layout, Download, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { LandingNav } from "../components/layout/LandingNav";
 import { Button } from "../components/ui/Button";
-import { PRESET_LIST } from "../constants/presets";
 import { PRO_PRICE_MONTHLY } from "../constants/pricing";
+
+// ---------------------------------------------------------------------------
+// Typing animation hook
+// ---------------------------------------------------------------------------
+
+const MARKDOWN_LINES = [
+  "# Alex Chen",
+  "Senior Frontend Engineer",
+  "alex@email.com | San Francisco, CA",
+  "",
+  "## Experience",
+  "",
+  "### Lead Engineer, Acme Inc.",
+  "2022 - Present",
+  "- Led migration to React 19, reducing bundle size by 40%",
+  "- Built real-time collaboration features serving 50K DAU",
+  "- Mentored team of 6 engineers across 3 time zones",
+  "",
+  "### Frontend Developer, StartupCo",
+  "2019 - 2022",
+  "- Architected design system used across 12 products",
+  "- Improved Lighthouse score from 45 to 98",
+  "",
+  "## Skills",
+  "TypeScript, React, Next.js, Node.js, GraphQL, AWS",
+];
+
+// Pre-typed lines (visible from the start) and lines typed live
+const PRE_TYPED_COUNT = 8;
+const FULL_TEXT = MARKDOWN_LINES.join("\n");
+const PRE_TYPED_TEXT = MARKDOWN_LINES.slice(0, PRE_TYPED_COUNT).join("\n");
+
+function useTypingAnimation(startTyping: boolean) {
+  const [charIndex, setCharIndex] = React.useState(PRE_TYPED_TEXT.length);
+
+  React.useEffect(() => {
+    if (!startTyping) return;
+    if (charIndex >= FULL_TEXT.length) return;
+
+    const char = FULL_TEXT[charIndex];
+    const delay = char === "\n" ? 120 : 28 + Math.random() * 18;
+
+    const timer = setTimeout(() => {
+      setCharIndex((prev) => prev + 1);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [startTyping, charIndex]);
+
+  return FULL_TEXT.slice(0, charIndex);
+}
+
+// ---------------------------------------------------------------------------
+// Markdown syntax highlighter (simple)
+// ---------------------------------------------------------------------------
+
+function highlightMarkdown(text: string) {
+  return text.split("\n").map((line, i) => {
+    let className = "text-stone-400";
+    if (line.startsWith("# ")) className = "text-amber-400 font-bold text-sm";
+    else if (line.startsWith("## ")) className = "text-amber-400 font-semibold";
+    else if (line.startsWith("### ")) className = "text-orange-300";
+    else if (line.startsWith("- ")) className = "text-stone-300";
+    else if (/^\d{4}/.test(line)) className = "text-stone-500 italic";
+    else if (line.includes("@") || line.includes("|")) className = "text-stone-500";
+    return (
+      <div key={i} className={className} style={{ minHeight: "1.3em" }}>
+        {line || "\u00A0"}
+      </div>
+    );
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Resume preview renderer (formatted from current typed text)
+// ---------------------------------------------------------------------------
+
+function ResumePreview({ markdown }: { markdown: string }) {
+  const lines = markdown.split("\n");
+  const elements: React.ReactNode[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith("# ")) {
+      elements.push(
+        <div key={i} className="text-center mb-0.5">
+          <div className="text-xs font-bold text-stone-900">{line.slice(2)}</div>
+        </div>
+      );
+    } else if (line.startsWith("## ")) {
+      elements.push(
+        <div key={i} className="mt-2 mb-0.5 border-b border-stone-200 pb-0.5">
+          <div className="text-[7px] font-bold text-stone-700 uppercase tracking-wider">{line.slice(3)}</div>
+        </div>
+      );
+    } else if (line.startsWith("### ")) {
+      const text = line.slice(4);
+      elements.push(
+        <div key={i} className="mt-1">
+          <span className="text-[8px] font-semibold text-stone-800">{text}</span>
+        </div>
+      );
+    } else if (line.startsWith("- ")) {
+      elements.push(
+        <div key={i} className="flex gap-1 ml-1">
+          <span className="text-[7px] text-stone-400">&#8226;</span>
+          <span className="text-[7px] text-stone-600 leading-tight">{line.slice(2)}</span>
+        </div>
+      );
+    } else if (/^\d{4}/.test(line)) {
+      elements.push(
+        <div key={i} className="text-[7px] text-stone-400 italic">{line}</div>
+      );
+    } else if (line.includes("@") || line.includes("|")) {
+      elements.push(
+        <div key={i} className="text-[7px] text-stone-500 text-center">{line}</div>
+      );
+    } else if (line.trim() === "") {
+      // skip blank lines in preview
+    } else {
+      elements.push(
+        <div key={i} className="text-[7px] text-stone-600">{line}</div>
+      );
+    }
+  }
+
+  return <>{elements}</>;
+}
 
 // ---------------------------------------------------------------------------
 // Hero
 // ---------------------------------------------------------------------------
 
 function Hero() {
-  return (
-    <section className="max-w-7xl mx-auto px-6 py-20 lg:py-28">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-        {/* Left — copy */}
-        <div className="flex flex-col gap-6">
-          <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight text-gray-950 leading-tight">
-            One page. Markdown. Done.
-          </h1>
-          <p className="text-lg text-gray-700 leading-relaxed">
-            Write your resume in Markdown. Pick a template. Get a pixel-perfect
-            PDF and a shareable link. No fluff, no 50-template paralysis, no
-            multi-page sprawl.
-          </p>
-          <div className="flex flex-col gap-3">
-            <div>
-              <Link to="/sign-up">
-                <Button variant="primary" size="large">
-                  Start writing
-                </Button>
-              </Link>
-            </div>
-            <p className="text-sm text-gray-500">
-              Free to use. PDF export on paid plan.
-            </p>
-          </div>
-        </div>
+  const [isVisible, setIsVisible] = React.useState(false);
+  const heroRef = React.useRef<HTMLDivElement>(null);
 
-        {/* Right — browser chrome mockup placeholder */}
-        <div className="shadow-xl rounded-lg overflow-hidden border border-gray-200 bg-white">
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { threshold: 0.3 }
+    );
+    if (heroRef.current) observer.observe(heroRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const typedText = useTypingAnimation(isVisible);
+
+  return (
+    <section className="pt-28 pb-20 px-6" ref={heroRef}>
+      <div className="max-w-5xl mx-auto text-center mb-12">
+        <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground leading-[1.1] tracking-tight">
+          The resume builder
+          <br />
+          <span className="text-accent">developers actually use.</span>
+        </h1>
+        <p className="mt-5 text-lg text-muted-foreground max-w-xl mx-auto">
+          Write in Markdown. Pick a template. Export a pixel-perfect
+          one-page PDF or share a public link. No fluff.
+        </p>
+        <div className="mt-8 flex items-center justify-center gap-4">
+          <Link to="/sign-up">
+            <Button variant="primary" className="text-sm px-6 py-2.5">
+              Build yours free
+            </Button>
+          </Link>
+          <a href="#templates" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+            Browse templates &rarr;
+          </a>
+        </div>
+      </div>
+
+      {/* Animated browser mockup */}
+      <div className="max-w-4xl mx-auto">
+        <div className="rounded-xl border border-border bg-card shadow-xl overflow-hidden">
           {/* Browser chrome */}
-          <div className="h-8 bg-gray-100 border-b border-gray-200 flex items-center px-3 gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-gray-300" />
-            <span className="w-2.5 h-2.5 rounded-full bg-gray-300" />
-            <span className="w-2.5 h-2.5 rounded-full bg-gray-300" />
-            <div className="flex-1 mx-3">
-              <div className="h-4 rounded bg-gray-200 max-w-[180px] mx-auto" />
+          <div className="flex items-center gap-2 px-4 py-2.5 bg-stone-100 border-b border-border">
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-red-400" />
+              <div className="w-3 h-3 rounded-full bg-amber-400" />
+              <div className="w-3 h-3 rounded-full bg-green-400" />
             </div>
-          </div>
-          {/* Split editor preview placeholder */}
-          <div className="flex h-72 lg:h-80">
-            {/* Editor pane */}
-            <div className="flex-1 bg-gray-950 p-4 flex flex-col gap-2">
-              <div className="h-3 w-1/3 rounded bg-gray-700" />
-              <div className="h-2.5 w-1/2 rounded bg-gray-800" />
-              <div className="h-2.5 w-2/3 rounded bg-gray-800" />
-              <div className="h-2.5 w-2/5 rounded bg-gray-800" />
-              <div className="mt-2 h-3 w-1/4 rounded bg-blue-800" />
-              <div className="h-2.5 w-3/5 rounded bg-gray-800" />
-              <div className="h-2.5 w-1/2 rounded bg-gray-800" />
-              <div className="mt-2 h-3 w-1/4 rounded bg-blue-800" />
-              <div className="h-2.5 w-4/5 rounded bg-gray-800" />
-              <div className="h-2.5 w-2/3 rounded bg-gray-800" />
-              <div className="h-2.5 w-3/5 rounded bg-gray-800" />
-            </div>
-            {/* Divider */}
-            <div className="w-px bg-gray-200" />
-            {/* Preview pane */}
-            <div className="flex-1 bg-white p-4 flex flex-col gap-2">
-              <div className="h-4 w-1/2 rounded bg-gray-800 mx-auto" />
-              <div className="h-2.5 w-1/3 rounded bg-gray-300 mx-auto" />
-              <div className="mt-3 h-px bg-gray-200" />
-              <div className="mt-2 h-3 w-1/4 rounded bg-gray-400" />
-              <div className="h-2 w-full rounded bg-gray-200" />
-              <div className="h-2 w-full rounded bg-gray-200" />
-              <div className="h-2 w-4/5 rounded bg-gray-200" />
-              <div className="mt-2 h-3 w-1/4 rounded bg-gray-400" />
-              <div className="h-2 w-full rounded bg-gray-200" />
-              <div className="h-2 w-3/4 rounded bg-gray-200" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// How It Works
-// ---------------------------------------------------------------------------
-
-const HOW_IT_WORKS_STEPS = [
-  {
-    icon: Code,
-    title: "Write in Markdown",
-    description:
-      "Your resume content in a format you already know. No drag-and-drop, no formatting toolbar. Just text.",
-  },
-  {
-    icon: Layout,
-    title: "Pick a template",
-    description:
-      "Choose from a handful of focused templates. Each one is designed for one page, period.",
-  },
-  {
-    icon: Download,
-    title: "Export or share",
-    description:
-      "Download a pixel-perfect PDF or share your public link: onesheet.cv/you",
-  },
-] as const;
-
-function HowItWorks() {
-  return (
-    <section className="bg-gray-50 border-y border-gray-200 py-20">
-      <div className="max-w-5xl mx-auto px-6">
-        <h2 className="text-2xl font-semibold text-gray-950 text-center mb-12">
-          How it works
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          {HOW_IT_WORKS_STEPS.map(({ icon: Icon, title, description }) => (
-            <div key={title} className="flex flex-col items-center gap-4">
-              <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-brand-50">
-                <Icon
-                  className="text-brand-500"
-                  size={28}
-                  strokeWidth={1.5}
-                />
+            <div className="flex-1 flex justify-center">
+              <div className="text-xs text-stone-400 bg-white rounded px-12 py-1 border border-stone-200">
+                onesheet.cv/editor
               </div>
-              <h3 className="text-base font-semibold text-gray-950">{title}</h3>
-              <p className="text-sm text-gray-700 leading-relaxed max-w-xs">
-                {description}
-              </p>
             </div>
-          ))}
+          </div>
+
+          {/* Split editor */}
+          <div className="flex min-h-[350px] md:min-h-[420px]">
+            {/* Markdown editor pane */}
+            <div className="w-1/2 bg-stone-900 p-4 md:p-6 font-mono text-[11px] md:text-xs leading-relaxed overflow-hidden relative">
+              {highlightMarkdown(typedText)}
+              {/* Blinking cursor */}
+              {typedText.length < FULL_TEXT.length && (
+                <span className="inline-block w-[2px] h-[14px] bg-amber-400 ml-[1px] animate-pulse absolute" />
+              )}
+            </div>
+
+            {/* Divider handle */}
+            <div className="w-px bg-stone-700 relative">
+              <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-8 bg-stone-600 rounded-full flex items-center justify-center">
+                <div className="w-px h-3 bg-stone-400" />
+              </div>
+            </div>
+
+            {/* Preview pane */}
+            <div className="w-1/2 bg-white p-4 md:p-8 overflow-hidden">
+              <div className="max-w-[240px] mx-auto">
+                <ResumePreview markdown={typedText} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -141,50 +225,323 @@ function HowItWorks() {
 }
 
 // ---------------------------------------------------------------------------
-// Template Showcase
+// Ink Divider (signature element)
+// ---------------------------------------------------------------------------
+
+function InkDivider() {
+  return (
+    <div className="w-full overflow-hidden py-4">
+      <svg viewBox="0 0 1200 24" fill="none" className="w-full h-6 text-border" preserveAspectRatio="none">
+        <path
+          d="M0 12 Q200 0, 400 12 T800 12 T1200 12"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          opacity="0.5"
+        />
+      </svg>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Features Bento Grid
+// ---------------------------------------------------------------------------
+
+function Features() {
+  return (
+    <section id="features" className="py-20 px-6">
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-10">
+          <p className="text-accent font-semibold text-sm tracking-wide uppercase mb-2">Features</p>
+          <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground">
+            Everything you need.<br />Nothing you don't.
+          </h2>
+        </div>
+
+        {/* Bento grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Markdown Editor - large card */}
+          <div className="md:col-span-2 rounded-xl border border-border bg-card p-6 overflow-hidden">
+            <h3 className="font-heading text-lg font-semibold text-foreground mb-1">Markdown-first editing</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              No drag-and-drop. No formatting toolbar. Write your resume in the format you already know. Live preview updates as you type.
+            </p>
+            <div className="rounded-lg overflow-hidden border border-border flex h-36">
+              <div className="w-1/2 bg-stone-900 p-3 font-mono text-[9px] text-stone-300 leading-relaxed">
+                <div className="text-amber-400 font-bold"># Alex Chen</div>
+                <div className="text-stone-500">Senior Frontend Engineer</div>
+                <div className="mt-1 text-amber-400">## Experience</div>
+                <div className="text-orange-300">### Lead Engineer, Acme</div>
+                <div className="text-stone-500 italic">2022 - Present</div>
+                <div>- Led migration to React 19</div>
+                <div>- Built collab features for 50K DAU</div>
+              </div>
+              <div className="w-1/2 bg-white p-3 text-[8px] text-stone-700">
+                <div className="text-center font-bold text-[9px]">Alex Chen</div>
+                <div className="text-center text-[7px] text-stone-500">Senior Frontend Engineer</div>
+                <div className="mt-1 border-b border-stone-200 pb-0.5 text-[6px] font-bold uppercase tracking-wider text-stone-600">Experience</div>
+                <div className="mt-0.5 font-semibold text-[7px]">Lead Engineer, Acme</div>
+                <div className="text-[6px] text-stone-400">2022 - Present</div>
+                <div className="text-[6px]">&bull; Led migration to React 19</div>
+                <div className="text-[6px]">&bull; Built collab features for 50K DAU</div>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Polish card */}
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h3 className="font-heading text-lg font-semibold text-foreground mb-1">AI that earns its keep</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Polish bullets into quantified achievements. Score against a job description. Import from a URL.
+            </p>
+            <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-2">
+              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <span className="text-accent">&#10024;</span> AI Polish
+              </div>
+              <div className="rounded bg-stone-200/60 px-2 py-1 text-[9px] text-stone-500 line-through">
+                Worked on React projects and helped the team
+              </div>
+              <div className="text-accent text-[10px]">&darr;</div>
+              <div className="rounded bg-green-50 border border-green-200 px-2 py-1 text-[9px] text-stone-700">
+                Led migration of 3 React apps to Next.js, reducing page load times by 62%
+              </div>
+            </div>
+          </div>
+
+          {/* Templates mini-card */}
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h3 className="font-heading text-lg font-semibold text-foreground mb-1">5 distinct templates</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Classic serif, clean sans, monospace dev, compact two-column, and minimal.
+            </p>
+            <div className="flex gap-1.5">
+              {/* Mini template thumbnails */}
+              <div className="flex-1 h-20 rounded border border-border bg-white p-1.5">
+                <div className="h-1 w-6 bg-stone-800 rounded-sm mx-auto mb-0.5" />
+                <div className="h-0.5 w-4 bg-stone-400 rounded-sm mx-auto mb-1" />
+                <div className="h-px w-full bg-stone-200 mb-0.5" />
+                <div className="space-y-0.5">
+                  <div className="h-0.5 w-full bg-stone-200 rounded-sm" />
+                  <div className="h-0.5 w-3/4 bg-stone-200 rounded-sm" />
+                  <div className="h-0.5 w-5/6 bg-stone-200 rounded-sm" />
+                </div>
+              </div>
+              <div className="flex-1 h-20 rounded border border-border bg-white p-1.5 flex">
+                <div className="w-1 bg-accent/30 rounded-sm mr-1" />
+                <div className="flex-1">
+                  <div className="h-1 w-5 bg-stone-800 rounded-sm mb-1" />
+                  <div className="space-y-0.5">
+                    <div className="h-0.5 w-full bg-stone-200 rounded-sm" />
+                    <div className="h-0.5 w-3/4 bg-stone-200 rounded-sm" />
+                    <div className="h-0.5 w-5/6 bg-stone-200 rounded-sm" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 h-20 rounded border border-border bg-white p-1.5 font-mono">
+                <div className="h-0.5 w-5 bg-stone-600 rounded-sm mb-1" />
+                <div className="border border-stone-200 rounded-sm p-0.5 mb-0.5">
+                  <div className="h-0.5 w-full bg-stone-200 rounded-sm" />
+                </div>
+                <div className="border border-stone-200 rounded-sm p-0.5">
+                  <div className="h-0.5 w-3/4 bg-stone-200 rounded-sm" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Job Match card */}
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h3 className="font-heading text-lg font-semibold text-foreground mb-1">Job match scoring</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Paste a job posting. Get a score and actionable suggestions to improve your fit.
+            </p>
+            <div className="rounded-lg border border-border bg-muted/50 p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <span className="text-accent">&#10024;</span> Job Match
+                </span>
+                <span className="text-sm font-bold text-success">87%</span>
+              </div>
+              <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-success to-success/70 rounded-full" style={{ width: "87%" }} />
+              </div>
+              <p className="text-[9px] text-muted-foreground mt-1.5">Strong match. Consider adding Kubernetes experience.</p>
+            </div>
+          </div>
+
+          {/* PDF + Share wide card */}
+          <div className="md:col-span-1 rounded-xl border border-border bg-card p-6">
+            <h3 className="font-heading text-lg font-semibold text-foreground mb-1">Export and share</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Pixel-perfect PDF that survives any ATS. Or share a public link with your own brand.
+            </p>
+            <div className="flex gap-3">
+              <div className="flex-1 rounded-lg border border-border bg-muted/50 p-3 text-center">
+                <div className="text-2xl mb-1">&#128196;</div>
+                <div className="text-[10px] font-medium text-foreground">PDF Export</div>
+                <div className="text-[8px] text-muted-foreground">ATS-optimized</div>
+              </div>
+              <div className="flex-1 rounded-lg border border-border bg-muted/50 p-3 text-center">
+                <div className="text-2xl mb-1">&#127760;</div>
+                <div className="text-[10px] font-medium text-foreground">Public Link</div>
+                <div className="text-[8px] text-muted-foreground font-mono">onesheet.cv/you</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Template Showcase (each visually distinct)
 // ---------------------------------------------------------------------------
 
 function TemplateShowcase() {
-  return (
-    <section className="py-20">
-      <div className="max-w-5xl mx-auto px-6">
-        <h2 className="text-2xl font-semibold text-gray-950 text-center mb-12">
-          Templates that respect the one-page rule
-        </h2>
+  const templates = [
+    {
+      name: "Classic",
+      desc: "Traditional serif, ATS-friendly",
+      render: (
+        <div className="p-3 h-full" style={{ fontFamily: "'Crimson Text', serif" }}>
+          <div className="text-center mb-1">
+            <div className="text-[9px] font-bold text-stone-900">Alex Chen</div>
+            <div className="text-[6px] text-stone-500">Senior Frontend Engineer</div>
+            <div className="text-[5px] text-stone-400">alex@email.com | San Francisco, CA</div>
+          </div>
+          <div className="border-t border-stone-300 my-1" />
+          <div className="text-[6px] font-bold text-stone-700 uppercase tracking-wider mb-0.5">Experience</div>
+          <div className="flex justify-between">
+            <span className="text-[6px] font-semibold text-stone-800">Lead Engineer, Acme Inc.</span>
+            <span className="text-[5px] text-stone-400 italic">2022 - Present</span>
+          </div>
+          <div className="text-[5px] text-stone-600 ml-1">&bull; Led migration to React 19</div>
+          <div className="text-[5px] text-stone-600 ml-1">&bull; Built collab features for 50K DAU</div>
+          <div className="flex justify-between mt-1">
+            <span className="text-[6px] font-semibold text-stone-800">Developer, StartupCo</span>
+            <span className="text-[5px] text-stone-400 italic">2019 - 2022</span>
+          </div>
+          <div className="text-[5px] text-stone-600 ml-1">&bull; Architected design system</div>
+          <div className="border-t border-stone-300 my-1" />
+          <div className="text-[6px] font-bold text-stone-700 uppercase tracking-wider mb-0.5">Skills</div>
+          <div className="text-[5px] text-stone-600">TypeScript, React, Next.js, Node.js</div>
+        </div>
+      ),
+    },
+    {
+      name: "Modern",
+      desc: "Clean sans-serif with color accents",
+      render: (
+        <div className="flex h-full" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+          <div className="w-1.5 bg-accent/20 flex-shrink-0" />
+          <div className="p-3 flex-1">
+            <div className="text-[9px] font-bold text-stone-900 mb-0.5">Alex Chen</div>
+            <div className="text-[5px] text-accent font-semibold uppercase tracking-widest mb-1.5">Senior Frontend Engineer</div>
+            <div className="text-[5px] font-bold text-accent uppercase tracking-wider mb-0.5">Experience</div>
+            <div className="text-[6px] font-semibold text-stone-800">Lead Engineer, Acme Inc.</div>
+            <div className="text-[5px] text-stone-400">2022 - Present</div>
+            <div className="text-[5px] text-stone-600 mt-0.5">&bull; Led migration to React 19</div>
+            <div className="text-[5px] text-stone-600">&bull; Built collab features for 50K DAU</div>
+            <div className="mt-1 text-[6px] font-semibold text-stone-800">Developer, StartupCo</div>
+            <div className="text-[5px] text-stone-400">2019 - 2022</div>
+            <div className="mt-1.5 text-[5px] font-bold text-accent uppercase tracking-wider mb-0.5">Skills</div>
+            <div className="flex gap-0.5 flex-wrap">
+              <span className="text-[4px] bg-accent/10 text-accent px-1 rounded">TypeScript</span>
+              <span className="text-[4px] bg-accent/10 text-accent px-1 rounded">React</span>
+              <span className="text-[4px] bg-accent/10 text-accent px-1 rounded">Next.js</span>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      name: "Minimal",
+      desc: "Maximum whitespace, understated",
+      render: (
+        <div className="p-4 h-full" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+          <div className="text-[9px] font-semibold text-stone-900 tracking-tight">Alex Chen</div>
+          <div className="text-[5px] text-stone-400 mt-0.5 mb-3">Senior Frontend Engineer &middot; San Francisco</div>
+          <div className="text-[5px] text-stone-400 uppercase tracking-[0.15em] mb-1">Experience</div>
+          <div className="text-[6px] text-stone-800 font-medium">Lead Engineer, Acme Inc.</div>
+          <div className="text-[5px] text-stone-500 mt-0.5">Led migration to React 19</div>
+          <div className="text-[5px] text-stone-500">Built collab features for 50K DAU</div>
+          <div className="mt-2 text-[6px] text-stone-800 font-medium">Developer, StartupCo</div>
+          <div className="text-[5px] text-stone-500 mt-0.5">Architected design system</div>
+          <div className="mt-3 text-[5px] text-stone-400 uppercase tracking-[0.15em] mb-0.5">Skills</div>
+          <div className="text-[5px] text-stone-600">TypeScript, React, Next.js, Node.js</div>
+        </div>
+      ),
+    },
+    {
+      name: "Technical",
+      desc: "Monospace developer style",
+      render: (
+        <div className="p-3 h-full bg-stone-50" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+          <div className="text-[8px] font-bold text-stone-900">$ whoami</div>
+          <div className="text-[6px] text-stone-600 mb-1.5">Alex Chen // Senior Frontend Engineer</div>
+          <div className="border border-stone-300 rounded p-1.5 mb-1.5">
+            <div className="text-[5px] font-bold text-stone-700 uppercase mb-0.5">// Experience</div>
+            <div className="text-[5px] text-stone-800 font-semibold">Lead Engineer @ Acme Inc.</div>
+            <div className="text-[5px] text-stone-500">2022-present</div>
+            <div className="text-[5px] text-stone-600 mt-0.5">- React 19 migration (-40% bundle)</div>
+            <div className="text-[5px] text-stone-600">- Collab features, 50K DAU</div>
+          </div>
+          <div className="border border-stone-300 rounded p-1.5">
+            <div className="text-[5px] font-bold text-stone-700 uppercase mb-0.5">// Skills</div>
+            <div className="text-[5px] text-stone-600">ts | react | next | node | gql</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      name: "Compact",
+      desc: "Two-column high density layout",
+      render: (
+        <div className="p-2 h-full flex gap-2" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+          <div className="w-1/3 bg-stone-100 rounded p-1.5">
+            <div className="text-[7px] font-bold text-stone-900 mb-1">Alex Chen</div>
+            <div className="text-[4px] text-stone-500 mb-1.5">Frontend Engineer<br />San Francisco, CA</div>
+            <div className="text-[4px] font-bold text-stone-700 uppercase mb-0.5">Skills</div>
+            <div className="text-[4px] text-stone-600 leading-relaxed">TypeScript<br />React<br />Next.js<br />Node.js<br />GraphQL</div>
+          </div>
+          <div className="flex-1">
+            <div className="text-[5px] font-bold text-stone-700 uppercase mb-0.5">Experience</div>
+            <div className="text-[5px] font-semibold text-stone-800">Lead Engineer, Acme</div>
+            <div className="text-[4px] text-stone-400">2022 - Present</div>
+            <div className="text-[4px] text-stone-600">&bull; React 19 migration</div>
+            <div className="text-[4px] text-stone-600">&bull; 50K DAU collab features</div>
+            <div className="text-[4px] text-stone-600">&bull; Mentored 6 engineers</div>
+            <div className="mt-1 text-[5px] font-semibold text-stone-800">Developer, StartupCo</div>
+            <div className="text-[4px] text-stone-400">2019 - 2022</div>
+            <div className="text-[4px] text-stone-600">&bull; Design system (12 products)</div>
+            <div className="text-[4px] text-stone-600">&bull; Lighthouse 45 to 98</div>
+          </div>
+        </div>
+      ),
+    },
+  ];
 
-        {/* Mobile: horizontal scroll; Desktop: 5-column grid */}
-        <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-5 md:overflow-visible md:pb-0">
-          {PRESET_LIST.map((template) => (
-            <div
-              key={template.id}
-              className="flex-shrink-0 w-40 md:w-auto snap-start"
-            >
-              {/* Thumbnail — US Letter aspect ratio (1:1.294) */}
-              <div
-                className="bg-gray-100 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
-                style={{ aspectRatio: "1 / 1.294" }}
-              >
-                {/* Placeholder content simulating a resume */}
-                <div className="p-3 flex flex-col gap-1.5 h-full">
-                  <div className="h-2.5 w-2/3 rounded bg-gray-400" />
-                  <div className="h-1.5 w-1/2 rounded bg-gray-300" />
-                  <div className="mt-1 h-px bg-gray-300" />
-                  <div className="h-1.5 w-1/3 rounded bg-gray-400" />
-                  <div className="h-1.5 w-full rounded bg-gray-200" />
-                  <div className="h-1.5 w-full rounded bg-gray-200" />
-                  <div className="h-1.5 w-4/5 rounded bg-gray-200" />
-                  <div className="mt-0.5 h-1.5 w-1/3 rounded bg-gray-400" />
-                  <div className="h-1.5 w-full rounded bg-gray-200" />
-                  <div className="h-1.5 w-3/4 rounded bg-gray-200" />
-                  <div className="h-1.5 w-full rounded bg-gray-200" />
-                  <div className="mt-0.5 h-1.5 w-1/3 rounded bg-gray-400" />
-                  <div className="h-1.5 w-full rounded bg-gray-200" />
-                  <div className="h-1.5 w-2/3 rounded bg-gray-200" />
-                </div>
+  return (
+    <section id="templates" className="py-20 px-6 bg-muted/40">
+      <div className="max-w-5xl mx-auto text-center">
+        <p className="text-accent font-semibold text-sm tracking-wide uppercase mb-2">Templates</p>
+        <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-3">
+          Five templates. All one page.
+        </h2>
+        <p className="text-muted-foreground max-w-lg mx-auto mb-10">
+          Classic serif, clean sans, monospace dev, high-density compact. Pick the voice that fits your career.
+        </p>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {templates.map((t) => (
+            <div key={t.name} className="group">
+              <div className="bg-white rounded-lg border border-border shadow-sm overflow-hidden h-48 transition-shadow hover:shadow-md">
+                {t.render}
               </div>
-              <p className="mt-2 text-sm font-medium text-center text-gray-700">
-                {template.name}
-              </p>
+              <p className="mt-2 text-sm font-medium text-foreground">{t.name}</p>
+              <p className="text-xs text-muted-foreground">{t.desc}</p>
             </div>
           ))}
         </div>
@@ -197,123 +554,114 @@ function TemplateShowcase() {
 // Pricing
 // ---------------------------------------------------------------------------
 
-const FREE_FEATURES = [
-  "Markdown editor with live preview",
-  "1 template",
-  "Public profile link (with OneSheet branding)",
-  "1 resume",
-];
+function Pricing() {
+  const freeFeatures = [
+    "Markdown editor with live preview",
+    "1 resume",
+    "Classic template",
+    "Public profile page",
+    "Version history",
+  ];
 
-const PRO_FEATURES = [
-  "Everything in Free",
-  "All templates",
-  "PDF export",
-  "Remove OneSheet branding",
-  "Up to 3 resume variants",
-  "Version history",
-  "Profile analytics",
-];
-
-function PricingCard({
-  title,
-  price,
-  features,
-  cta,
-  to,
-  variant,
-  badge,
-}: {
-  title: string;
-  price: string;
-  features: string[];
-  cta: string;
-  to: string;
-  variant: "free" | "pro";
-  badge?: string;
-}) {
-  const isPro = variant === "pro";
+  const proFeatures = [
+    "Everything in Free, plus:",
+    "Up to 3 resumes",
+    "All 5 templates",
+    "PDF export (ATS-optimized)",
+    "AI bullet polish + job match",
+    "Custom QR code on profile",
+    "No OneSheet branding",
+    "API access for agents",
+  ];
 
   return (
-    <div
-      className={[
-        "relative rounded-lg p-6 flex flex-col gap-6",
-        isPro
-          ? "border-2 border-brand-500"
-          : "border border-gray-200",
-      ].join(" ")}
-    >
-      {badge && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-50 text-brand-700 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">
-          {badge}
-        </span>
-      )}
+    <section id="pricing" className="py-20 px-6">
+      <div className="max-w-3xl mx-auto text-center">
+        <p className="text-accent font-semibold text-sm tracking-wide uppercase mb-2">Pricing</p>
+        <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-3">
+          Simple, honest pricing
+        </h2>
+        <p className="text-muted-foreground mb-10">
+          Start free. Upgrade when you need PDF export and all templates.
+        </p>
 
-      <div>
-        <h3 className="text-base font-semibold text-gray-950">{title}</h3>
-        <p className="mt-1 text-3xl font-semibold text-gray-950">{price}</p>
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Free */}
+          <div className="rounded-xl border border-border bg-card p-8 text-left">
+            <h3 className="font-heading text-xl font-semibold text-foreground">Free</h3>
+            <p className="text-3xl font-bold text-foreground mt-2">$0</p>
+            <p className="text-sm text-muted-foreground mt-1 mb-6">Forever free</p>
+            <ul className="space-y-2.5">
+              {freeFeatures.map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm text-foreground">
+                  <Check className="w-4 h-4 text-success flex-shrink-0 mt-0.5" strokeWidth={2} />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Link to="/sign-up" className="block mt-8">
+              <Button variant="secondary" className="w-full text-sm">
+                Get started
+              </Button>
+            </Link>
+          </div>
+
+          {/* Pro */}
+          <div className="rounded-xl border-2 border-accent bg-card p-8 text-left relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white text-xs font-semibold px-3 py-0.5 rounded-full">
+              Popular
+            </div>
+            <h3 className="font-heading text-xl font-semibold text-foreground">Pro</h3>
+            <p className="text-3xl font-bold text-foreground mt-2">${PRO_PRICE_MONTHLY}<span className="text-base font-normal text-muted-foreground">/mo</span></p>
+            <p className="text-sm text-muted-foreground mt-1 mb-6">Cancel anytime</p>
+            <ul className="space-y-2.5">
+              {proFeatures.map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm text-foreground">
+                  <Check className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" strokeWidth={2} />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Link to="/sign-up" className="block mt-8">
+              <Button variant="primary" className="w-full text-sm">
+                Upgrade to Pro
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
-
-      <ul className="flex flex-col gap-2.5 flex-1">
-        {features.map((feature) => (
-          <li key={feature} className="flex items-start gap-2 text-sm text-gray-700">
-            <Check
-              className={isPro ? "text-brand-500" : "text-gray-400"}
-              size={16}
-              strokeWidth={2}
-              style={{ marginTop: 1, flexShrink: 0 }}
-            />
-            {feature}
-          </li>
-        ))}
-      </ul>
-
-      <Link to={to}>
-        <Button
-          variant={isPro ? "primary" : "secondary"}
-          className="w-full"
-        >
-          {cta}
-        </Button>
-      </Link>
-    </div>
+    </section>
   );
 }
 
-function Pricing() {
+// ---------------------------------------------------------------------------
+// Final CTA
+// ---------------------------------------------------------------------------
+
+function FinalCTA() {
   return (
-    <section className="bg-gray-50 border-y border-gray-200 py-20">
-      <div className="max-w-2xl mx-auto px-6">
-        <h2 className="text-2xl font-semibold text-gray-950 text-center mb-12">
-          Simple pricing
+    <section className="relative py-24 px-6 overflow-hidden">
+      <img
+        src="/images/cta-professional.jpg"
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-primary/90" />
+      <div className="relative max-w-2xl mx-auto text-center">
+        <h2 className="font-heading text-3xl md:text-4xl font-semibold text-white mb-4">
+          Your next opportunity starts with one page.
         </h2>
-
-        {/* Mobile: Pro first; Desktop: side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Pro card — rendered first in DOM so it appears first on mobile */}
-          <div className="order-1 md:order-2 pt-4">
-            <PricingCard
-              title="Pro"
-              price={`$${PRO_PRICE_MONTHLY}/mo`}
-              features={PRO_FEATURES}
-              cta="Start writing"
-              to="/sign-up"
-              variant="pro"
-              badge="Most popular"
-            />
-          </div>
-
-          {/* Free card */}
-          <div className="order-2 md:order-1">
-            <PricingCard
-              title="Free"
-              price="$0"
-              features={FREE_FEATURES}
-              cta="Get started"
-              to="/sign-up"
-              variant="free"
-            />
-          </div>
-        </div>
+        <p className="text-white/60 mb-8 max-w-md mx-auto">
+          Join thousands of developers who write their resume in Markdown and never look back.
+        </p>
+        <Link to="/sign-up">
+          <Button
+            variant="primary"
+            className="bg-white text-foreground hover:bg-white/90 text-sm px-6 py-2.5"
+          >
+            Build yours free
+          </Button>
+        </Link>
       </div>
     </section>
   );
@@ -324,23 +672,17 @@ function Pricing() {
 // ---------------------------------------------------------------------------
 
 function Footer() {
-  const year = new Date().getFullYear();
-
   return (
-    <footer className="bg-gray-50 border-t border-gray-200 py-8">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-gray-950">OneSheet</span>
-          <span>&mdash;</span>
-          <span>&copy; {year} All rights reserved.</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <Link to="/privacy" className="hover:text-gray-900 transition-colors">
-            Privacy
-          </Link>
-          <Link to="/terms" className="hover:text-gray-900 transition-colors">
-            Terms
-          </Link>
+    <footer className="py-8 px-6 border-t border-border">
+      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <Link to="/" className="font-heading text-sm font-semibold text-foreground">
+          OneSheet
+        </Link>
+        <div className="flex items-center gap-6 text-xs text-muted-foreground">
+          <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+          <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+          <Link to="/docs" className="hover:text-foreground transition-colors">API</Link>
+          <span>&copy; {new Date().getFullYear()}</span>
         </div>
       </div>
     </footer>
@@ -348,19 +690,19 @@ function Footer() {
 }
 
 // ---------------------------------------------------------------------------
-// Landing (page)
+// Landing Page
 // ---------------------------------------------------------------------------
 
 export function Landing() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-background">
       <LandingNav />
-      <main className="flex-1">
-        <Hero />
-        <HowItWorks />
-        <TemplateShowcase />
-        <Pricing />
-      </main>
+      <Hero />
+      <InkDivider />
+      <Features />
+      <TemplateShowcase />
+      <Pricing />
+      <FinalCTA />
       <Footer />
     </div>
   );

@@ -25,10 +25,10 @@ interface ProfileData {
 
 function ProfileNav() {
   return (
-    <header className="h-12 bg-white border-b border-gray-200 flex items-center px-6">
+    <header className="h-12 bg-card/90 backdrop-blur-sm border-b border-border flex items-center px-6">
       <Link
         to="/"
-        className="text-base font-semibold tracking-tight text-gray-950 hover:text-brand-500 transition-colors"
+        className="text-base font-semibold font-heading tracking-tight text-foreground hover:text-primary transition-colors"
       >
         OneSheet
       </Link>
@@ -56,15 +56,15 @@ function ProfileSkeleton() {
 function ProfileNotFound() {
   return (
     <div className="flex flex-col items-center justify-center flex-1 gap-4 py-24 text-center px-4">
-      <p className="text-xl font-semibold text-gray-900">
+      <p className="text-xl font-semibold text-foreground">
         This profile doesn't exist
       </p>
-      <p className="text-gray-500">
+      <p className="text-muted-foreground">
         The username you're looking for hasn't been claimed yet.
       </p>
       <Link
         to="/sign-up"
-        className="mt-2 inline-flex items-center justify-center rounded-md bg-brand-500 px-5 py-2 text-sm font-medium text-white hover:bg-brand-600 transition-colors"
+        className="mt-2 inline-flex items-center justify-center rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-600 transition-colors"
       >
         Create your own OneSheet
       </Link>
@@ -133,7 +133,7 @@ export function PublicProfile() {
         if (cancelled) return;
 
         setData(json);
-        document.title = `${json.displayName} — Resume | OneSheet`;
+        document.title = `${json.displayName} | Resume | OneSheet`;
       } catch {
         if (!cancelled) setNotFound(true);
       } finally {
@@ -153,7 +153,7 @@ export function PublicProfile() {
   const canDownload = isOwner && user?.subscription?.status === "active";
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-background">
       {(!data || data.showBranding) && <ProfileNav />}
 
       {loading && (
@@ -184,15 +184,15 @@ export function PublicProfile() {
           />
 
           {data.showBranding && (
-            <footer className="text-xs text-gray-400 text-center py-4">
+            <footer className="text-xs text-muted-foreground text-center py-4">
               Built with{" "}
-              <Link to="/" className="hover:text-brand-500 transition-colors">
+              <Link to="/" className="hover:text-primary transition-colors">
                 OneSheet
               </Link>{" "}
-              —{" "}
+              /{" "}
               <Link
                 to="/sign-up"
-                className="hover:text-brand-500 transition-colors"
+                className="hover:text-primary transition-colors"
               >
                 Create yours
               </Link>

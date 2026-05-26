@@ -61,8 +61,8 @@ const FONT_GROUPS = (() => {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <details open className="group">
-      <summary className="flex items-center cursor-pointer select-none text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 list-none [&::-webkit-details-marker]:hidden">
-        <span className="mr-1.5 text-[10px] text-gray-400 transition-transform group-open:rotate-90">&#9654;</span>
+      <summary className="flex items-center cursor-pointer select-none text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 list-none [&::-webkit-details-marker]:hidden">
+        <span className="mr-1.5 text-[10px] text-muted-foreground/60 transition-transform group-open:rotate-90">&#9654;</span>
         {title}
       </summary>
       <div className="space-y-3 pb-1">{children}</div>
@@ -72,7 +72,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Label({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
   return (
-    <label htmlFor={htmlFor} className="block text-sm text-gray-700">
+    <label htmlFor={htmlFor} className="block text-sm text-foreground">
       {children}
     </label>
   );
@@ -88,7 +88,7 @@ function FieldRow({ label, htmlFor, children }: { label: string; htmlFor?: strin
 }
 
 const selectClasses =
-  "h-8 px-2 text-sm rounded border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent";
+  "h-8 px-2 text-sm rounded border border-input bg-card focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent";
 
 // ---------------------------------------------------------------------------
 // Font Select (shared for display / body)
@@ -184,7 +184,7 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
   // Render
   // -----------------------------------------------------------------------
   return (
-    <div className="h-full overflow-y-auto p-4 space-y-6 bg-white">
+    <div className="h-full overflow-y-auto p-4 space-y-6 bg-card">
       {/* ---------------------------------------------------------------- */}
       {/* Presets                                                           */}
       {/* ---------------------------------------------------------------- */}
@@ -198,12 +198,12 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
               className={[
                 "text-left rounded-lg border p-2.5 transition-shadow",
                 styles.preset === preset.id
-                  ? "ring-2 ring-brand-500 ring-offset-2 border-brand-300"
-                  : "border-gray-200 hover:border-gray-300",
+                  ? "ring-2 ring-ring ring-offset-2 border-primary/50"
+                  : "border-border hover:border-input",
               ].join(" ")}
             >
-              <div className="text-sm font-bold text-gray-900 leading-tight">{preset.name}</div>
-              <div className="text-xs text-gray-500 leading-snug mt-0.5">{preset.description}</div>
+              <div className="text-sm font-bold text-foreground leading-tight">{preset.name}</div>
+              <div className="text-xs text-muted-foreground leading-snug mt-0.5">{preset.description}</div>
             </button>
           ))}
         </div>
@@ -224,7 +224,7 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
         <div>
           <div className="flex items-center justify-between mb-1">
             <Label htmlFor="dp-font-size">Font size</Label>
-            <span className="text-xs text-gray-500 tabular-nums">{styles.fontSize}px</span>
+            <span className="text-xs text-muted-foreground tabular-nums">{styles.fontSize}px</span>
           </div>
           <input
             id="dp-font-size"
@@ -234,14 +234,14 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
             step={0.5}
             value={styles.fontSize}
             onChange={(e) => updateStyle("fontSize", parseFloat(e.target.value))}
-            className="w-full accent-brand-500"
+            className="w-full accent-primary"
           />
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
             <Label htmlFor="dp-line-height">Line height</Label>
-            <span className="text-xs text-gray-500 tabular-nums">{styles.lineHeight.toFixed(1)}</span>
+            <span className="text-xs text-muted-foreground tabular-nums">{styles.lineHeight.toFixed(1)}</span>
           </div>
           <input
             id="dp-line-height"
@@ -251,7 +251,7 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
             step={0.1}
             value={styles.lineHeight}
             onChange={(e) => updateStyle("lineHeight", parseFloat(e.target.value))}
-            className="w-full accent-brand-500"
+            className="w-full accent-primary"
           />
         </div>
       </Section>
@@ -277,7 +277,7 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
                   }}
                   className={[
                     "w-6 h-6 rounded-full flex items-center justify-center transition-shadow",
-                    selected ? "ring-2 ring-brand-500 ring-offset-2" : "hover:ring-2 hover:ring-gray-300 hover:ring-offset-1",
+                    selected ? "ring-2 ring-ring ring-offset-2" : "hover:ring-2 hover:ring-border hover:ring-offset-1",
                   ].join(" ")}
                   style={{ backgroundColor: color.hex }}
                 >
@@ -298,8 +298,8 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
                 "w-6 h-6 rounded-full flex items-center justify-center transition-shadow",
                 "border-2",
                 isCustomColor
-                  ? "ring-2 ring-brand-500 ring-offset-2"
-                  : "hover:ring-2 hover:ring-gray-300 hover:ring-offset-1",
+                  ? "ring-2 ring-ring ring-offset-2"
+                  : "hover:ring-2 hover:ring-border hover:ring-offset-1",
               ].join(" ")}
               style={{
                 borderImage: "conic-gradient(red, yellow, lime, aqua, blue, magenta, red) 1",
@@ -336,7 +336,7 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
                     updateStyle("accentColor", v);
                   }
                 }}
-                className="h-8 w-28 px-2 text-sm rounded border border-gray-300 bg-white font-mono focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="h-8 w-28 px-2 text-sm rounded border border-input bg-card font-mono focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               />
             </div>
           )}
@@ -363,8 +363,8 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
                 className={[
                   "flex items-center justify-center w-9 h-8 rounded transition-colors",
                   styles.headerAlignment === value
-                    ? "bg-gray-200 text-gray-900"
-                    : "text-gray-500 hover:bg-gray-100",
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:bg-muted",
                 ].join(" ")}
               >
                 <Icon className="w-4 h-4" strokeWidth={1.5} />
@@ -426,7 +426,7 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
             onClick={() => updateStyle("showHeaderDivider", !styles.showHeaderDivider)}
             className={[
               "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
-              styles.showHeaderDivider ? "bg-brand-500" : "bg-gray-300",
+              styles.showHeaderDivider ? "bg-primary" : "bg-muted-foreground/30",
             ].join(" ")}
           >
             <span
@@ -446,7 +446,7 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
             onClick={() => updateStyle("showSectionDividers", !styles.showSectionDividers)}
             className={[
               "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
-              styles.showSectionDividers ? "bg-brand-500" : "bg-gray-300",
+              styles.showSectionDividers ? "bg-primary" : "bg-muted-foreground/30",
             ].join(" ")}
           >
             <span
@@ -532,17 +532,17 @@ export function DesignPanel({ styles, onStylesChange }: DesignPanelProps) {
       {/* ---------------------------------------------------------------- */}
       {/* Reset                                                             */}
       {/* ---------------------------------------------------------------- */}
-      <div className="pt-2 border-t border-gray-200">
+      <div className="pt-2 border-t border-border">
         <button
           type="button"
           onClick={handleReset}
           disabled={!hasCustomizations(styles)}
           className={[
             "inline-flex items-center gap-1.5 text-sm font-medium rounded-md px-3 h-8 transition-colors",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             hasCustomizations(styles)
-              ? "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
-              : "text-gray-400 cursor-not-allowed",
+              ? "text-foreground hover:bg-muted active:bg-muted/80"
+              : "text-muted-foreground cursor-not-allowed",
           ].join(" ")}
         >
           <RotateCcw className="w-3.5 h-3.5" strokeWidth={1.5} />

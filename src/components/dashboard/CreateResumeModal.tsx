@@ -71,7 +71,7 @@ export function CreateResumeModal({ isOpen, onClose }: CreateResumeModalProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="resume-title-input"
-            className="text-sm font-medium text-gray-700"
+            className="text-sm font-medium text-foreground"
           >
             Title
           </label>
@@ -85,16 +85,16 @@ export function CreateResumeModal({ isOpen, onClose }: CreateResumeModalProps) {
             placeholder="e.g., Frontend, Backend, Startup"
             maxLength={80}
             className={[
-              "h-9 px-3 text-sm rounded-md border border-gray-300",
-              "focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent",
-              "placeholder:text-gray-400",
+              "h-9 px-3 text-sm rounded-md border border-input",
+              "focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent",
+              "placeholder:text-muted-foreground",
             ].join(" ")}
           />
         </div>
 
         {/* Starter template picker */}
         <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-foreground">
             Start from
           </span>
           <div className="grid grid-cols-2 gap-2">
@@ -108,14 +108,14 @@ export function CreateResumeModal({ isOpen, onClose }: CreateResumeModalProps) {
                   className={[
                     "relative text-left rounded-md border p-2.5 text-sm transition-colors",
                     selected
-                      ? "border-brand-500 bg-brand-50 ring-1 ring-brand-500"
-                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
+                      ? "border-primary bg-secondary ring-1 ring-primary"
+                      : "border-border hover:border-border/80 hover:bg-muted",
                   ].join(" ")}
                 >
-                  <p className="font-medium text-gray-900">{t.label}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{t.description}</p>
+                  <p className="font-medium text-foreground">{t.label}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t.description}</p>
                   {selected && (
-                    <Check className="absolute top-2 right-2 w-4 h-4 text-brand-500" strokeWidth={2} />
+                    <Check className="absolute top-2 right-2 w-4 h-4 text-primary" strokeWidth={2} />
                   )}
                 </button>
               );

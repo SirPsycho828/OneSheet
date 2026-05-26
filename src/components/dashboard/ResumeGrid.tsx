@@ -44,7 +44,7 @@ function sortResumes(
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col shadow-sm">
+    <div className="bg-card rounded-lg border border-border overflow-hidden flex flex-col shadow-sm">
       {/* Thumbnail skeleton */}
       <div className="hidden sm:block w-full">
         <Skeleton height={337} className="w-full rounded-none" />
@@ -74,11 +74,11 @@ function AddCard({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       className={[
-        "bg-white rounded-lg border-2 border-dashed border-gray-300",
+        "bg-card rounded-lg border-2 border-dashed border-border",
         "flex flex-col items-center justify-center gap-2 p-8",
-        "text-gray-400 hover:text-gray-600 hover:border-gray-400",
+        "text-muted-foreground hover:text-foreground hover:border-border/80",
         "transition-colors cursor-pointer min-h-[160px]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
       ].join(" ")}
       aria-label="Create new resume"
     >
@@ -95,11 +95,11 @@ function AddCard({ onClick }: { onClick: () => void }) {
 function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-      <p className="text-gray-500 text-base">No resumes yet.</p>
+      <p className="text-muted-foreground text-base">No resumes yet.</p>
       <button
         type="button"
         onClick={onCreateClick}
-        className="text-brand-500 hover:underline text-sm font-medium focus-visible:outline-none"
+        className="text-primary hover:underline text-sm font-medium focus-visible:outline-none"
       >
         Create your first resume
       </button>

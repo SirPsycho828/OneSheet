@@ -210,9 +210,9 @@ export function Editor() {
   // ---------------------------------------------------------------------------
   if (isLoading) {
     return (
-      <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+      <div className="flex flex-col h-screen bg-background overflow-hidden">
         {/* Nav skeleton */}
-        <div className="h-14 flex items-center gap-4 px-4 border-b border-gray-200 bg-white flex-shrink-0">
+        <div className="h-14 flex items-center gap-4 px-4 border-b border-border bg-card flex-shrink-0">
           <Skeleton width={80} height={20} />
           <div className="flex-1 flex justify-center">
             <Skeleton width={180} height={18} />
@@ -225,12 +225,12 @@ export function Editor() {
 
         {/* Editor skeleton — two panels */}
         <div className="flex flex-1 overflow-hidden">
-          <div className="w-1/2 p-6 flex flex-col gap-3 border-r border-gray-200">
+          <div className="w-1/2 p-6 flex flex-col gap-3 border-r border-border">
             {Array.from({ length: 12 }).map((_, i) => (
               <Skeleton key={i} variant="text" width={`${60 + (i % 5) * 8}%`} />
             ))}
           </div>
-          <div className="flex-1 flex justify-center items-start pt-8 px-4 bg-gray-50">
+          <div className="flex-1 flex justify-center items-start pt-8 px-4 bg-muted">
             <div className="flex flex-col gap-4" style={{ width: 500 }}>
               <Skeleton height={32} className="w-1/2 mx-auto" />
               {Array.from({ length: 8 }).map((_, i) => (
@@ -241,7 +241,7 @@ export function Editor() {
         </div>
 
         {/* Status bar skeleton */}
-        <div className="h-8 bg-gray-50 border-t border-gray-200" />
+        <div className="h-8 bg-muted border-t border-border" />
       </div>
     );
   }
@@ -250,7 +250,7 @@ export function Editor() {
   const previewMarkdown = previewingVersion?.markdown ?? markdown;
 
   return (
-    <div className="flex flex-col h-screen bg-white overflow-hidden">
+    <div className="flex flex-col h-screen bg-card overflow-hidden">
       <AppNav
         title={title}
         onTitleChange={setTitle}
