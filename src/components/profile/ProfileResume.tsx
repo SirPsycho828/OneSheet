@@ -1,3 +1,7 @@
+import * as React from "react";
+import { stylesToCssVars, stylesToDataAttrs } from "../../lib/styleUtils";
+import { deriveStyles } from "../../constants/presets";
+import type { ResumeStyles } from "../../types/resume";
 
 // Paper dimensions at 96 DPI — must match PaperContainer and PDF lib
 const PAPER_DIMENSIONS = {
@@ -10,6 +14,7 @@ interface ProfileResumeProps {
   templateId: string;
   paperSize: "us-letter" | "a4";
   scaleFactor: number;
+  styles?: ResumeStyles;
 }
 
 /**
@@ -23,9 +28,14 @@ export function ProfileResume({
   templateId,
   paperSize,
   scaleFactor,
+  styles,
 }: ProfileResumeProps) {
+  const resolvedStyles = styles ?? deriveStyles(templateId, paperSize ?? "us-letter");
   const { width: paperWidth, height: paperHeight } =
-    PAPER_DIMENSIONS[paperSize];
+    PAPER_DIMENSIONS[resolvedStyles.pageSize];
+  const pageMarginPx = Math.round(resolvedStyles.pageMargin * 96);
+  const cssVars = stylesToCssVars(resolvedStyles);
+  const dataAttrs = stylesToDataAttrs(resolvedStyles);
 
   return (
     <>
@@ -38,7 +48,7 @@ export function ProfileResume({
           className="bg-white shadow-lg overflow-hidden"
           style={{ width: paperWidth, height: paperHeight, flexShrink: 0 }}
         >
-          <div style={{ padding: "48px" }}>
+          <div style={{ padding: pageMarginPx }}>
             <div
               style={
                 scaleFactor < 1
@@ -50,11 +60,14 @@ export function ProfileResume({
                   : undefined
               }
             >
-              <div
-                className="resume-content"
-                data-template={templateId}
-                dangerouslySetInnerHTML={{ __html: resumeHtml }}
-              />
+              {/* data-preset on parent, .resume-content as child — required by CSS descendant selectors */}
+              <div {...dataAttrs}>
+                <div
+                  className="resume-content"
+                  style={cssVars as React.CSSProperties}
+                  dangerouslySetInnerHTML={{ __html: resumeHtml }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -63,12 +76,15 @@ export function ProfileResume({
       {/* Mobile view — full-width, no paper simulation */}
       <div className="md:hidden px-4 py-6">
         <div className="bg-white">
-          <div style={{ padding: "24px" }}>
-            <div
-              className="resume-content"
-              data-template={templateId}
-              dangerouslySetInnerHTML={{ __html: resumeHtml }}
-            />
+          <div style={{ padding: pageMarginPx }}>
+            {/* data-preset on parent, .resume-content as child — required by CSS descendant selectors */}
+            <div {...dataAttrs}>
+              <div
+                className="resume-content"
+                style={cssVars as React.CSSProperties}
+                dangerouslySetInnerHTML={{ __html: resumeHtml }}
+              />
+            </div>
           </div>
         </div>
       </div>

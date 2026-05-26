@@ -6,6 +6,7 @@ import { ProfileResume } from "../components/profile/ProfileResume";
 import { ProfileActions } from "../components/profile/ProfileActions";
 import { Skeleton } from "../components/ui/Skeleton";
 import { useAuth } from "../hooks/useAuth";
+import type { ResumeStyles } from "../types/resume";
 
 interface ProfileData {
   displayName: string;
@@ -15,6 +16,7 @@ interface ProfileData {
   scaleFactor: number;
   lastUpdated: string | null;
   showBranding: boolean;
+  styles?: ResumeStyles;
 }
 
 // ---------------------------------------------------------------------------
@@ -173,6 +175,7 @@ export function PublicProfile() {
             templateId={data.templateId}
             paperSize={data.paperSize}
             scaleFactor={data.scaleFactor}
+            styles={data.styles}
           />
 
           <ProfileActions
