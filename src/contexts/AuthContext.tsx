@@ -11,6 +11,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../config/firebase";
 import type { User, AuthState } from "../types/user";
 
+const ADMIN_EMAIL = "steve.petusky@gmail.com";
+
 interface AuthContextValue {
   authState: AuthState;
   user: User | null;
@@ -36,7 +38,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const userData = userDoc.data() as User;
+      let userData = { ...userDoc.data(), uid: fbUser.uid } as User;
+
+      // Admin tier override: force subscription status for testing
+      if (fbUser.email === ADMIN_EMAIL) {
+        try {
+          const adminSnap = await getDoc(doc(db, "config", "admin"));
+          const tierOverride = adminSnap.data()?.tierOverride as string | undefined;
+          if (tierOverride === "free" || tierOverride === "pro") {
+            userData = {
+              ...userData,
+              subscription: {
+                ...userData.subscription,
+                status: tierOverride === "pro" ? "active" : "free",
+              },
+            };
+          }
+        } catch {
+          // If config/admin doesn't exist, default to real subscription
+        }
+      }
 
       if (!userData.onboardingComplete || !userData.username) {
         setUser(userData);
