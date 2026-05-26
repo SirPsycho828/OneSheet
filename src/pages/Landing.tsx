@@ -88,9 +88,18 @@ function ResumePreview({ markdown }: { markdown: string }) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (line.startsWith("# ")) {
+      // Collect the header block (name + following non-section lines)
+      const headerLines: string[] = [line.slice(2)];
+      while (i + 1 < lines.length && lines[i + 1].trim() !== "" && !lines[i + 1].startsWith("#")) {
+        i++;
+        headerLines.push(lines[i]);
+      }
       elements.push(
-        <div key={i} className="text-center mb-0.5">
-          <div className="text-xs font-bold text-stone-900">{line.slice(2)}</div>
+        <div key={i} className="text-center mb-1">
+          <div className="text-xs font-bold text-stone-900">{headerLines[0]}</div>
+          {headerLines.slice(1).map((hl, j) => (
+            <div key={`h${j}`} className="text-[7px] text-stone-500">{hl}</div>
+          ))}
         </div>
       );
     } else if (line.startsWith("## ")) {
