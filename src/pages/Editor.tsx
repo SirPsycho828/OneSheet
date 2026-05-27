@@ -326,7 +326,7 @@ export function Editor() {
           markdown={markdown}
           onMarkdownChange={setMarkdown}
           onClose={() => setIsAIPanelOpen(false)}
-          resumeId={resolvedResumeId}
+          resumeId={resolvedResumeId ?? undefined}
         />
       )}
 

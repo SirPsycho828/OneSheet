@@ -200,6 +200,8 @@ export function ResumeCard({
         paperSize: resume.paperSize,
         overflow: resume.overflow,
         styles: resolvedStyles,
+        showQrCode: resume.showQrCode ?? false,
+        qrCodeUrl: resume.qrCodeUrl ?? null,
       });
       onResumesChange();
       toast.success("Resume duplicated.");

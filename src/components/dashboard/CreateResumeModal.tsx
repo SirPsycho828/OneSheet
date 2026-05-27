@@ -51,6 +51,8 @@ export function CreateResumeModal({ isOpen, onClose }: CreateResumeModalProps) {
         paperSize,
         overflow: { isOverflowing: false, scaleFactor: 1 },
         styles: { ...PRESET_DEFAULTS.classic, pageSize: paperSize },
+        showQrCode: false,
+        qrCodeUrl: null,
       });
       onClose();
       navigate(`/editor/${newId}`);
