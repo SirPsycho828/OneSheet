@@ -5,8 +5,29 @@ import { renderMarkdown } from "../lib/markdown";
 import { deriveStyles } from "../lib/styleUtils";
 import { postProcessHtml } from "../lib/postProcess";
 import { getAdminTierStatus } from "../lib/adminUtils";
+import { checkRateLimit } from "../middleware/rateLimit";
 
 const router = Router();
+
+async function rateLimitByIp(
+  req: Request,
+  res: Response,
+  next: () => void
+): Promise<void> {
+  const clientIp = req.ip ?? req.socket.remoteAddress ?? "unknown";
+  const result = await checkRateLimit(`public:${clientIp}`);
+  if (!result.allowed) {
+    res.setHeader("Retry-After", String(result.retryAfterSeconds ?? 60));
+    res.status(429).json({
+      error: {
+        code: "RATE_LIMIT_EXCEEDED",
+        message: "Too many requests. Please slow down.",
+      },
+    });
+    return;
+  }
+  next();
+}
 
 /**
  * GET /api/profile/:username
@@ -14,7 +35,7 @@ const router = Router();
  * Public profile data — no auth required.
  * Returns rendered resume HTML and metadata for the user's default resume.
  */
-router.get("/:username", async (req: Request, res: Response): Promise<void> => {
+router.get("/:username", rateLimitByIp, async (req: Request, res: Response): Promise<void> => {
   const username = String(req.params.username);
   const db = admin.firestore();
 
@@ -33,7 +54,7 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
         .get();
 
       if (redirectDoc.exists) {
-        const newUsername = redirectDoc.data()!.redirectTo;
+        const newUsername = redirectDoc.data()?.redirectTo;
         res.redirect(301, `/api/profile/${encodeURIComponent(newUsername)}`);
         return;
       }
@@ -44,7 +65,13 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const uid = usernameDoc.data()!.uid;
+    const uid = usernameDoc.data()?.uid;
+    if (!uid) {
+      res.status(404).json({
+        error: { code: "NOT_FOUND", message: "Profile not found" },
+      });
+      return;
+    }
 
     // 2. Get user doc for display name + subscription
     const userDoc = await db.collection("users").doc(uid).get();
@@ -55,7 +82,7 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const userData = userDoc.data()! // safe: exists check above;
+    const userData = userDoc.data() ?? {};
 
     // 3. Get default resume
     const resumesSnap = await db
@@ -150,10 +177,16 @@ router.get(
         return;
       }
 
-      const uid = usernameDoc.data()!.uid;
+      const uid = usernameDoc.data()?.uid;
+      if (!uid) {
+        res.status(404).json({
+          error: { code: "NOT_FOUND", message: "Profile not found" },
+        });
+        return;
+      }
       const userDoc = await db.collection("users").doc(uid).get();
       const displayName = userDoc.exists
-        ? (userDoc.data()!.displayName ?? username)
+        ? (userDoc.data()?.displayName ?? username)
         : username;
 
       res.setHeader("Cache-Control", "public, max-age=3600");

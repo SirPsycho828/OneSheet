@@ -119,8 +119,14 @@ async function requirePaidUser(
     return null;
   }
 
-  const userData = userDoc.data()!; // safe: exists check above
-  const subscriptionStatus: string = userData?.subscription?.status ?? "free";
+  const userData = userDoc.data();
+  if (!userData) {
+    res.status(403).json({
+      error: { code: "USER_NOT_FOUND", message: "User not found" },
+    });
+    return null;
+  }
+  const subscriptionStatus: string = userData.subscription?.status ?? "free";
   const isPro = adminTier.isAdmin ? adminTier.isPro : subscriptionStatus === "active";
 
   if (!isPro) {
@@ -290,7 +296,7 @@ router.delete(
         return;
       }
 
-      if (keyDoc.data()!.userId !== userId) {
+      if (keyDoc.data()?.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this API key" },
         });
@@ -331,7 +337,7 @@ router.post(
         return;
       }
 
-      if (keyDoc.data()!.userId !== userId) {
+      if (keyDoc.data()?.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this API key" },
         });
@@ -421,7 +427,13 @@ router.get(
         return;
       }
 
-      const data = resumeDoc.data()! // safe: exists check above;
+      const data = resumeDoc.data();
+      if (!data) {
+        res.status(404).json({
+          error: { code: "RESUME_NOT_FOUND", message: "Resume data missing" },
+        });
+        return;
+      }
       if (data.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this resume" },
@@ -485,8 +497,14 @@ router.post(
         return;
       }
 
-      const userData = userDoc.data()!; // safe: exists check above
-      let subscriptionStatus: string = userData?.subscription?.status ?? "free";
+      const userData = userDoc.data();
+      if (!userData) {
+        res.status(403).json({
+          error: { code: "USER_NOT_FOUND", message: "User data missing" },
+        });
+        return;
+      }
+      let subscriptionStatus: string = userData.subscription?.status ?? "free";
 
       // Admin tier override for resume limits
       const adminTier = await getAdminTierStatus(userId);
@@ -581,7 +599,7 @@ router.put(
       updates.title = title.trim();
     }
     if (markdown !== undefined) {
-      if (typeof markdown !== "string" || markdown.length > 1_048_576) {
+      if (typeof markdown !== "string" || Buffer.byteLength(markdown, "utf8") > 1_048_576) {
         res.status(400).json({
           error: { code: "INVALID_MARKDOWN", message: "Markdown must be a string under 1MB" },
         });
@@ -612,7 +630,7 @@ router.put(
         return;
       }
 
-      if (resumeDoc.data()!.userId !== userId) {
+      if (resumeDoc.data()?.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this resume" },
         });
@@ -653,7 +671,7 @@ router.delete(
         return;
       }
 
-      const resumeData = resumeDoc.data()! // safe: exists check above;
+      const resumeData = resumeDoc.data() ?? {};
       if (resumeData.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this resume" },
@@ -742,7 +760,7 @@ router.post(
         return;
       }
 
-      const resumeData = resumeDoc.data()! // safe: exists check above;
+      const resumeData = resumeDoc.data() ?? {};
       if (resumeData.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this resume" },
@@ -806,7 +824,7 @@ router.post(
         return;
       }
 
-      const resumeData = resumeDoc.data()! // safe: exists check above;
+      const resumeData = resumeDoc.data() ?? {};
       if (resumeData.userId !== userId) {
         res.status(403).json({
           error: { code: "FORBIDDEN", message: "You do not own this resume" },
@@ -835,7 +853,7 @@ router.post(
           logger.error("agent/export: failed to increment pdfDownloads", err);
         });
 
-      const safeUsername = username.replace(/[^a-z0-9_-]/gi, "").toLowerCase() || "resume";
+      const safeUsername = username.normalize("NFKD").replace(/[^\w-]/g, "").substring(0, 100).toLowerCase() || "resume";
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="${safeUsername}-resume.pdf"`);
       res.setHeader("Cache-Control", "no-store");

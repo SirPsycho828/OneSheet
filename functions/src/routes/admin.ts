@@ -2,9 +2,31 @@ import { Router, Response } from "express";
 import * as admin from "firebase-admin";
 import { logger } from "firebase-functions";
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
+import { checkRateLimit } from "../middleware/rateLimit";
 import { ADMIN_EMAIL } from "../lib/constants";
 
 const router = Router();
+
+async function applySensitiveRateLimit(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: () => void
+): Promise<void> {
+  if (!req.userId) { next(); return; }
+  const result = await checkRateLimit(`user:${req.userId}:sensitive`);
+  if (!result.allowed) {
+    res.setHeader("Retry-After", String(result.retryAfterSeconds ?? 60));
+    res.status(429).json({
+      error: {
+        code: "RATE_LIMIT_EXCEEDED",
+        message: "Too many requests. Please slow down.",
+        retryAfterSeconds: result.retryAfterSeconds ?? 60,
+      },
+    });
+    return;
+  }
+  next();
+}
 
 /**
  * POST /api/admin/bootstrap-claims
@@ -18,6 +40,7 @@ const router = Router();
 router.post(
   "/bootstrap-claims",
   requireAuth,
+  applySensitiveRateLimit,
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const userId = req.userId!;
 

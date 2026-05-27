@@ -45,8 +45,9 @@ export async function requireAuth(
         .where("isActive", "==", true)
         .get();
 
-      for (const doc of candidateSnap.docs) {
-        const data = doc.data();
+      // Iterate all candidates without early exit to prevent timing side-channels
+      for (const candidateDoc of candidateSnap.docs) {
+        const data = candidateDoc.data();
         const storedHash = data.keyHash as string;
         const salt = data.salt as string | undefined;
 
@@ -54,20 +55,21 @@ export async function requireAuth(
           ? crypto.createHash("sha256").update(apiKey + salt).digest("hex")
           : crypto.createHash("sha256").update(apiKey).digest("hex");
 
-        // Timing-safe comparison
         try {
           if (crypto.timingSafeEqual(Buffer.from(computedHash, "hex"), Buffer.from(storedHash, "hex"))) {
-            keyDoc = doc;
-            break;
+            keyDoc = candidateDoc;
           }
         } catch {
-          // Length mismatch, skip
+          // Length mismatch — perform a dummy comparison to equalize timing
+          const dummy = crypto.createHash("sha256").update("dummy").digest("hex");
+          try { crypto.timingSafeEqual(Buffer.from(computedHash, "hex"), Buffer.from(dummy, "hex")); } catch { /* ignore */ }
         }
       }
 
       if (!keyDoc) {
+        logger.info("auth: API key validation failed", { prefix });
         res.status(401).json({
-          error: { code: "INVALID_API_KEY", message: "Invalid or revoked API key" },
+          error: { code: "UNAUTHORIZED", message: "Authentication failed" },
         });
         return;
       }
@@ -78,14 +80,21 @@ export async function requireAuth(
       // Load users/{userId} to check subscription
       const userDoc = await db.collection("users").doc(userId).get();
       if (!userDoc.exists) {
-        res.status(403).json({
-          error: { code: "USER_NOT_FOUND", message: "User not found" },
+        logger.info("auth: user doc not found for API key", { userId });
+        res.status(401).json({
+          error: { code: "UNAUTHORIZED", message: "Authentication failed" },
         });
         return;
       }
 
-      const userData = userDoc.data()!; // safe: exists check above
-      const subscriptionStatus: string = userData?.subscription?.status ?? "free";
+      const userData = userDoc.data();
+      if (!userData) {
+        res.status(403).json({
+          error: { code: "USER_NOT_FOUND", message: "Authentication failed" },
+        });
+        return;
+      }
+      const subscriptionStatus: string = userData.subscription?.status ?? "free";
 
       if (subscriptionStatus !== "active") {
         res.status(403).json({
@@ -110,7 +119,7 @@ export async function requireAuth(
     } catch (err) {
       logger.error("auth: API key verification error", err);
       res.status(401).json({
-        error: { code: "INVALID_API_KEY", message: "API key verification failed" },
+        error: { code: "UNAUTHORIZED", message: "Authentication failed" },
       });
       return;
     }

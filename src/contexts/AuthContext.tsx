@@ -45,8 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       let userData = { ...userDocSnap.data(), uid: fbUser.uid } as User;
 
-      // Admin tier override: force subscription status for testing
-      if (adminClaim) {
+      // Admin tier override: force subscription status (dev/staging only)
+      if (adminClaim && import.meta.env.DEV) {
         try {
           const adminSnap = await getDoc(doc(db, "config", "admin"));
           const tierOverride = adminSnap.data()?.tierOverride as string | undefined;

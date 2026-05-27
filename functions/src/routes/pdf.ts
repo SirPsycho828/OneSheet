@@ -51,8 +51,14 @@ router.post(
         return;
       }
 
-      const userData = userDoc.data()!; // safe: exists check above
-      const subscriptionStatus: string = userData?.subscription?.status ?? "free";
+      const userData = userDoc.data();
+      if (!userData) {
+        res.status(403).json({
+          error: { code: "USER_NOT_FOUND", message: "User data missing" },
+        });
+        return;
+      }
+      const subscriptionStatus: string = userData.subscription?.status ?? "free";
 
       const adminTier = await getAdminTierStatus(userId);
       const isPro = adminTier.isAdmin ? adminTier.isPro : subscriptionStatus === "active";
@@ -89,7 +95,14 @@ router.post(
         return;
       }
 
-      resumeData = resumeDoc.data()!; // safe: exists check above
+      const docData = resumeDoc.data();
+      if (!docData) {
+        res.status(404).json({
+          error: { code: "RESUME_NOT_FOUND", message: "Resume data missing" },
+        });
+        return;
+      }
+      resumeData = docData;
 
       if (resumeData.userId !== userId) {
         res.status(403).json({
@@ -144,7 +157,7 @@ router.post(
       // ------------------------------------------------------------------
       // 6. Send PDF response
       // ------------------------------------------------------------------
-      const safeUsername = username.replace(/[^a-z0-9_-]/gi, "").toLowerCase() || "resume";
+      const safeUsername = username.normalize("NFKD").replace(/[^\w-]/g, "").substring(0, 100).toLowerCase() || "resume";
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",

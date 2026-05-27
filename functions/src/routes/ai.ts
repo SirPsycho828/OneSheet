@@ -12,19 +12,32 @@ const router = Router();
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Check if an IPv4 address is in a private/reserved range. */
+/** Check if an IP address (IPv4 or IPv6) is in a private/reserved range. */
 function isPrivateIp(ip: string): boolean {
-  const parts = ip.split(".").map(Number);
-  if (parts.length !== 4) return true; // malformed → block
-  const [a, b] = parts;
-  return (
-    a === 10 ||
-    a === 127 ||
-    a === 0 ||
-    (a === 172 && b >= 16 && b <= 31) ||
-    (a === 192 && b === 168) ||
-    (a === 169 && b === 254) // link-local
-  );
+  if (net.isIPv4(ip)) {
+    const parts = ip.split(".").map(Number);
+    if (parts.length !== 4) return true; // malformed → block
+    const [a, b] = parts;
+    return (
+      a === 10 ||
+      a === 127 ||
+      a === 0 ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 169 && b === 254) // link-local
+    );
+  }
+
+  // IPv6 checks
+  const norm = ip.toLowerCase().replace(/^\[|\]$/g, "");
+  if (norm === "::1" || norm === "::") return true;
+  if (norm.startsWith("fe80")) return true;  // link-local
+  if (norm.startsWith("fc") || norm.startsWith("fd")) return true;  // unique-local
+  // IPv4-mapped IPv6 (::ffff:x.x.x.x)
+  const v4Mapped = norm.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (v4Mapped) return isPrivateIp(v4Mapped[1]);
+
+  return false;
 }
 
 interface OpenRouterMessage {
@@ -295,26 +308,37 @@ router.post(
         return;
       }
 
-      // Block obviously private hostnames
-      const blockedHostname =
-        hostname === "localhost" ||
-        hostname === "127.0.0.1" ||
-        hostname === "0.0.0.0" ||
-        hostname === "::1" ||
-        hostname === "[::1]" ||
-        hostname.endsWith(".local") ||
-        hostname.endsWith(".internal");
-      if (blockedHostname) {
+      // Block obviously private hostnames and internal patterns
+      const strippedHostname = hostname.replace(/^\[|\]$/g, "");
+      if (
+        /^(localhost|.*\.local|.*\.internal|.*\.intranet|.*\.corp|.*\.home)$/i.test(strippedHostname) ||
+        (net.isIP(strippedHostname) && isPrivateIp(strippedHostname))
+      ) {
         res.status(400).json({
           error: { code: "INVALID_URL", message: "URL not allowed" },
         });
         return;
       }
 
-      // Resolve DNS and check if the resolved IP is private
-      if (!net.isIP(hostname)) {
-        const addresses = await dns.promises.resolve4(hostname);
-        for (const ip of addresses) {
+      // Resolve DNS (both IPv4 and IPv6) and check resolved IPs
+      if (!net.isIP(strippedHostname)) {
+        const [v4Result, v6Result] = await Promise.allSettled([
+          dns.promises.resolve4(hostname),
+          dns.promises.resolve6(hostname),
+        ]);
+
+        const allAddresses: string[] = [];
+        if (v4Result.status === "fulfilled") allAddresses.push(...v4Result.value);
+        if (v6Result.status === "fulfilled") allAddresses.push(...v6Result.value);
+
+        if (allAddresses.length === 0) {
+          res.status(400).json({
+            error: { code: "INVALID_URL", message: "URL not allowed" },
+          });
+          return;
+        }
+
+        for (const ip of allAddresses) {
           if (isPrivateIp(ip)) {
             res.status(400).json({
               error: { code: "INVALID_URL", message: "URL not allowed" },
@@ -322,11 +346,6 @@ router.post(
             return;
           }
         }
-      } else if (isPrivateIp(hostname)) {
-        res.status(400).json({
-          error: { code: "INVALID_URL", message: "URL not allowed" },
-        });
-        return;
       }
     } catch {
       res.status(400).json({
