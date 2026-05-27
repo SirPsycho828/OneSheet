@@ -782,13 +782,11 @@ function FinalCTA() {
         <p className="text-white/60 mb-8 max-w-md mx-auto">
           Markdown in, polished PDF out. Free to start, ready in minutes.
         </p>
-        <Link to="/sign-up">
-          <Button
-            variant="primary"
-            className="bg-white text-foreground hover:bg-white/90 text-sm px-6 py-2.5"
-          >
-            Build yours free
-          </Button>
+        <Link
+          to="/sign-up"
+          className="inline-flex items-center justify-center font-medium rounded-md bg-white text-foreground hover:bg-white/90 text-sm px-6 h-10 transition-colors"
+        >
+          Build yours free
         </Link>
       </div>
     </section>

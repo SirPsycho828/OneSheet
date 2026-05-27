@@ -30,7 +30,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             to="/"
             className="hover:opacity-80 transition-opacity"
           >
-            <img src="/logo.png" alt="OneSheet" className="h-8 brightness-0 invert" />
+            <span className="flex items-center gap-2">
+              <img src="/favicon.png" alt="" className="h-7 brightness-0 invert" />
+              <span className="font-heading text-xl font-semibold text-white tracking-tight">OneSheet</span>
+            </span>
           </Link>
 
           <div className="hidden lg:block mt-auto">
