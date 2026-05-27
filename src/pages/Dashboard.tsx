@@ -11,6 +11,7 @@ import { getUserResumes } from "../services/resumes";
 import { getAnalyticsForResumes } from "../services/analytics";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/useToast";
+import { UpgradeModal } from "../components/ui/UpgradeModal";
 import { FREE_RESUME_LIMIT, PRO_RESUME_LIMIT } from "../constants/pricing";
 import type { Resume } from "../types/resume";
 import type { Analytics } from "../types/analytics";
@@ -135,6 +136,7 @@ export function Dashboard() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [sortBy, setSortBy] = React.useState<SortOption>("updated");
   const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
 
   const resumeLimit =
     user?.subscription?.status === "active" ? PRO_RESUME_LIMIT : FREE_RESUME_LIMIT;
@@ -180,9 +182,7 @@ export function Dashboard() {
 
   function handleCreateClick() {
     if (atLimit) {
-      toast.info(
-        `You've reached the ${resumeLimit}-resume limit for your plan. Upgrade to create more.`
-      );
+      setShowUpgradeModal(true);
       return;
     }
     setShowCreateModal(true);
@@ -223,6 +223,11 @@ export function Dashboard() {
       <CreateResumeModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
+      />
+
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
       />
     </div>
   );

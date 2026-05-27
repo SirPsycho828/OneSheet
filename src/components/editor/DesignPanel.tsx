@@ -1,6 +1,7 @@
 import * as React from "react";
 import { AlignLeft, AlignCenter, AlignRight, Check, RotateCcw } from "lucide-react";
 import { ConfirmModal } from "../ui/ConfirmModal";
+import { UpgradeModal } from "../ui/UpgradeModal";
 import type { ResumeStyles } from "../../types/resume";
 import { PRESET_LIST, PRESET_DEFAULTS, FONT_OPTIONS, ACCENT_COLORS } from "../../constants/presets";
 import type { PresetId } from "../../constants/presets";
@@ -160,6 +161,7 @@ export function DesignPanel({
   // -----------------------------------------------------------------------
   // Confirm modal state for preset/reset
   // -----------------------------------------------------------------------
+  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
   const [confirmTarget, setConfirmTarget] = React.useState<PresetId | null>(null);
   const confirmPresetName = confirmTarget
     ? (PRESET_LIST.find((p) => p.id === confirmTarget)?.name ?? confirmTarget)
@@ -572,7 +574,15 @@ export function DesignPanel({
             <p className="text-xs text-muted-foreground mb-1.5">
               {isPaid
                 ? "Custom URL or leave blank for your public profile."
-                : "Upgrade to Pro to set a custom URL."}
+                : (
+                  <button
+                    type="button"
+                    onClick={() => setShowUpgradeModal(true)}
+                    className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 cursor-pointer transition-colors"
+                  >
+                    Upgrade to Pro to set a custom URL.
+                  </button>
+                )}
             </p>
             <input
               id="dp-qr-url"
@@ -619,6 +629,11 @@ export function DesignPanel({
         title="Reset styles?"
         message={`This will reset all style options to ${confirmPresetName} defaults.`}
         confirmLabel="Reset"
+      />
+
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
       />
     </div>
   );

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Download, Share2, Loader2 } from "lucide-react";
 import { Button } from "../ui/Button";
 import { OverflowMenu } from "../ui/OverflowMenu";
+import { UpgradeModal } from "../ui/UpgradeModal";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../../hooks/useToast";
 import { auth } from "../../config/firebase";
@@ -40,6 +41,7 @@ export function AppNav({
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
   const [localTitle, setLocalTitle] = React.useState(title);
   const [isExporting, setIsExporting] = React.useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
   const titleInputRef = React.useRef<HTMLInputElement>(null);
 
   // Sync local title when prop changes (e.g., initial load)
@@ -77,7 +79,7 @@ export function AppNav({
 
     // Free / canceled: prompt to upgrade
     if (subscriptionStatus !== "active") {
-      toast.info("Upgrade to a paid plan to export PDFs.");
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -269,7 +271,7 @@ export function AppNav({
           <Button
             variant="primary"
             className="text-xs"
-            onClick={handleExportPdf}
+            onClick={() => setShowUpgradeModal(true)}
             title="Upgrade to export as PDF"
           >
             <Download className="w-4 h-4" strokeWidth={1.5} />
@@ -280,6 +282,11 @@ export function AppNav({
         {/* Kebab menu */}
         <OverflowMenu items={menuItems} triggerLabel="Editor menu" />
       </div>
+
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
     </header>
   );
 }

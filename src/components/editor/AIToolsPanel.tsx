@@ -1,6 +1,7 @@
 import * as React from "react";
 import { X, Sparkles, Target, Upload, Zap, Maximize2, Minimize2, History, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Button } from "../ui/Button";
+import { UpgradeModal } from "../ui/UpgradeModal";
 import { useAuthContext } from "../../contexts/AuthContext";
 import {
   polishBullets,
@@ -457,6 +458,7 @@ const TABS: { id: Tab; label: string; icon: typeof Sparkles }[] = [
 export function AIToolsPanel({ markdown, onMarkdownChange, onClose, resumeId }: AIToolsPanelProps) {
   const [activeTab, setActiveTab] = React.useState<Tab>("polish");
   const [expanded, setExpanded] = React.useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
   const { user } = useAuthContext();
   const isPro = user?.subscription?.status === "active";
 
@@ -520,12 +522,16 @@ export function AIToolsPanel({ markdown, onMarkdownChange, onClose, resumeId }: 
       {/* Content */}
       <div className={`flex-1 overflow-y-auto px-4 py-4 ${expanded ? "max-w-2xl mx-auto w-full" : ""}`}>
         {!isPro && (
-          <div className="flex items-start gap-2 p-2.5 mb-4 bg-secondary border border-primary/20 rounded-md">
+          <button
+            type="button"
+            onClick={() => setShowUpgradeModal(true)}
+            className="flex items-start gap-2 p-2.5 mb-4 bg-secondary border border-primary/20 rounded-md w-full text-left hover:bg-muted transition-colors cursor-pointer"
+          >
             <Zap className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" strokeWidth={2} />
             <p className="text-[11px] text-primary leading-relaxed">
               <strong>Pro subscribers</strong> get access to a more powerful AI model for better results.
             </p>
-          </div>
+          </button>
         )}
         {activeTab === "polish" && (
           <PolishTab markdown={markdown} onMarkdownChange={onMarkdownChange} />
@@ -535,6 +541,11 @@ export function AIToolsPanel({ markdown, onMarkdownChange, onClose, resumeId }: 
           <ImportTab onMarkdownChange={onMarkdownChange} onClose={onClose} />
         )}
       </div>
+
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
     </div>
   );
 }
