@@ -42,11 +42,8 @@ function SettingsNav() {
 
   return (
     <header className="h-14 flex items-center gap-3 px-4 border-b border-border bg-card/90 backdrop-blur-sm flex-shrink-0">
-      <Link
-        to="/dashboard"
-        className="font-heading text-sm font-semibold tracking-tight text-foreground hover:text-primary transition-colors flex-shrink-0"
-      >
-        OneSheet
+      <Link to="/dashboard" className="flex-shrink-0 hover:opacity-80 transition-opacity">
+        <img src="/logo.png" alt="OneSheet" className="h-6" />
       </Link>
 
       <div className="w-px h-5 bg-border flex-shrink-0" aria-hidden />

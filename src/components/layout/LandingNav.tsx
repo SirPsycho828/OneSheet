@@ -26,9 +26,9 @@ export function LandingNav() {
         {/* Wordmark */}
         <Link
           to="/"
-          className="font-heading text-xl font-semibold tracking-tight text-foreground hover:text-primary transition-colors"
+          className="hover:opacity-80 transition-opacity"
         >
-          OneSheet
+          <img src="/logo.png" alt="OneSheet" className="h-8" />
         </Link>
 
         {/* Desktop nav */}

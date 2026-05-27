@@ -296,6 +296,18 @@ export function useResume(resumeId?: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedMarkdown, debouncedTitle, debouncedTemplateId, debouncedPaperSize, debouncedStyles]);
 
+  // QR changes save immediately (no debounce needed for toggles)
+  const prevQrRef = useRef({ showQrCode, qrCodeUrl });
+  useEffect(() => {
+    if (isLoading) return;
+    const prev = prevQrRef.current;
+    prevQrRef.current = { showQrCode, qrCodeUrl };
+    if (prev.showQrCode !== showQrCode || prev.qrCodeUrl !== qrCodeUrl) {
+      save();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showQrCode, qrCodeUrl, isLoading]);
+
   // ---------------------------------------------------------------------------
   // Sync on reconnect: if there was a pending save, trigger immediately
   // ---------------------------------------------------------------------------

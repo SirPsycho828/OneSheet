@@ -73,11 +73,8 @@ export function ApiDocs() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="h-14 flex items-center gap-3 px-4 border-b border-border bg-card/90 backdrop-blur-sm flex-shrink-0">
-        <Link
-          to="/"
-          className="text-sm font-semibold font-heading tracking-tight text-foreground hover:text-primary transition-colors"
-        >
-          OneSheet
+        <Link to="/" className="hover:opacity-80 transition-opacity">
+          <img src="/logo.png" alt="OneSheet" className="h-6" />
         </Link>
         <div className="w-px h-5 bg-border" aria-hidden />
         <span className="text-sm font-medium text-muted-foreground">

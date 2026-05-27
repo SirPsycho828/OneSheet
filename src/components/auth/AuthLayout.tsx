@@ -28,9 +28,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="relative flex flex-col justify-between p-8 lg:p-12 min-h-[200px] lg:min-h-screen">
           <Link
             to="/"
-            className="font-heading text-xl font-semibold text-white/90 hover:text-white transition-colors"
+            className="hover:opacity-80 transition-opacity"
           >
-            OneSheet
+            <img src="/logo.png" alt="OneSheet" className="h-8 brightness-0 invert" />
           </Link>
 
           <div className="hidden lg:block mt-auto">

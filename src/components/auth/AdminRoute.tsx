@@ -1,10 +1,8 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
-const ADMIN_EMAIL = "steve.petusky@gmail.com";
-
 export function AdminRoute() {
-  const { authState, user } = useAuth();
+  const { authState, isAdmin } = useAuth();
 
   if (authState === "loading") {
     return (
@@ -14,7 +12,7 @@ export function AdminRoute() {
     );
   }
 
-  if (authState !== "authenticated" || user?.email !== ADMIN_EMAIL) {
+  if (authState !== "authenticated" || !isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
 

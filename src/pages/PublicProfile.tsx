@@ -26,11 +26,8 @@ interface ProfileData {
 function ProfileNav() {
   return (
     <header className="h-12 bg-card/90 backdrop-blur-sm border-b border-border flex items-center px-6">
-      <Link
-        to="/"
-        className="text-base font-semibold font-heading tracking-tight text-foreground hover:text-primary transition-colors"
-      >
-        OneSheet
+      <Link to="/" className="hover:opacity-80 transition-opacity">
+        <img src="/logo.png" alt="OneSheet" className="h-6" />
       </Link>
     </header>
   );

@@ -1,4 +1,5 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
+import { logger } from "firebase-functions";
 import * as admin from "firebase-admin";
 
 const MAX_VERSIONS_PER_RESUME = 50;
@@ -24,7 +25,7 @@ export const cleanupVersions = onSchedule(
 
     // 1. List all resume documents
     const resumesSnap = await db.collection("resumes").get();
-    console.log(`cleanupVersions: processing ${resumesSnap.size} resumes`);
+    logger.info(`cleanupVersions: processing ${resumesSnap.size} resumes`);
 
     let totalDeleted = 0;
 
@@ -46,8 +47,8 @@ export const cleanupVersions = onSchedule(
 
         // 3. Delete oldest versions beyond the cap
         const toDelete = versionsSnap.docs.slice(MAX_VERSIONS_PER_RESUME);
-        console.log(
-          `cleanupVersions: resume ${resumeId} has ${versionsSnap.size} versions — deleting ${toDelete.length}`
+        logger.info(
+          `cleanupVersions: resume ${resumeId} has ${versionsSnap.size} versions - deleting ${toDelete.length}`
         );
 
         // Batch deletes in groups of 500 (Firestore batch limit)
@@ -59,11 +60,11 @@ export const cleanupVersions = onSchedule(
           totalDeleted += Math.min(BATCH_SIZE, toDelete.length - i);
         }
       } catch (err) {
-        console.error(`cleanupVersions: error processing resume ${resumeId}`, err);
+        logger.error(`cleanupVersions: error processing resume ${resumeId}`, err);
         // Continue to next resume rather than aborting the whole job
       }
     }
 
-    console.log(`cleanupVersions: complete — deleted ${totalDeleted} old version(s)`);
+    logger.info(`cleanupVersions: complete - deleted ${totalDeleted} old version(s)`);
   }
 );

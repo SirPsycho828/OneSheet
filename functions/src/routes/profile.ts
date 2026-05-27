@@ -4,7 +4,7 @@ import { logger } from "firebase-functions";
 import { renderMarkdown } from "../lib/markdown";
 import { deriveStyles } from "../lib/styleUtils";
 import { postProcessHtml } from "../lib/postProcess";
-import { ADMIN_EMAIL } from "../lib/constants";
+import { getAdminTierStatus } from "../lib/adminUtils";
 
 const router = Router();
 
@@ -93,15 +93,10 @@ router.get("/:username", async (req: Request, res: Response): Promise<void> => {
       )
       .catch(() => {});
 
-    // 6. Determine Pro status (check admin override for admin user)
-    let isPro = userData.subscription?.status === "active";
-    const authUser = await admin.auth().getUser(uid);
-    if (authUser.email === ADMIN_EMAIL) {
-      const adminDoc = await db.collection("config").doc("admin").get();
-      const tierOverride = adminDoc.data()?.tierOverride as string | undefined;
-      if (tierOverride === "pro") isPro = true;
-      else if (tierOverride === "free") isPro = false;
-    }
+    // 6. Determine Pro status (uses shared admin tier utility)
+    const subscriptionActive = userData.subscription?.status === "active";
+    const adminTier = await getAdminTierStatus(uid);
+    const isPro = adminTier.isAdmin ? adminTier.isPro : subscriptionActive;
     const showBranding = !isPro;
 
     // QR code: use custom URL if set, otherwise profile URL

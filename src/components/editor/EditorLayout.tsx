@@ -21,6 +21,8 @@ interface EditorLayoutProps {
   qrCodeUrl?: string | null;
   onQrCodeUrlChange?: (url: string | null) => void;
   isPaid?: boolean;
+  /** Pre-computed QR code URL (includes fallback to profile URL). */
+  effectiveQrUrl?: string;
 }
 
 type LeftMode = "source" | "design";
@@ -45,6 +47,7 @@ export function EditorLayout({
   qrCodeUrl,
   onQrCodeUrlChange,
   isPaid,
+  effectiveQrUrl,
 }: EditorLayoutProps) {
   // ---------------------------------------------------------------------------
   // Desktop split state
@@ -203,7 +206,7 @@ export function EditorLayout({
             markdown={markdown}
             styles={styles}
             onOverflowChange={onOverflowChange}
-            qrCodeUrl={showQrCode ? (qrCodeUrl || undefined) : undefined}
+            qrCodeUrl={effectiveQrUrl}
           />
         </div>
       </div>
@@ -268,6 +271,7 @@ export function EditorLayout({
               markdown={markdown}
               styles={styles}
               onOverflowChange={onOverflowChange}
+              qrCodeUrl={effectiveQrUrl}
             />
           )}
         </div>

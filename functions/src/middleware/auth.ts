@@ -34,25 +34,44 @@ export async function requireAuth(
     try {
       const db = admin.firestore();
 
-      // Hash the provided key with SHA-256
-      const keyHash = crypto.createHash("sha256").update(apiKey).digest("hex");
+      // Try salted keys first (new format), then fall back to unsalted (legacy)
+      let keyDoc: FirebaseFirestore.QueryDocumentSnapshot | null = null;
 
-      // Query apiKeys where keyHash == hash AND isActive == true
-      const snap = await db
+      // Look up by key prefix for efficient querying
+      const prefix = apiKey.substring(0, 12);
+      const candidateSnap = await db
         .collection("apiKeys")
-        .where("keyHash", "==", keyHash)
+        .where("keyPrefix", "==", prefix)
         .where("isActive", "==", true)
-        .limit(1)
         .get();
 
-      if (snap.empty) {
+      for (const doc of candidateSnap.docs) {
+        const data = doc.data();
+        const storedHash = data.keyHash as string;
+        const salt = data.salt as string | undefined;
+
+        const computedHash = salt
+          ? crypto.createHash("sha256").update(apiKey + salt).digest("hex")
+          : crypto.createHash("sha256").update(apiKey).digest("hex");
+
+        // Timing-safe comparison
+        try {
+          if (crypto.timingSafeEqual(Buffer.from(computedHash, "hex"), Buffer.from(storedHash, "hex"))) {
+            keyDoc = doc;
+            break;
+          }
+        } catch {
+          // Length mismatch, skip
+        }
+      }
+
+      if (!keyDoc) {
         res.status(401).json({
           error: { code: "INVALID_API_KEY", message: "Invalid or revoked API key" },
         });
         return;
       }
 
-      const keyDoc = snap.docs[0];
       const keyData = keyDoc.data();
       const userId: string = keyData.userId;
 

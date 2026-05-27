@@ -11,12 +11,11 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../config/firebase";
 import type { User, AuthState } from "../types/user";
 
-import { ADMIN_EMAIL } from "../constants/admin";
-
 interface AuthContextValue {
   authState: AuthState;
   user: User | null;
   firebaseUser: FirebaseUser | null;
+  isAdmin: boolean;
   refreshUser: () => Promise<void>;
 }
 
@@ -26,22 +25,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>("loading");
   const [user, setUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const evaluateUser = useCallback(async (fbUser: FirebaseUser) => {
     try {
-      const userDocRef = doc(db, "users", fbUser.uid);
-      const userDoc = await getDoc(userDocRef);
+      const [userDocSnap, tokenResult] = await Promise.all([
+        getDoc(doc(db, "users", fbUser.uid)),
+        fbUser.getIdTokenResult(),
+      ]);
 
-      if (!userDoc.exists()) {
+      const adminClaim = tokenResult.claims.admin === true;
+      setIsAdmin(adminClaim);
+
+      if (!userDocSnap.exists()) {
         setUser(null);
         setAuthState("needs_onboarding");
         return;
       }
 
-      let userData = { ...userDoc.data(), uid: fbUser.uid } as User;
+      let userData = { ...userDocSnap.data(), uid: fbUser.uid } as User;
 
       // Admin tier override: force subscription status for testing
-      if (fbUser.email === ADMIN_EMAIL) {
+      if (adminClaim) {
         try {
           const adminSnap = await getDoc(doc(db, "config", "admin"));
           const tierOverride = adminSnap.data()?.tierOverride as string | undefined;
@@ -107,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [evaluateUser]);
 
   return (
-    <AuthContext.Provider value={{ authState, user, firebaseUser, refreshUser }}>
+    <AuthContext.Provider value={{ authState, user, firebaseUser, isAdmin, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

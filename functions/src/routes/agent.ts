@@ -8,7 +8,7 @@ import { renderMarkdown } from "../lib/markdown";
 import { buildHtmlDocument, generatePdf } from "../lib/pdf";
 import { deriveStyles } from "../lib/styleUtils";
 import { postProcessHtml } from "../lib/postProcess";
-import { ADMIN_EMAIL } from "../lib/constants";
+import { getAdminTierStatus } from "../lib/adminUtils";
 
 const router = Router();
 
@@ -69,6 +69,36 @@ async function applyRateLimit(
   next();
 }
 
+/**
+ * Stricter per-user rate limit for sensitive operations (key generation).
+ * Applies regardless of auth method (bearer or apikey).
+ */
+async function applySensitiveRateLimit(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: () => void
+): Promise<void> {
+  if (!req.userId) {
+    next();
+    return;
+  }
+
+  const result = await checkRateLimit(`user:${req.userId}:sensitive`);
+  if (!result.allowed) {
+    res.setHeader("Retry-After", String(result.retryAfterSeconds ?? 60));
+    res.status(429).json({
+      error: {
+        code: "RATE_LIMIT_EXCEEDED",
+        message: "Too many requests. Please slow down.",
+        retryAfterSeconds: result.retryAfterSeconds ?? 60,
+      },
+    });
+    return;
+  }
+
+  next();
+}
+
 // ---------------------------------------------------------------------------
 // Helper: require paid subscription (used inside route handlers)
 // ---------------------------------------------------------------------------
@@ -77,7 +107,10 @@ async function requirePaidUser(
   res: Response
 ): Promise<FirebaseFirestore.DocumentData | null> {
   const db = admin.firestore();
-  const userDoc = await db.collection("users").doc(userId).get();
+  const [userDoc, adminTier] = await Promise.all([
+    db.collection("users").doc(userId).get(),
+    getAdminTierStatus(userId),
+  ]);
 
   if (!userDoc.exists) {
     res.status(403).json({
@@ -86,21 +119,9 @@ async function requirePaidUser(
     return null;
   }
 
-  const userData = userDoc.data()! // safe: exists check above;
+  const userData = userDoc.data()!; // safe: exists check above
   const subscriptionStatus: string = userData?.subscription?.status ?? "free";
-
-  // Check admin tier override (matches ai.ts / profile.ts pattern)
-  let isPro = subscriptionStatus === "active";
-  try {
-    const authUser = await admin.auth().getUser(userId);
-    if (authUser.email === ADMIN_EMAIL) {
-      const adminDoc = await db.collection("config").doc("admin").get();
-      const tierOverride = adminDoc.data()?.tierOverride as string | undefined;
-      isPro = tierOverride !== "free"; // admin defaults to pro unless explicitly "free"
-    }
-  } catch {
-    // If auth lookup fails, fall through to normal subscription check
-  }
+  const isPro = adminTier.isAdmin ? adminTier.isPro : subscriptionStatus === "active";
 
   if (!isPro) {
     res.status(403).json({
@@ -130,6 +151,7 @@ router.post(
   "/keys/generate",
   requireAuth,
   applyRateLimit,
+  applySensitiveRateLimit,
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const userId = req.userId!;
     const db = admin.firestore();
@@ -167,7 +189,8 @@ router.post(
       // Generate key: os_sk_live_{32 hex chars}
       const randomHex = crypto.randomBytes(16).toString("hex"); // 32 hex chars
       const plainKey = `os_sk_live_${randomHex}`;
-      const keyHash = crypto.createHash("sha256").update(plainKey).digest("hex");
+      const salt = crypto.randomBytes(16).toString("hex");
+      const keyHash = crypto.createHash("sha256").update(plainKey + salt).digest("hex");
       const keyPrefix = plainKey.substring(0, 12); // "os_sk_live_x"
 
       const now = admin.firestore.FieldValue.serverTimestamp();
@@ -175,6 +198,7 @@ router.post(
 
       await keyRef.set({
         keyHash,
+        salt,
         keyPrefix,
         userId,
         name: name.trim(),
@@ -461,18 +485,14 @@ router.post(
         return;
       }
 
-      const userData = userDoc.data()! // safe: exists check above;
+      const userData = userDoc.data()!; // safe: exists check above
       let subscriptionStatus: string = userData?.subscription?.status ?? "free";
 
       // Admin tier override for resume limits
-      try {
-        const authUser = await admin.auth().getUser(userId);
-        if (authUser.email === ADMIN_EMAIL) {
-          const adminDoc = await db.collection("config").doc("admin").get();
-          const tierOverride = adminDoc.data()?.tierOverride as string | undefined;
-          if (tierOverride !== "free") subscriptionStatus = "active";
-        }
-      } catch { /* fall through */ }
+      const adminTier = await getAdminTierStatus(userId);
+      if (adminTier.isAdmin && adminTier.isPro) {
+        subscriptionStatus = "active";
+      }
 
       const limit = VARIANT_LIMITS[subscriptionStatus] ?? VARIANT_LIMITS["free"];
 
@@ -560,7 +580,15 @@ router.put(
       }
       updates.title = title.trim();
     }
-    if (markdown !== undefined) updates.markdown = markdown;
+    if (markdown !== undefined) {
+      if (typeof markdown !== "string" || markdown.length > 1_048_576) {
+        res.status(400).json({
+          error: { code: "INVALID_MARKDOWN", message: "Markdown must be a string under 1MB" },
+        });
+        return;
+      }
+      updates.markdown = markdown;
+    }
     if (templateId !== undefined) updates.templateId = templateId;
 
     if (Object.keys(updates).length === 0) {

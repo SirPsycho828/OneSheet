@@ -184,9 +184,9 @@ export function AppNav({
       {/* Logo */}
       <Link
         to="/dashboard"
-        className="font-heading text-sm font-semibold tracking-tight text-foreground hover:text-primary transition-colors flex-shrink-0"
+        className="flex-shrink-0 hover:opacity-80 transition-opacity"
       >
-        OneSheet
+        <img src="/logo.png" alt="OneSheet" className="h-6" />
       </Link>
 
       <div className="w-px h-5 bg-border flex-shrink-0" aria-hidden />

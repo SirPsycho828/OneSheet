@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 import * as admin from "firebase-admin";
 import { logger } from "firebase-functions";
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
@@ -6,8 +6,7 @@ import { renderMarkdown } from "../lib/markdown";
 import { buildHtmlDocument, generatePdf } from "../lib/pdf";
 import { deriveStyles } from "../lib/styleUtils";
 import { postProcessHtml } from "../lib/postProcess";
-import { ADMIN_EMAIL } from "../lib/constants";
-import { Response } from "express";
+import { getAdminTierStatus } from "../lib/adminUtils";
 
 const router = Router();
 
@@ -55,17 +54,8 @@ router.post(
       const userData = userDoc.data()!; // safe: exists check above
       const subscriptionStatus: string = userData?.subscription?.status ?? "free";
 
-      let isPro = subscriptionStatus === "active";
-      try {
-        const authUser = await admin.auth().getUser(userId);
-        if (authUser.email === ADMIN_EMAIL) {
-          const adminDoc = await db.collection("config").doc("admin").get();
-          const tierOverride = adminDoc.data()?.tierOverride as string | undefined;
-          isPro = tierOverride !== "free";
-        }
-      } catch {
-        // fall through to normal subscription check
-      }
+      const adminTier = await getAdminTierStatus(userId);
+      const isPro = adminTier.isAdmin ? adminTier.isPro : subscriptionStatus === "active";
 
       if (!isPro) {
         res.status(403).json({

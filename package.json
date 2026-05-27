@@ -3,6 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "description": "One-page resume builder with AI polish, PDF export, and public profile hosting",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SirPsycho828/OneSheet.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

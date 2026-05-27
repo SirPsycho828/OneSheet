@@ -2,13 +2,30 @@ import { Router, Response } from "express";
 import * as admin from "firebase-admin";
 import { logger } from "firebase-functions";
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth";
-import { ADMIN_EMAIL } from "../lib/constants";
+import { getAdminTierStatus } from "../lib/adminUtils";
+import * as dns from "dns";
+import * as net from "net";
 
 const router = Router();
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/** Check if an IPv4 address is in a private/reserved range. */
+function isPrivateIp(ip: string): boolean {
+  const parts = ip.split(".").map(Number);
+  if (parts.length !== 4) return true; // malformed → block
+  const [a, b] = parts;
+  return (
+    a === 10 ||
+    a === 127 ||
+    a === 0 ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168) ||
+    (a === 169 && b === 254) // link-local
+  );
+}
 
 interface OpenRouterMessage {
   role: "system" | "user" | "assistant";
@@ -22,12 +39,11 @@ interface AIModelConfig {
 
 async function getAIModelForUser(userId: string): Promise<AIModelConfig | null> {
   const db = admin.firestore();
-  const [keyDoc, aiDoc, userDoc, authUser, adminDoc] = await Promise.all([
+  const [keyDoc, aiDoc, userDoc, adminTier] = await Promise.all([
     db.collection("config").doc("openrouter").get(),
     db.collection("config").doc("ai").get(),
     db.collection("users").doc(userId).get(),
-    admin.auth().getUser(userId),
-    db.collection("config").doc("admin").get(),
+    getAdminTierStatus(userId),
   ]);
 
   const apiKey = keyDoc.data()?.apiKey as string | undefined;
@@ -36,20 +52,14 @@ async function getAIModelForUser(userId: string): Promise<AIModelConfig | null> 
   const aiData = aiDoc.data();
   const freeModelId = aiData?.freeModelId as string | undefined;
   const proModelId = aiData?.proModelId as string | undefined;
-  // Fallback: legacy single-model config
   const legacyModelId = aiData?.activeModelId as string | undefined;
 
   const subscriptionStatus: string =
     userDoc.data()?.subscription?.status ?? "free";
-  const isAdmin = authUser.email === ADMIN_EMAIL;
-
-  // Admin can override their entire account tier via config/admin.tierOverride
-  const tierOverride = adminDoc.data()?.tierOverride as string | undefined;
-  const isPro = isAdmin
-    ? tierOverride !== "free" // admin defaults to pro unless explicitly set to "free"
+  const isPro = adminTier.isAdmin
+    ? adminTier.isPro
     : subscriptionStatus === "active";
 
-  // Pro users and admin get the pro model, free users get the free model
   const modelId = isPro
     ? proModelId ?? legacyModelId
     : freeModelId ?? legacyModelId;
@@ -81,9 +91,9 @@ async function callOpenRouter(
 
   if (!response.ok) {
     const errorBody = await response.text();
-    logger.error("OpenRouter API error:", response.status, errorBody);
+    // Log only the status code, not the full response body (may contain sensitive API details)
+    logger.error("OpenRouter API error:", response.status);
 
-    // Parse OpenRouter error for user-friendly message
     let userMessage = `AI service error (${response.status})`;
     try {
       const parsed = JSON.parse(errorBody) as {
@@ -277,14 +287,42 @@ router.post(
     try {
       const parsed = new URL(url);
       const hostname = parsed.hostname.toLowerCase();
-      const blocked =
+
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        res.status(400).json({
+          error: { code: "INVALID_URL", message: "URL not allowed" },
+        });
+        return;
+      }
+
+      // Block obviously private hostnames
+      const blockedHostname =
         hostname === "localhost" ||
         hostname === "127.0.0.1" ||
         hostname === "0.0.0.0" ||
         hostname === "::1" ||
+        hostname === "[::1]" ||
         hostname.endsWith(".local") ||
-        /^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(hostname);
-      if (blocked || !["http:", "https:"].includes(parsed.protocol)) {
+        hostname.endsWith(".internal");
+      if (blockedHostname) {
+        res.status(400).json({
+          error: { code: "INVALID_URL", message: "URL not allowed" },
+        });
+        return;
+      }
+
+      // Resolve DNS and check if the resolved IP is private
+      if (!net.isIP(hostname)) {
+        const addresses = await dns.promises.resolve4(hostname);
+        for (const ip of addresses) {
+          if (isPrivateIp(ip)) {
+            res.status(400).json({
+              error: { code: "INVALID_URL", message: "URL not allowed" },
+            });
+            return;
+          }
+        }
+      } else if (isPrivateIp(hostname)) {
         res.status(400).json({
           error: { code: "INVALID_URL", message: "URL not allowed" },
         });

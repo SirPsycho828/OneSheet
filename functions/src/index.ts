@@ -10,7 +10,9 @@ import stripeRoutes from "./routes/stripe";
 import analyticsRoutes from "./routes/analytics";
 import agentRoutes from "./routes/agent";
 import aiRoutes from "./routes/ai";
+import adminRoutes from "./routes/admin";
 import { cleanupVersions } from "./scheduled/cleanupVersions";
+import { validateOrigin } from "./middleware/originValidation";
 import { stripeSecretKey, stripeWebhookSecret, stripeProPriceId } from "./config";
 
 export { cleanupVersions };
@@ -38,6 +40,9 @@ app.use((req, res, next) => {
   }
 });
 
+// Origin validation on state-changing requests
+app.use(validateOrigin);
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
@@ -51,6 +56,7 @@ app.use("/api/stripe", stripeRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/agent", agentRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Export as Firebase Function
 export const api = onRequest(
