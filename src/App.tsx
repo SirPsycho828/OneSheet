@@ -17,10 +17,12 @@ import { Terms } from "./pages/Terms";
 import { PublicProfile } from "./pages/PublicProfile";
 import { Dashboard } from "./pages/Dashboard";
 import { Settings } from "./pages/Settings";
+import { SetupWizard } from "./pages/SetupWizard";
 import { Admin } from "./pages/Admin";
 import { ApiDocs } from "./pages/ApiDocs";
 import { AgentGuide } from "./pages/AgentGuide";
 import { ErrorBoundary } from "./components/ui/ErrorBoundary";
+import { TourProvider } from "./contexts/TourContext";
 
 
 function NotFound() {
@@ -48,6 +50,7 @@ export default function App() {
     <BrowserRouter>
       <ToastProvider>
         <AuthProvider>
+          <TourProvider>
           <ToastContainer />
           <Routes>
             {/* Public routes — redirect signed-in users */}
@@ -67,6 +70,7 @@ export default function App() {
 
             {/* Private routes — require authenticated state */}
             <Route element={<PrivateRoute />}>
+              <Route path="/setup-wizard" element={<SetupWizard />} />
               <Route path="/editor" element={<ErrorBoundary><Editor /></ErrorBoundary>} />
               <Route path="/editor/:resumeId" element={<ErrorBoundary><Editor /></ErrorBoundary>} />
               <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
@@ -90,6 +94,7 @@ export default function App() {
             {/* 404 fallback */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </TourProvider>
         </AuthProvider>
       </ToastProvider>
     </BrowserRouter>

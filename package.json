@@ -23,6 +23,7 @@
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-joyride": "^3.1.0",
     "react-router-dom": "^7.15.1",
     "rehype-sanitize": "^6.0.0",
     "rehype-stringify": "^10.0.1",

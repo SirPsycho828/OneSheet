@@ -146,14 +146,15 @@ export function ResumeGrid({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {sorted.map((resume) => (
-        <ResumeCard
-          key={resume.id}
-          resume={resume}
-          analytics={analytics[resume.id] ?? null}
-          allResumes={resumes}
-          onResumesChange={onResumesChange}
-        />
+      {sorted.map((resume, i) => (
+        <div key={resume.id} {...(i === 0 ? { "data-tour": "resume-card" } : {})}>
+          <ResumeCard
+            resume={resume}
+            analytics={analytics[resume.id] ?? null}
+            allResumes={resumes}
+            onResumesChange={onResumesChange}
+          />
+        </div>
       ))}
       {!atLimit && <AddCard onClick={onCreateClick} />}
     </div>
