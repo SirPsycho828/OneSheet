@@ -382,6 +382,16 @@ export function Settings() {
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
             API
           </h2>
+          <p className="text-xs text-muted-foreground mb-3">
+            Use API keys to access your resume data programmatically.{" "}
+            <Link to="/docs" className="text-primary hover:underline">
+              API Reference
+            </Link>{" "}
+            /{" "}
+            <Link to="/agents" className="text-primary hover:underline">
+              Agent Guide
+            </Link>
+          </p>
           <ApiKeysCard />
         </section>
       </main>

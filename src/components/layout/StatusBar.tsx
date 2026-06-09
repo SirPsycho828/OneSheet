@@ -1,3 +1,4 @@
+import { History } from "lucide-react";
 import type { SaveStatus } from "../../hooks/useResume";
 
 interface StatusBarProps {
@@ -6,6 +7,8 @@ interface StatusBarProps {
   onTogglePaperSize: () => void;
   isOnline?: boolean;
   isLocalBackupActive?: boolean;
+  onOpenVersionHistory?: () => void;
+  wordCount?: number;
 }
 
 const PAPER_SIZE_LABELS: Record<"us-letter" | "a4", string> = {
@@ -35,6 +38,8 @@ export function StatusBar({
   onTogglePaperSize,
   isOnline = true,
   isLocalBackupActive = false,
+  onOpenVersionHistory,
+  wordCount,
 }: StatusBarProps) {
   // Determine label and class — override when local backup is active
   let { label, className } = SAVE_STATUS_CONFIG[saveStatus];
@@ -69,17 +74,38 @@ export function StatusBar({
         <span className={className} aria-live="polite" aria-atomic="true">
           {label}
         </span>
+        {wordCount != null && (
+          <span className="text-gray-400 hidden sm:inline">
+            {wordCount} {wordCount === 1 ? "word" : "words"}
+          </span>
+        )}
       </div>
 
-      {/* Paper size toggle */}
-      <button
-        type="button"
-        onClick={onTogglePaperSize}
-        className="hover:text-gray-700 transition-colors underline-offset-2 hover:underline"
-        title="Click to toggle paper size"
-      >
-        {PAPER_SIZE_LABELS[paperSize]}
-      </button>
+      {/* Right side: version history + keyboard hint + paper size */}
+      <div className="flex items-center gap-3">
+        {onOpenVersionHistory && (
+          <button
+            type="button"
+            onClick={onOpenVersionHistory}
+            className="flex items-center gap-1 hover:text-gray-700 transition-colors"
+            title="Version history"
+          >
+            <History className="w-3 h-3" strokeWidth={1.5} />
+            <span className="hidden sm:inline">History</span>
+          </button>
+        )}
+        <span className="hidden sm:inline text-gray-400" title="Save shortcut">
+          Ctrl+S to save
+        </span>
+        <button
+          type="button"
+          onClick={onTogglePaperSize}
+          className="hover:text-gray-700 transition-colors underline-offset-2 hover:underline"
+          title="Click to toggle paper size"
+        >
+          {PAPER_SIZE_LABELS[paperSize]}
+        </button>
+      </div>
     </footer>
   );
 }

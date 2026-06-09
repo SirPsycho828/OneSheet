@@ -6,6 +6,7 @@ import { useToast } from "../hooks/useToast";
 import { AppNav } from "../components/layout/AppNav";
 import { StatusBar } from "../components/layout/StatusBar";
 import { EditorLayout } from "../components/editor/EditorLayout";
+import { GuidanceTip } from "../components/ux/GuidanceTip";
 import { Skeleton } from "../components/ui/Skeleton";
 import { VersionPanel } from "../components/versions/VersionPanel";
 import { AIToolsPanel } from "../components/editor/AIToolsPanel";
@@ -258,6 +259,12 @@ export function Editor() {
     );
   }
 
+  // Word count for status bar
+  const wordCount = React.useMemo(
+    () => markdown.trim().split(/\s+/).filter(Boolean).length,
+    [markdown]
+  );
+
   // When previewing a version, show its content in the preview pane
   const previewMarkdown = previewingVersion?.markdown ?? markdown;
 
@@ -270,6 +277,20 @@ export function Editor() {
         onOpenVersionHistory={() => setIsVersionPanelOpen(true)}
         resumeId={resolvedResumeId ?? undefined}
       />
+
+      <div className="px-4 pt-2 flex-shrink-0 flex flex-col gap-2">
+        <GuidanceTip id="editor-workflow-order">
+          <strong>Recommended workflow:</strong> Write your content in{" "}
+          <strong>Source</strong>, customize the look in <strong>Design</strong>,
+          then use <strong>AI</strong> to polish your bullet points.
+        </GuidanceTip>
+        {wordCount >= 50 && (
+          <GuidanceTip id="editor-try-design">
+            Looking good! Try the <strong>Design</strong> tab to pick a template
+            and customize fonts, colors, and layout.
+          </GuidanceTip>
+        )}
+      </div>
 
       <main className="flex-1 overflow-hidden">
         {styles && (
@@ -319,6 +340,8 @@ export function Editor() {
         onTogglePaperSize={handleTogglePaperSize}
         isOnline={isOnline}
         isLocalBackupActive={isLocalBackupActive}
+        onOpenVersionHistory={() => setIsVersionPanelOpen(true)}
+        wordCount={wordCount}
       />
 
       {isAIPanelOpen && (

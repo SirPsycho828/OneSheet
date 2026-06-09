@@ -47,7 +47,7 @@ function ProfileSkeleton() {
 }
 
 // ---------------------------------------------------------------------------
-// 404 state
+// 404 state — username not found
 // ---------------------------------------------------------------------------
 
 function ProfileNotFound() {
@@ -70,6 +70,33 @@ function ProfileNotFound() {
 }
 
 // ---------------------------------------------------------------------------
+// No resume state — user exists but hasn't shared a resume
+// ---------------------------------------------------------------------------
+
+function ProfileNoResume({ isOwner }: { isOwner: boolean }) {
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 gap-4 py-24 text-center px-4">
+      <p className="text-xl font-semibold text-foreground">
+        No resume shared yet
+      </p>
+      <p className="text-muted-foreground max-w-sm">
+        {isOwner
+          ? "You haven't set a default resume for your public profile. Set one from the dashboard to share your resume here."
+          : "This user hasn't shared a public resume yet. Check back later."}
+      </p>
+      {isOwner && (
+        <Link
+          to="/dashboard"
+          className="mt-2 inline-flex items-center justify-center rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-600 transition-colors"
+        >
+          Go to Dashboard
+        </Link>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main page
 // ---------------------------------------------------------------------------
 
@@ -78,7 +105,7 @@ export function PublicProfile() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [data, setData] = React.useState<ProfileData | null>(null);
-  const [notFound, setNotFound] = React.useState(false);
+  const [errorState, setErrorState] = React.useState<"none" | "not_found" | "no_resume">("none");
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -88,7 +115,7 @@ export function PublicProfile() {
 
     async function fetchProfile() {
       setLoading(true);
-      setNotFound(false);
+      setErrorState("none");
       setData(null);
 
       // Check for username redirect before hitting the API
@@ -118,11 +145,13 @@ export function PublicProfile() {
         if (cancelled) return;
 
         if (res.status === 404) {
-          setNotFound(true);
+          const body = await res.json().catch(() => ({}));
+          const code = (body as { code?: string })?.code;
+          setErrorState(code === "NO_RESUME" ? "no_resume" : "not_found");
           return;
         }
         if (!res.ok) {
-          setNotFound(true);
+          setErrorState("not_found");
           return;
         }
 
@@ -132,7 +161,7 @@ export function PublicProfile() {
         setData(json);
         document.title = `${json.displayName} | Resume | OneSheet`;
       } catch {
-        if (!cancelled) setNotFound(true);
+        if (!cancelled) setErrorState("not_found");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -159,9 +188,15 @@ export function PublicProfile() {
         </main>
       )}
 
-      {!loading && notFound && (
+      {!loading && errorState === "not_found" && (
         <main className="flex-1 flex">
           <ProfileNotFound />
+        </main>
+      )}
+
+      {!loading && errorState === "no_resume" && (
+        <main className="flex-1 flex">
+          <ProfileNoResume isOwner={isOwner} />
         </main>
       )}
 

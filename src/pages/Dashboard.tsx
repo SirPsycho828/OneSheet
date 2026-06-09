@@ -67,6 +67,7 @@ function DashboardNav({ onSignOut }: DashboardNavProps) {
         My Resumes
       </span>
 
+
       {/* Right actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
         {profileUrl && (
@@ -193,16 +194,23 @@ export function Dashboard() {
       <DashboardNav onSignOut={handleSignOut} />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8">
-        {/* Top bar: create button + sort */}
+        {/* Top bar: create button + sort + resume count */}
         <div className="flex items-center justify-between mb-6 gap-4">
-          <Button
-            variant="primary"
-            onClick={handleCreateClick}
-            className="flex items-center gap-1.5"
-          >
-            <Plus className="w-4 h-4" strokeWidth={2} />
-            New Resume
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="primary"
+              onClick={handleCreateClick}
+              className="flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" strokeWidth={2} />
+              New Resume
+            </Button>
+            {!isLoading && (
+              <span className="text-xs text-muted-foreground">
+                {resumes.length} of {resumeLimit}
+              </span>
+            )}
+          </div>
 
           <SortDropdown value={sortBy} onChange={setSortBy} />
         </div>

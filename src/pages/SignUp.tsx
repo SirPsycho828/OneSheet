@@ -12,7 +12,7 @@ export function SignUp() {
       <div className="mb-8">
         <h1 className="font-heading text-2xl font-semibold text-foreground">Create your account</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Start writing your resume in Markdown.
+          Start writing your resume in Markdown. You'll pick a username next.
         </p>
       </div>
 

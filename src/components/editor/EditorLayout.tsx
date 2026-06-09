@@ -3,6 +3,7 @@ import { Code, Eye, Palette, Sparkles } from "lucide-react";
 import { MarkdownInput } from "./MarkdownInput";
 import { ResumePreview } from "./ResumePreview";
 import { DesignPanel } from "./DesignPanel";
+import { GuidanceTip } from "../ux/GuidanceTip";
 import type { OverflowState } from "../../hooks/useOverflow";
 import type { ResumeStyles } from "../../types/resume";
 
@@ -102,6 +103,9 @@ export function EditorLayout({
     };
   }, []);
 
+  // Show first-run guidance when editor has minimal content
+  const isBlankResume = markdown.trim().length < 30;
+
   // ---------------------------------------------------------------------------
   // Mobile tab state
   // ---------------------------------------------------------------------------
@@ -164,7 +168,18 @@ export function EditorLayout({
           </div>
 
           {/* Panel content */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden flex flex-col">
+            {leftMode === "source" && isBlankResume && (
+              <div className="px-3 pt-3 flex-shrink-0">
+                <GuidanceTip id="editor-first-run">
+                  Write your resume in Markdown. Use <strong># Heading</strong> for sections,{" "}
+                  <strong>**bold**</strong> for emphasis, and <strong>- bullets</strong> for
+                  experience items. Start with your name, then add Experience, Skills, and
+                  Education sections.
+                </GuidanceTip>
+              </div>
+            )}
+            <div className="flex-1 overflow-hidden">
             {leftMode === "source" ? (
               <MarkdownInput
                 value={markdown}
@@ -182,6 +197,7 @@ export function EditorLayout({
                 isPaid={isPaid}
               />
             )}
+            </div>
           </div>
         </div>
 
@@ -257,7 +273,17 @@ export function EditorLayout({
         </div>
 
         {/* Active panel */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden flex flex-col">
+          {mobileTab === "edit" && isBlankResume && (
+            <div className="px-3 pt-3 flex-shrink-0">
+              <GuidanceTip id="editor-first-run">
+                Write your resume in Markdown. Use <strong># Heading</strong> for sections,{" "}
+                <strong>**bold**</strong> for emphasis, and <strong>- bullets</strong> for
+                experience items.
+              </GuidanceTip>
+            </div>
+          )}
+          <div className="flex-1 overflow-hidden">
           {mobileTab === "edit" ? (
             <MarkdownInput
               value={markdown}
@@ -274,6 +300,7 @@ export function EditorLayout({
               qrCodeUrl={effectiveQrUrl}
             />
           )}
+          </div>
         </div>
       </div>
     </>
