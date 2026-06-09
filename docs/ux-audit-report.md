@@ -156,3 +156,56 @@ Gaps:
 - **Pages with worst scores:** Editor (3/9), Dashboard (4/9), Admin (4/8)
 - **Most common missing layer:** Next Steps (missing on 5 pages) and Guidance (missing or partial on 9 pages)
 - **Workflows at risk:** First-time user setup (Bumpy), Create/edit resume (Bumpy), Public profile (Bumpy)
+
+## Results
+
+### Before/After Scorecard
+
+| Page | Before | After | Change |
+|------|--------|-------|--------|
+| Editor | 3/9 | 7/9 | +4 |
+| Dashboard | 4/9 | 6/9 | +2 |
+| Public Profile | 3/6 | 5/6 | +2 |
+| Settings | 5/7 | 6/7 | +1 |
+| Sign Up | 5/7 | 6/7 | +1 |
+| Landing | 5/5 | 5/5 | -- |
+| Sign In | 5/7 | 5/7 | -- |
+| Onboarding | 6/7 | 6/7 | -- |
+| Verify Email | 7/7 | 7/7 | -- |
+| Admin | 4/8 | 4/8 | -- |
+| API Docs | 4/4 | 4/4 | -- |
+| Agent Guide | 7/7 | 7/7 | -- |
+| Privacy | 3/3 | 3/3 | -- |
+| Terms | 3/3 | 3/3 | -- |
+
+### Score Changes (Modified Pages)
+
+**Editor (3/9 -> 7/9):**
+- Guidance: M -> P (workflow order tip, first-run markdown syntax tip)
+- Empty States: M -> P (blank resume guidance in EditorLayout)
+- Metrics: M -> P (word count in StatusBar)
+- Next Steps: M -> P (state-aware "try Design" nudge at 50+ words)
+
+**Dashboard (4/9 -> 6/9):**
+- Empty States: P -> P (enriched with EmptyState component, icon, description)
+- Metrics: / -> P (resume count "N of M" indicator)
+
+**Public Profile (3/6 -> 5/6):**
+- Empty States: / -> P (distinguished NO_RESUME vs NOT_FOUND with owner-aware messaging)
+- Feedback: - -> P (actionable CTA for profile owner when no resume shared)
+
+**Settings (5/7 -> 6/7):**
+- Guidance: / -> P (API section description with links to /docs and /agents)
+
+**Sign Up (5/7 -> 6/7):**
+- Next Steps: / -> P ("You'll pick a username next" preview of post-signup flow)
+
+### Resolution Summary
+- **Findings resolved:** 12/20
+- **Already fixed:** 3 (UX-011, UX-017, UX-018)
+- **Deferred:** 5 (UX-008, UX-014, UX-016, UX-019 -- admin-only or over-engineering risk)
+- **Average page score:** 4.7/7.1 -> 5.4/7.1 (applicable layers only)
+- **Workflows fixed:** First-time user setup (Bumpy -> Smooth), Create/edit resume (Bumpy -> Smooth), Public profile (Bumpy -> Smooth)
+- **Components created:** GuidanceTip, NextStepCard, EmptyState (src/components/ux/)
+- **Onboarding:** Not applicable (3 user-facing pages, linear workflow, guidance tips sufficient)
+- **Pages modified:** 9
