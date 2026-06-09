@@ -218,6 +218,12 @@ export function Editor() {
     }
   }
 
+  // Word count for status bar (must be before any early return)
+  const wordCount = React.useMemo(
+    () => markdown.trim().split(/\s+/).filter(Boolean).length,
+    [markdown]
+  );
+
   // ---------------------------------------------------------------------------
   // Loading skeleton
   // ---------------------------------------------------------------------------
@@ -258,12 +264,6 @@ export function Editor() {
       </div>
     );
   }
-
-  // Word count for status bar
-  const wordCount = React.useMemo(
-    () => markdown.trim().split(/\s+/).filter(Boolean).length,
-    [markdown]
-  );
 
   // When previewing a version, show its content in the preview pane
   const previewMarkdown = previewingVersion?.markdown ?? markdown;
