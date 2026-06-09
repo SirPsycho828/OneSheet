@@ -174,26 +174,28 @@ export function TourProvider({ children }: { children: ReactNode }) {
   return (
     <TourContext.Provider value={{ startTour }}>
       {children}
-      <Joyride
-        steps={TOUR_STEPS}
-        run={run}
-        continuous
-        showSkipButton
-        disableOverlayClose
-        spotlightClicks
-        callback={handleCallback}
-        tooltipComponent={TourTooltip as never}
-        styles={{
-          options: {
-            zIndex: 10000,
-            arrowColor: "#FFFFFF",
-            overlayColor: "rgba(0, 0, 0, 0.4)",
-          },
-        }}
-        floaterProps={{
-          disableAnimation: true,
-        }}
-      />
+      {run && (
+        <Joyride
+          steps={TOUR_STEPS}
+          run
+          continuous
+          showSkipButton
+          disableOverlayClose
+          spotlightClicks
+          callback={handleCallback}
+          tooltipComponent={TourTooltip as never}
+          styles={{
+            options: {
+              zIndex: 10000,
+              arrowColor: "#FFFFFF",
+              overlayColor: "rgba(0, 0, 0, 0.4)",
+            },
+          }}
+          floaterProps={{
+            disableAnimation: true,
+          }}
+        />
+      )}
     </TourContext.Provider>
   );
 }
