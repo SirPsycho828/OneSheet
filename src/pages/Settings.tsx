@@ -9,6 +9,8 @@ import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/useToast";
 import { checkUsernameAvailability, changeUsername } from "../services/usernames";
 import { getLinkedProviders, linkGoogle, linkGithub } from "../services/auth";
+import { resetWizard } from "../services/onboarding";
+import { useTour, clearTourCompletion } from "../contexts/TourContext";
 
 // ---------------------------------------------------------------------------
 // Settings Nav
@@ -271,6 +273,63 @@ function LinkedAccounts() {
 }
 
 // ---------------------------------------------------------------------------
+// Onboarding Controls
+// ---------------------------------------------------------------------------
+
+function OnboardingControls() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { startTour } = useTour();
+  const toast = useToast();
+  const [resetting, setResetting] = React.useState(false);
+
+  async function handleRestartWizard() {
+    if (!user) return;
+    setResetting(true);
+    try {
+      await resetWizard(user.uid);
+      navigate("/setup-wizard");
+    } catch {
+      toast.error("Failed to reset wizard.");
+    } finally {
+      setResetting(false);
+    }
+  }
+
+  function handleReplayTour() {
+    clearTourCompletion();
+    navigate("/dashboard");
+    // Small delay so we navigate first, then start tour
+    setTimeout(() => startTour(), 500);
+  }
+
+  return (
+    <div className="bg-card rounded-lg border border-input p-4 max-w-lg">
+      <p className="text-sm text-muted-foreground mb-3">
+        Re-run the setup wizard or replay the guided tour to learn the app.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={handleRestartWizard}
+          disabled={resetting}
+          className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          {resetting ? "Resetting..." : "Restart setup wizard"}
+        </button>
+        <button
+          type="button"
+          onClick={handleReplayTour}
+          className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+        >
+          Replay app tour
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Settings page
 // ---------------------------------------------------------------------------
 
@@ -366,6 +425,14 @@ export function Settings() {
           <LinkedAccounts />
         </section>
 
+        {/* Onboarding section */}
+        <section className="mb-8">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+            Onboarding
+          </h2>
+          <OnboardingControls />
+        </section>
+
         {/* Billing section */}
         <section className="mb-8">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
@@ -382,6 +449,16 @@ export function Settings() {
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
             API
           </h2>
+          <p className="text-xs text-muted-foreground mb-3">
+            Use API keys to access your resume data programmatically.{" "}
+            <Link to="/docs" className="text-primary hover:underline">
+              API Reference
+            </Link>{" "}
+            /{" "}
+            <Link to="/agents" className="text-primary hover:underline">
+              Agent Guide
+            </Link>
+          </p>
           <ApiKeysCard />
         </section>
       </main>

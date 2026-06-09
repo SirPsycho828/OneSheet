@@ -74,9 +74,19 @@ function PolishTab({ markdown, onMarkdownChange }: Pick<AIToolsPanelProps, "mark
       </p>
 
       {bullets.length === 0 ? (
-        <p className="text-sm text-muted-foreground italic">
-          No bullet points found. Add some with - or * in your markdown.
-        </p>
+        <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+          <p>No bullet points found in your resume.</p>
+          <p className="text-xs">Add bullet points in the Source tab using this format:</p>
+          <pre className="text-xs font-mono bg-muted rounded-md p-2.5 border border-border whitespace-pre">
+{`- Led migration to React 18
+- Reduced load time by 40%
+* Managed team of 5 engineers`}
+          </pre>
+          <p className="text-xs">
+            Start lines with <code className="bg-muted px-1 rounded">-</code> or{" "}
+            <code className="bg-muted px-1 rounded">*</code> followed by a space.
+          </p>
+        </div>
       ) : (
         <>
           <p className="text-xs text-muted-foreground">{bullets.length} bullet point{bullets.length !== 1 ? "s" : ""} found</p>
@@ -398,7 +408,7 @@ function ImportTab({ onMarkdownChange, onClose }: Pick<AIToolsPanelProps, "onMar
   return (
     <div className="flex flex-col gap-4">
       <p className="text-xs text-muted-foreground">
-        Paste text from an existing resume (copied from a PDF or document) and AI will convert it to structured markdown.
+        Already have a resume? Copy the text from a PDF or Word document, paste it below, and AI will convert it to structured Markdown. This will replace your current resume content.
       </p>
 
       {!preview ? (
@@ -406,7 +416,7 @@ function ImportTab({ onMarkdownChange, onClose }: Pick<AIToolsPanelProps, "onMar
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Paste your resume text here..."
+            placeholder="Paste your resume text here (e.g., copied from a PDF viewer)..."
             rows={10}
             className="w-full px-2.5 py-2 text-xs font-mono rounded-md border border-input resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
           />

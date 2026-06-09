@@ -1,6 +1,7 @@
-import { Plus } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 import { ResumeCard } from "./ResumeCard";
 import { Skeleton } from "../ui/Skeleton";
+import { EmptyState as EmptyStateComponent } from "../ux/EmptyState";
 import type { Resume } from "../../types/resume";
 import type { Analytics } from "../../types/analytics";
 
@@ -94,16 +95,12 @@ function AddCard({ onClick }: { onClick: () => void }) {
 
 function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-      <p className="text-muted-foreground text-base">No resumes yet.</p>
-      <button
-        type="button"
-        onClick={onCreateClick}
-        className="text-primary hover:underline text-sm font-medium focus-visible:outline-none"
-      >
-        Create your first resume
-      </button>
-    </div>
+    <EmptyStateComponent
+      icon={<FileText className="h-6 w-6" strokeWidth={1.5} />}
+      title="No resumes yet"
+      description="Create your first resume to get started. Write in Markdown, pick a design template, and share your public profile link."
+      action={{ label: "Create your first resume", onClick: onCreateClick }}
+    />
   );
 }
 
@@ -149,14 +146,15 @@ export function ResumeGrid({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {sorted.map((resume) => (
-        <ResumeCard
-          key={resume.id}
-          resume={resume}
-          analytics={analytics[resume.id] ?? null}
-          allResumes={resumes}
-          onResumesChange={onResumesChange}
-        />
+      {sorted.map((resume, i) => (
+        <div key={resume.id} {...(i === 0 ? { "data-tour": "resume-card" } : {})}>
+          <ResumeCard
+            resume={resume}
+            analytics={analytics[resume.id] ?? null}
+            allResumes={resumes}
+            onResumesChange={onResumesChange}
+          />
+        </div>
       ))}
       {!atLimit && <AddCard onClick={onCreateClick} />}
     </div>

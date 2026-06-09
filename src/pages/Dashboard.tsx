@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { ChevronDown, Plus } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
@@ -9,6 +9,7 @@ import { ResumeGrid } from "../components/dashboard/ResumeGrid";
 import { CreateResumeModal } from "../components/dashboard/CreateResumeModal";
 import { getUserResumes } from "../services/resumes";
 import { getAnalyticsForResumes } from "../services/analytics";
+import { markWizardCompleted } from "../services/onboarding";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/useToast";
 import { UpgradeModal } from "../components/ui/UpgradeModal";
@@ -67,17 +68,21 @@ function DashboardNav({ onSignOut }: DashboardNavProps) {
         My Resumes
       </span>
 
+
       {/* Right actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
         {profileUrl && (
           <a
             href={profileUrl}
             className="text-xs text-muted-foreground hover:text-primary transition-colors hidden sm:inline"
+            data-tour="view-profile"
           >
             View profile
           </a>
         )}
-        <OverflowMenu items={menuItems} triggerLabel="Dashboard menu" />
+        <span data-tour="dashboard-menu">
+          <OverflowMenu items={menuItems} triggerLabel="Dashboard menu" />
+        </span>
       </div>
     </header>
   );
@@ -138,12 +143,15 @@ export function Dashboard() {
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
 
+  const [wizardChecked, setWizardChecked] = React.useState(false);
+  const [needsWizard, setNeedsWizard] = React.useState(false);
+
   const resumeLimit =
     user?.subscription?.status === "active" ? PRO_RESUME_LIMIT : FREE_RESUME_LIMIT;
   const atLimit = resumes.length >= resumeLimit;
 
   // ---------------------------------------------------------------------------
-  // Load resumes + analytics
+  // Load resumes + analytics + wizard check
   // ---------------------------------------------------------------------------
 
   const loadData = React.useCallback(async () => {
@@ -152,6 +160,17 @@ export function Dashboard() {
     try {
       const userResumes = await getUserResumes(user.uid);
       setResumes(userResumes);
+
+      // Wizard backfill: existing users with resumes skip wizard
+      if (!user.wizardCompleted) {
+        if (userResumes.length > 0) {
+          // Backfill: auto-mark wizard completed for existing users
+          markWizardCompleted(user.uid).catch(() => {});
+        } else {
+          setNeedsWizard(true);
+        }
+      }
+      setWizardChecked(true);
 
       const ids = userResumes.map((r) => r.id);
       if (ids.length > 0) {
@@ -162,6 +181,7 @@ export function Dashboard() {
       }
     } catch {
       toast.error("Failed to load resumes.");
+      setWizardChecked(true);
     } finally {
       setIsLoading(false);
     }
@@ -188,23 +208,38 @@ export function Dashboard() {
     setShowCreateModal(true);
   }
 
+  // Redirect to setup wizard for new users who haven't completed it
+  if (wizardChecked && needsWizard) {
+    return <Navigate to="/setup-wizard" replace />;
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <DashboardNav onSignOut={handleSignOut} />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8">
-        {/* Top bar: create button + sort */}
+        {/* Top bar: create button + sort + resume count */}
         <div className="flex items-center justify-between mb-6 gap-4">
-          <Button
-            variant="primary"
-            onClick={handleCreateClick}
-            className="flex items-center gap-1.5"
-          >
-            <Plus className="w-4 h-4" strokeWidth={2} />
-            New Resume
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="primary"
+              onClick={handleCreateClick}
+              className="flex items-center gap-1.5"
+              data-tour="new-resume"
+            >
+              <Plus className="w-4 h-4" strokeWidth={2} />
+              New Resume
+            </Button>
+            {!isLoading && (
+              <span className="text-xs text-muted-foreground">
+                {resumes.length} of {resumeLimit}
+              </span>
+            )}
+          </div>
 
-          <SortDropdown value={sortBy} onChange={setSortBy} />
+          <div data-tour="sort-resumes">
+            <SortDropdown value={sortBy} onChange={setSortBy} />
+          </div>
         </div>
 
         {/* Grid */}

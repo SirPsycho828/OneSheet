@@ -16,6 +16,7 @@ export interface User {
   onboardingComplete: boolean;
   subscription: Subscription;
   paperSize: "us-letter" | "a4";
+  wizardCompleted?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
